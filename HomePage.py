@@ -1,5 +1,8 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from NavBar import NavBar
+
+print("running home page")
 
 class HomePage(QWidget):
     def __init__(self):

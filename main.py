@@ -1,4 +1,6 @@
+print("running main")
 import sys
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
 from MainWindow import MainWindow
 

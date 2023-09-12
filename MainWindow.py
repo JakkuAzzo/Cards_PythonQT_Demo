@@ -1,9 +1,10 @@
+print("running main window")
+
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
-from Cards_PythonQT_Demo.HomePage import HomePage
+from HomePage import HomePage
 from LibraryPage import LibraryPage
 from ShopPage import ShopPage
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
