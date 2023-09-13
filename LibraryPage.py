@@ -1,15 +1,16 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QMessageBox, QLabel, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel, QSpacerItem, QSizePolicy
 from NavBar import NavBar
-
-print("running library page")
+from GameWindow import GameWindow  # Add this import
 
 class LibraryPage(QWidget):
-    def __init__(self, main_window):
+    def __init__(self, main_window, home_page):
         super().__init__()
-        self.initUI(main_window)
+        self.main_window = main_window
+        self.home_page = home_page
+        self.initUI()
 
-    def initUI(self, main_window):
+    def initUI(self):
         layout = QGridLayout()
         self.setLayout(layout)
         self.populate_library()
@@ -22,21 +23,14 @@ class LibraryPage(QWidget):
         welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(welcome_label, 1, 0, 1, 3)
 
-        # Content for Library Page
-        for i in range(3):
-            for j in range(3):
-                library_item = QLabel(f'Library Item {i*3 + j + 1}')
-                library_item.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                layout.addWidget(library_item, i+2, j)
-
-        self.nav_bar = NavBar(main_window)
+        self.nav_bar = NavBar(self.main_window)
         layout.addWidget(self.nav_bar, 5, 0, 1, 3)
 
     def populate_library(self):
         for i in range(3):
             for j in range(3):
                 library_item = QPushButton(f'Library Item {i*3 + j + 1}')
-                library_item.clicked.connect(self.show_popup)
+                library_item.clicked.connect(self.show_game)
                 self.layout().addWidget(library_item, i, j)
 
     def show_popup(self):
@@ -44,3 +38,7 @@ class LibraryPage(QWidget):
         message_box.setWindowTitle("Library Item Clicked")
         message_box.setText("Details about the selected library item.")
         message_box.exec()
+
+    def show_game(self):
+        selected_deck = "Selected Deck Name"  # You'll need to replace this with actual logic to get the selected deck name
+        self.home_page.handle_card_deck_selection(selected_deck)

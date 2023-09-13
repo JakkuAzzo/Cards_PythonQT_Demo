@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
 
-        self.library_page = LibraryPage(self)
+        self.library_page = LibraryPage(self, HomePage)
         self.home_page = HomePage(self)
         self.shop_page = ShopPage(self)
 
