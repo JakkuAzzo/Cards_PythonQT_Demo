@@ -5,8 +5,11 @@ from NavBar import NavBar
 print("running home page")
 
 class HomePage(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):  # Pass the main_window argument
         super().__init__()
+        self.initUI(main_window)
+
+    def initUI(self, main_window):
         layout = QVBoxLayout()
 
         # Title Label
@@ -23,7 +26,7 @@ class HomePage(QWidget):
         content_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(content_label)
 
-        self.nav_bar = NavBar()
+        self.nav_bar = NavBar(main_window)  # Pass the main_window to NavBar
         layout.addWidget(self.nav_bar)
 
         self.setLayout(layout)

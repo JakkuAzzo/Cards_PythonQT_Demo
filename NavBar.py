@@ -1,14 +1,24 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton
 
-print("running nav bar")
 class NavBar(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
         layout = QHBoxLayout()
-        left_arrow_button = QPushButton("← Library")
-        center_button = QPushButton("Home")
-        right_arrow_button = QPushButton("Shop →")
-        layout.addWidget(left_arrow_button)
-        layout.addWidget(center_button)
-        layout.addWidget(right_arrow_button)
+        
+        print("initializing nav bar")
+
+        self.main_window = main_window
+
+        self.library_button = QPushButton("Library")
+        self.library_button.clicked.connect(self.main_window.show_library)
+        layout.addWidget(self.library_button)
+        
+        self.home_button = QPushButton("Home")
+        self.home_button.clicked.connect(self.main_window.show_home)
+        layout.addWidget(self.home_button)
+
+        self.shop_button = QPushButton("Shop")
+        self.shop_button.clicked.connect(self.main_window.show_shop)
+        layout.addWidget(self.shop_button)
+
         self.setLayout(layout)

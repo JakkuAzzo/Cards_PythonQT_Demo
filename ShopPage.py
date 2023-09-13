@@ -1,15 +1,15 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QFrame, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QFrame, QSpacerItem, QSizePolicy, QMessageBox
 from NavBar import NavBar
 
 print("running shop page")
 
 class ShopPage(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
-        self.initUI()
+        self.initUI(main_window)
 
-    def initUI(self):
+    def initUI(self, main_window):
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.populate_shop()
@@ -18,10 +18,11 @@ class ShopPage(QWidget):
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title_label)
 
-        spacer_top = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        layout.addItem(spacer_top)
+        welcome_label = QLabel("Welcome to the Shop!")
+        welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(welcome_label)
 
-        self.nav_bar = NavBar()
+        self.nav_bar = NavBar(main_window)
         layout.addWidget(self.nav_bar)
 
     def populate_shop(self):

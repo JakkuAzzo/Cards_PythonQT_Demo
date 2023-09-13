@@ -5,11 +5,11 @@ from NavBar import NavBar
 print("running library page")
 
 class LibraryPage(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
-        self.initUI()
+        self.initUI(main_window)
 
-    def initUI(self):
+    def initUI(self, main_window):
         layout = QGridLayout()
         self.setLayout(layout)
         self.populate_library()
@@ -18,8 +18,9 @@ class LibraryPage(QWidget):
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title_label, 0, 0, 1, 3)
 
-        spacer_top = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        layout.addItem(spacer_top, 1, 0, 1, 3)
+        welcome_label = QLabel("Welcome to the Library!")
+        welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(welcome_label, 1, 0, 1, 3)
 
         # Content for Library Page
         for i in range(3):
@@ -28,7 +29,7 @@ class LibraryPage(QWidget):
                 library_item.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 layout.addWidget(library_item, i+2, j)
 
-        self.nav_bar = NavBar()
+        self.nav_bar = NavBar(main_window)
         layout.addWidget(self.nav_bar, 5, 0, 1, 3)
 
     def populate_library(self):
