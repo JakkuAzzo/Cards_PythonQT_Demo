@@ -31,7 +31,7 @@ class LibraryPage(QWidget):
 
     def scan_card_packs(self):
         # Load the list of card pack directories
-        with open("Packs\card_packs.txt", "r") as file:  # Updated path to "Packs"
+        with open("Packs/card_packs.txt", "r") as file:  # Updated path to "Packs"
             card_pack_directories = file.readlines()
             card_pack_directories = [directory.strip() for directory in card_pack_directories]
 
@@ -104,7 +104,7 @@ class LibraryPage(QWidget):
         self.load_card_packs()
 
     def load_card_packs(self):
-        with open("Packs\card_packs.txt", "r") as file:  # Updated path to "Packs"
+        with open("Packs/card_packs.txt", "r") as file:  # Updated path to "Packs"
             card_pack_directories = file.readlines()
             card_pack_directories = [directory.strip() for directory in card_pack_directories]
 

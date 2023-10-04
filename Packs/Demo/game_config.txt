@@ -1,0 +1,16 @@
+multiplayer: y
+local_server: y
+local_server_address: 192.168.1.8
+cards_dealt_to_each_player: 5
+random_card_dealing: y
+shared_card_table: y
+shared_card_table_size: medium, separate window
+shared_card_table_theme: green_classic.svg
+take_turns: y
+who_starts: random
+turn_order: clockwise
+theme: greyscale
+card_pack: solitaire_pack.svg
+custom_animations: n
+animation_speed: n/a
+animation_scale: n/a
