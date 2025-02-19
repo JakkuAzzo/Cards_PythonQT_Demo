@@ -1,8 +1,9 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy
 
 class NavBar(QWidget):
-    def __init__(self, main_window):
-        super().__init__()
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         layout = QHBoxLayout()
         
         print("initializing nav bar")
