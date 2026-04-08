@@ -1,12 +1,18 @@
+from GameLogic import GameLogic
+from PackAnalyzer import PackAnalyzer
+
+
 class CardPack:
-    def __init__(self, pack_name):
-        self.pack_name = pack_name
+    def __init__(self, pack_path):
+        self.pack_path = pack_path
         self.analyzer = PackAnalyzer()
         self.game_logic = None
+        self.metadata = None
 
     def load(self):
-        if self.analyzer.analyze(self.pack_name):
-            self.game_logic = GameLogic()  # Assuming you have a GameLogic class
+        self.metadata = self.analyzer.analyze(self.pack_path)
+        self.game_logic = GameLogic(self.metadata)
 
     def unload(self):
         self.game_logic = None
+        self.metadata = None
