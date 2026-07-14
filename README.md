@@ -4,6 +4,12 @@ Cards is a local-first platform for creating and playing card games on iPhone an
 
 There is deliberately no large store and no general code-generating AI. The creator is a lightweight classifier and configuration interpreter: it recognises a game family, chooses tested defaults, applies explicit overrides, and rejects unknown resources.
 
+## App preview
+
+| Home | Local live table |
+| --- | --- |
+| ![Cards home screen](docs/screenshots/ios-home.png) | ![Cards local live-table screen](docs/screenshots/ios-live-table.png) |
+
 ## Current implementation
 
 ### Shared
@@ -99,7 +105,7 @@ javac -Xlint:all -Werror -d "$BUILD_DIR" \
 java -cp "$BUILD_DIR" EngineSelfTest
 ```
 
-The iOS app and XCTest sources also type-check with the installed Xcode SDK. Full simulator tests currently require installing the iOS platform component reported missing by this machine's Xcode installation. Android platform builds require Android SDK 33 or newer, which is not installed on this machine.
+The iOS XCTest suite runs on the installed iOS 26.5 simulator runtime. Android platform builds require Android SDK 33 or newer, which is not installed on this machine.
 
 ## Repository direction
 
