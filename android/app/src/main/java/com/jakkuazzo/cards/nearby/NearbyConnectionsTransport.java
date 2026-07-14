@@ -16,6 +16,7 @@ import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +66,7 @@ public final class NearbyConnectionsTransport {
 
     public void send(byte[] bytes) {
         if (!connected.isEmpty()) {
-            client.sendPayload(connected, Payload.fromBytes(bytes));
+            client.sendPayload(new ArrayList<>(connected), Payload.fromBytes(bytes));
         }
     }
 
@@ -125,4 +126,3 @@ public final class NearbyConnectionsTransport {
         listener.onPeersChanged(Collections.unmodifiableSet(new HashSet<>(connected)));
     }
 }
-
