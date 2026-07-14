@@ -59,12 +59,21 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: release
-      - run: cd release && zip -r ../Cards-Android-debug.apk.zip Cards-Android-debug-apk && zip -r ../Cards-macOS.zip Cards-macOS && zip -r ../Cards-Windows.zip Cards-Windows
+      - name: Package downloaded artifacts
+        run: |
+          set -euo pipefail
+          apk="$(find release -type f -name '*.apk' -print -quit)"
+          app="$(find release -type d -name '*.app' -print -quit)"
+          exe="$(find release -type f -name 'Cards.exe' -print -quit)"
+          test -n "$apk" && test -n "$app" && test -n "$exe"
+          cp "$apk" Cards-Android-debug.apk
+          (cd "$(dirname "$app")" && zip -r "$GITHUB_WORKSPACE/Cards-macOS.zip" "$(basename "$app")")
+          (cd "$(dirname "$exe")" && zip -j "$GITHUB_WORKSPACE/Cards-Windows.zip" "$(basename "$exe")")
       - uses: softprops/action-gh-release@v2
         with:
           prerelease: true
           generate_release_notes: true
           files: |
-            Cards-Android-debug.apk.zip
+            Cards-Android-debug.apk
             Cards-macOS.zip
             Cards-Windows.zip
