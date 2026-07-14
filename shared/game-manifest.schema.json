@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cards.local/schemas/game-manifest.schema.json",
+  "title": "Cards Game Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "archetype", "players", "capabilities", "resources", "deck", "rules", "presentation"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "archetype": { "enum": ["prompt-draw", "poker", "guess-who"] },
+    "summary": { "type": "string", "maxLength": 280 },
+    "players": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "maximum": { "type": "integer", "minimum": 1, "maximum": 16 }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["multiplayer", "nearby", "ar"],
+      "properties": {
+        "multiplayer": { "type": "boolean" },
+        "nearby": { "type": "boolean" },
+        "ar": { "type": "boolean" }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tableDesign", "cardBack", "cardSet"],
+      "properties": {
+        "tableDesign": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" },
+        "cardBack": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" },
+        "cardSet": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" }
+      }
+    },
+    "deck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "cards"],
+      "properties": {
+        "kind": { "enum": ["classic", "prompts", "characters"] },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-zA-Z0-9-_.]{1,80}$" },
+              "text": { "type": "string", "minLength": 1, "maxLength": 500 }
+            }
+          },
+          "maxItems": 500
+        }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["initialHandSize", "drawPerTurn", "playPerTurn", "turnOrder", "winCondition"],
+      "properties": {
+        "initialHandSize": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "drawPerTurn": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "playPerTurn": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "turnOrder": { "enum": ["clockwise"] },
+        "winCondition": { "enum": ["deck-empty", "last-player", "manual"] }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accentStartHex", "accentEndHex", "supportsAR"],
+      "properties": {
+        "accentStartHex": { "type": "string", "pattern": "^[0-9A-Fa-f]{6}$" },
+        "accentEndHex": { "type": "string", "pattern": "^[0-9A-Fa-f]{6}$" },
+        "supportsAR": { "type": "boolean" }
+      }
+    }
+  }
+}

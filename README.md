@@ -1,56 +1,110 @@
-# Cards App
+# Cards
 
-Cards App is a lightweight Python launcher environment for running card games and other small Python apps inside a single desktop shell.
+Cards is a local-first platform for creating and playing card games on iPhone and Android. A game is a small validated manifest that selects a known gameplay template, bundled card resources, multiplayer capabilities, and a table design. The same deterministic state drives conventional screens and optional AR tables.
 
-An iPhone rebuild now lives in [ios/README.md](ios/README.md) with a generated Xcode project under [ios/CardsiOS.xcodeproj](ios/CardsiOS.xcodeproj).
+There is deliberately no large store and no general code-generating AI. The creator is a lightweight classifier and configuration interpreter: it recognises a game family, chooses tested defaults, applies explicit overrides, and rejects unknown resources.
 
-## What it does
+## Current implementation
 
-- Manages local packs from the Library view.
-- Lets you pick a pack, launch a session, and inspect basic game state.
-- Provides a reusable UI shell for Python-based games or app previews.
+### Shared
 
-## Setup
+- Closed JSON schemas for game manifests and network envelopes.
+- An allowlisted resource catalogue for tables, card backs, and card sets.
+- Poker, Guess Who, and prompt-draw template classification.
+- A SplitMix64/Fisher-Yates shuffle fixture shared by Swift and Java.
+- Host-authoritative revisions, ordered turns, snapshots/private-message protocol definitions, and validation tests.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+### iPhone
+
+- Existing offline classic and prompt decks.
+- A working two-dimensional multiplayer Table Talk preview.
+- Simulated nearby joins over a tested loopback transport.
+- An encrypted Apple Multipeer Connectivity adapter for nearby Apple devices.
+- An ARKit/RealityKit table that finds a horizontal surface and renders the digital table/card state.
+- A minimal creator that accepts an idea or YAML-style settings and previews validated prompt games.
+
+### Android
+
+- The same deterministic multiplayer engine and seed-42 conformance result as iOS.
+- A conventional live-table activity.
+- A Google Nearby Connections `P2P_STAR` adapter for Bluetooth/Wi-Fi-assisted nearby sessions.
+- Optional ARCore installation and session lifecycle with a non-AR fallback.
+
+## Lightweight creator format
+
+The interpreter can infer a template from an idea:
+
+```yaml
+idea: four-player poker night
+multiplayer: y
+max_user: 4
+ar: n
+tabledesign: poker_2.png
 ```
 
-## Run
+This selects the poker archetype, standard 52-card resource, two-card starting hands, nearby multiplayer, and the bundled `poker-2` table. Explicit settings override template defaults.
 
-```bash
-python main.py
+Guess Who selects a two-player character-grid configuration and bundled character set:
+
+```yaml
+idea: a nearby Guess Who game
 ```
 
-## iPhone build
+Custom prompt games supply their own text cards:
 
-```bash
-cd ios
-xcodegen generate
-open CardsiOS.xcodeproj
+```yaml
+name: Road Trip Stories
+players: 2-6
+ar: y
+tabledesign: green_classic.svg
+- What is the funniest thing that happened on a journey?
+- Which place would you revisit tomorrow?
 ```
 
-The iPhone target is a native SwiftUI rebuild. It renders bundled pack metadata and a session shell, but it does not execute the old PyQt pack widgets.
+The canonical machine-readable format is JSON; this small YAML-style syntax is only creator input. See [shared/game-manifest.schema.json](shared/game-manifest.schema.json), [shared/resources/catalog.json](shared/resources/catalog.json), and [shared/PROTOCOL.md](shared/PROTOCOL.md).
 
-## Pack format
+## Template status
 
-A pack is a folder under `Packs/` with a readable `game_config.txt` and optionally a Python entry script.
+| Template | Configuration | Runtime |
+| --- | --- | --- |
+| Prompt draw | Complete | Playable in the local multiplayer and AR previews |
+| Poker | Complete defaults and resources | Dedicated dealing, community-card, betting, and hand-ranking runtime still required |
+| Guess Who | Complete defaults and character resources | Dedicated private-target and character-grid runtime still required |
 
-Example:
+The creator does not label an unimplemented runtime as playable.
 
-- `Packs/Demo/game_config.txt`
-- `Packs/Demo/generate_game_gui.py`
+## Tests
 
-If a pack includes a Python script, the app detects it and previews the pack metadata in the session window.
+Run all dependency-free conformance checks from the repository root:
 
-## Demo pack
+```bash
+# Shared JSON contracts
+python3 -m unittest discover -s shared/tests -v
 
-The built-in Demo pack is meant to show how pack metadata is surfaced in the app. It is not a full game engine yet, but it now loads visible content instead of acting like a dead selection.
+# Swift creator, shuffle, and multiplayer runtime
+RUNNER="$(mktemp)"
+xcrun swiftc \
+  ios/CardsiOS/MultiplayerModels.swift \
+  ios/CardsiOS/MultiplayerEngine.swift \
+  ios/CardsiOS/GameDraftInterpreter.swift \
+  tools/SwiftConformanceRunner.swift \
+  -o "$RUNNER"
+"$RUNNER"
 
-## Notes
+# Android/Java core
+BUILD_DIR="$(mktemp -d)"
+javac -Xlint:all -Werror -d "$BUILD_DIR" \
+  android/app/src/main/java/com/jakkuazzo/cards/core/*.java \
+  android/core-test/EngineSelfTest.java
+java -cp "$BUILD_DIR" EngineSelfTest
+```
 
-- `requirements.txt` currently pins PyQt6.
-- The Library uses `Packs/card_packs.txt` as the canonical pack registry.
-- The app is structured so it can be extended to run additional Python games or app-style packs.
+The iOS app and XCTest sources also type-check with the installed Xcode SDK. Full simulator tests currently require installing the iOS platform component reported missing by this machine's Xcode installation. Android platform builds require Android SDK 33 or newer, which is not installed on this machine.
+
+## Repository direction
+
+This repository is the canonical monorepo and now contains `ios/`, `android/`, and `shared/`. The old Python/Qt implementation remains in Git history only. Rename and archive the separate `JakkuAzzo/Cards` Android template repository after this branch becomes the default branch, then rename this GitHub repository to `Cards`.
+
+## Next engineering milestone
+
+Wire real host/join screens to the production nearby adapters, exchange authenticated protocol envelopes, and run a mixed iPhone/Android Table Talk session. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.

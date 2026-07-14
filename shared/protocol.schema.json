@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cards.local/schemas/protocol.schema.json",
+  "title": "Cards Nearby Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "sessionID", "messageID", "senderID", "revision", "type", "payload"],
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "sessionID": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "messageID": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "senderID": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "type": {
+      "enum": ["hello", "join", "snapshot", "command", "event", "private-event", "ack", "error", "ping"]
+    },
+    "recipientID": { "type": ["string", "null"] },
+    "payload": { "type": "object" }
+  }
+}

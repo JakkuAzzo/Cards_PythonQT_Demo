@@ -1,8 +1,8 @@
 # Cards iOS
 
-This folder contains the SwiftUI rebuild for iPhone.
+The iPhone client is a native SwiftUI app with conventional and optional AR play modes.
 
-## Generate the Xcode project
+## Generate the project
 
 ```bash
 cd ios
@@ -10,15 +10,22 @@ xcodegen generate
 open CardsiOS.xcodeproj
 ```
 
-## What is included
+## Included
 
-- A native SwiftUI shell with Home, Library, and Shop tabs.
-- A bundled pack catalog derived from the demo pack configuration.
-- A session screen that previews pack metadata on iPhone.
+- Offline classic and prompt deck play.
+- A host-authoritative multiplayer engine with deterministic shuffling and turn validation.
+- A live Table Talk preview with simulated nearby players.
+- Loopback transport tests and an encrypted Apple Multipeer Connectivity adapter.
+- ARKit/RealityKit horizontal-surface table placement.
+- A lightweight template creator for poker, Guess Who, and custom prompt games.
+- Manifest, creator, engine, transport, and deck XCTest sources.
 
-## What is not ported yet
+The custom `Info.plist` declares camera, local-network, and `_cards-table._tcp` Bonjour access. AR remains optional; unsupported or camera-disabled devices can always use the conventional table.
 
-- The Python pack runtime and dynamic `create_game_widget` entry points.
-- Arbitrary local folder scanning from the desktop app.
+## Creator boundary
 
-Those desktop-only features need a separate native implementation or a backend service.
+The creator produces data, not Swift code. It selects from `ResourceCatalog`, applies template defaults, validates the result, and enables a preview only when that runtime is implemented. Poker and Guess Who currently produce correct manifests but do not yet claim to be playable engines.
+
+## Production nearby work
+
+`AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. Cross-platform sessions should use the same JSON envelopes through Google Nearby Connections on both platforms. The current screen uses loopback transport until connection verification and host/join UX are wired.

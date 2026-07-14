@@ -2,24 +2,53 @@ import SwiftUI
 
 struct LibraryView: View {
     @EnvironmentObject private var store: PackStore
+    @State private var searchText = ""
+
+    private var visiblePacks: [PackRecord] {
+        let packs = store.packs.sorted {
+            let leftFavorite = store.isFavorite($0)
+            let rightFavorite = store.isFavorite($1)
+            return leftFavorite == rightFavorite ? $0.name < $1.name : leftFavorite
+        }
+        guard !searchText.isEmpty else { return packs }
+        return packs.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.summary.localizedCaseInsensitiveContains(searchText) ||
+            $0.badge.localizedCaseInsensitiveContains(searchText)
+        }
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 header
 
-                if store.packs.isEmpty {
-                    Text("No bundled packs are available yet.")
+                if visiblePacks.isEmpty {
+                    Text(searchText.isEmpty ? "No bundled packs are available yet." : "No decks match your search.")
                         .foregroundStyle(AppTheme.textSecondary)
                         .surfaceCard()
                 } else {
-                    ForEach(store.packs) { pack in
-                        Button {
-                            store.select(pack)
-                        } label: {
-                            PackLibraryRow(pack: pack, isSelected: store.selectedPack?.id == pack.id)
+                    ForEach(visiblePacks) { pack in
+                        HStack(spacing: 10) {
+                            Button {
+                                store.select(pack)
+                            } label: {
+                                PackLibraryRow(pack: pack, isSelected: store.selectedPack?.id == pack.id)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                store.toggleFavorite(pack)
+                            } label: {
+                                Image(systemName: store.isFavorite(pack) ? "star.fill" : "star")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(store.isFavorite(pack) ? AppTheme.accent : AppTheme.textSecondary)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color.white.opacity(0.08), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(store.isFavorite(pack) ? "Remove \(pack.name) from favourites" : "Add \(pack.name) to favourites")
                         }
-                        .buttonStyle(.plain)
                     }
                 }
 
@@ -36,6 +65,7 @@ struct LibraryView: View {
         }
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, prompt: "Search decks")
     }
 
     private var header: some View {
@@ -44,7 +74,7 @@ struct LibraryView: View {
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            Text("On iPhone the library reads bundled pack metadata instead of scanning desktop folders.")
+            Text("Choose a deck to play. Favourites stay at the top.")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }

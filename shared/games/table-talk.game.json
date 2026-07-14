@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "table-talk",
+  "name": "Table Talk",
+  "archetype": "prompt-draw",
+  "summary": "Take turns drawing questions that skip the small talk.",
+  "players": { "minimum": 2, "maximum": 8 },
+  "capabilities": { "multiplayer": true, "nearby": true, "ar": true },
+  "resources": { "tableDesign": "poker-2", "cardBack": "classic-red", "cardSet": "prompt-basic" },
+  "deck": {
+    "kind": "prompts",
+    "cards": [
+      { "id": "tt-01", "text": "What tiny decision changed your life more than you expected?" },
+      { "id": "tt-02", "text": "Which place have you visited that still feels vivid?" },
+      { "id": "tt-03", "text": "What skill would you love to become excellent at overnight?" },
+      { "id": "tt-04", "text": "What is a hill you are willing to die on?" },
+      { "id": "tt-05", "text": "Which ordinary day would you happily relive?" },
+      { "id": "tt-06", "text": "What has made you laugh hardest this year?" },
+      { "id": "tt-07", "text": "What is something you changed your mind about recently?" },
+      { "id": "tt-08", "text": "Which fictional world would you visit for one week?" }
+    ]
+  },
+  "rules": {
+    "initialHandSize": 0,
+    "drawPerTurn": 1,
+    "playPerTurn": 0,
+    "turnOrder": "clockwise",
+    "winCondition": "deck-empty"
+  },
+  "presentation": {
+    "accentStartHex": "7C3AED",
+    "accentEndHex": "DB2777",
+    "supportsAR": true
+  }
+}

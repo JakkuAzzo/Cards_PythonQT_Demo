@@ -24,15 +24,31 @@ struct RootView: View {
                 }
 
                 NavigationStack {
+                    LiveTableView()
+                }
+                .tabItem {
+                    Label("Table", systemImage: "person.3.fill")
+                }
+
+                NavigationStack {
+                    CreatorView()
+                }
+                .tabItem {
+                    Label("Create", systemImage: "wand.and.stars")
+                }
+
+                NavigationStack {
                     ShopView()
                 }
                 .tabItem {
-                    Label("Shop", systemImage: "cart.fill")
+                    Label("Discover", systemImage: "sparkles")
                 }
             }
             .tint(AppTheme.accent)
         }
-        .sheet(item: $store.activeSessionPack) { pack in
+        .sheet(item: $store.activeSessionPack, onDismiss: {
+            store.closeSession()
+        }) { pack in
             NavigationStack {
                 GameSessionView(pack: pack)
             }

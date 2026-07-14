@@ -1,4 +1,26 @@
-# Python bytecode caches
+# macOS
+.DS_Store
+
+# Python (legacy branch/tooling)
+.venv/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Xcode
+ios/DerivedData/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# Local IDE settings
+.idea/
+.vscode/
+
+# Android / Gradle
+.gradle/
+android/.gradle/
+android/local.properties
+android/**/build/

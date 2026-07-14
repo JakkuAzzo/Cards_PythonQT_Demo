@@ -7,37 +7,87 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A8D9611DF311DF4E859755C /* NearbyTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */; };
+		121B3A0A818BE0B2DADD296E /* AppleNearbyTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */; };
 		19830E438962EAA3B891192E /* PackDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */; };
 		24EABC1AE5E081219A17EB82 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */; };
 		3E4C12E62409AECB6EB7EC00 /* CardsiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */; };
 		41811FE1413C78846A2867A4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8C111DC7F42CDF421D982C /* RootView.swift */; };
+		45976F71BE3E2F3DDB688A34 /* NearbyTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */; };
+		47AFD3ACB253295097F86C2B /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1235CCFA06BF1FE587FC4D77 /* GameSession.swift */; };
 		560710217367EE752A21C8F8 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79EE95A532797CC934CFBCAD /* ShopView.swift */; };
+		5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A5D6BDF63E934918504B23 /* GameSessionTests.swift */; };
 		6A5217969DCB705413A0F53C /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134053370B6367E2F434AB49 /* Models.swift */; };
 		878B2035A033911D1E938A47 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B962AC39D27E6786A9191286 /* HomeView.swift */; };
+		994D019777A790DFC8313ADD /* MultiplayerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */; };
+		A8F412381E419AF4C520082F /* CreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14A95AEE25B417D778A1A2B /* CreatorView.swift */; };
+		B3D065BFE0E38D5BE54C3670 /* MultiplayerEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABED054878F396E69A2E8A77 /* MultiplayerEngineTests.swift */; };
+		B5D3842241F2B945E1536F2D /* GameDraftInterpreterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */; };
 		B83F3A1CDDB99C6EC2D8C878 /* PackStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A4388CE59393D107D0B6E3 /* PackStore.swift */; };
+		C1BD8C2A0C5F868FEBB1EC55 /* ARTableModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */; };
 		E25D8079A93985E599A77F9B /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791C10C195794C2CCD0BF939 /* LibraryView.swift */; };
+		E726D82B23589B0468274570 /* GameDraftInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */; };
+		EDB474DC408068AAD5FD233B /* MultiplayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */; };
+		F552729F3A9278134EEF80F1 /* LiveTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454369D312DC6D3A154BE456 /* LiveTableView.swift */; };
 		FF098F7D26F86993749F65F4 /* GameSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CCFC33291F18D4B160A914 /* GameSessionView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		4FC9FE6E40E8EA8D5A90C20B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8357D2B2D8BFE1F456F3A8D2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 82BFAB60D281CF001D14A363;
+			remoteInfo = CardsiOS;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerEngine.swift; sourceTree = "<group>"; };
+		09A5D6BDF63E934918504B23 /* GameSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionTests.swift; sourceTree = "<group>"; };
+		1235CCFA06BF1FE587FC4D77 /* GameSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSession.swift; sourceTree = "<group>"; };
 		134053370B6367E2F434AB49 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		1880DCB362CE32108379444F /* CardsiOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CardsiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B8C111DC7F42CDF421D982C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleNearbyTransport.swift; sourceTree = "<group>"; };
+		1F4A75C2A75CB77C16FE570C /* CardsiOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CardsiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		41CCFC33291F18D4B160A914 /* GameSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionView.swift; sourceTree = "<group>"; };
+		454369D312DC6D3A154BE456 /* LiveTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTableView.swift; sourceTree = "<group>"; };
+		49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreterTests.swift; sourceTree = "<group>"; };
+		6A48665E88B6AA1724ECC941 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransportTests.swift; sourceTree = "<group>"; };
 		791C10C195794C2CCD0BF939 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		79EE95A532797CC934CFBCAD /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		82A4388CE59393D107D0B6E3 /* PackStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackStore.swift; sourceTree = "<group>"; };
+		8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreter.swift; sourceTree = "<group>"; };
+		A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerModels.swift; sourceTree = "<group>"; };
+		ABED054878F396E69A2E8A77 /* MultiplayerEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerEngineTests.swift; sourceTree = "<group>"; };
 		B962AC39D27E6786A9191286 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		D14A95AEE25B417D778A1A2B /* CreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorView.swift; sourceTree = "<group>"; };
+		D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransport.swift; sourceTree = "<group>"; };
 		F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackDetailView.swift; sourceTree = "<group>"; };
 		FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardsiOSApp.swift; sourceTree = "<group>"; };
+		FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARTableModeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		282EFB6ED2CA09F1C80AB3FB /* CardsiOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */,
+				09A5D6BDF63E934918504B23 /* GameSessionTests.swift */,
+				ABED054878F396E69A2E8A77 /* MultiplayerEngineTests.swift */,
+				77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */,
+			);
+			path = CardsiOSTests;
+			sourceTree = "<group>";
+		};
 		963E839381D9A3D1236BF02F = {
 			isa = PBXGroup;
 			children = (
 				DE559902B784E4F4951A3EEF /* CardsiOS */,
+				282EFB6ED2CA09F1C80AB3FB /* CardsiOSTests */,
 				B1FE1B9A1AE3C39EF4489C36 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				1880DCB362CE32108379444F /* CardsiOS.app */,
+				1F4A75C2A75CB77C16FE570C /* CardsiOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,12 +104,22 @@
 		DE559902B784E4F4951A3EEF /* CardsiOS */ = {
 			isa = PBXGroup;
 			children = (
+				1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */,
 				2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */,
+				FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */,
 				FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */,
+				D14A95AEE25B417D778A1A2B /* CreatorView.swift */,
+				8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */,
+				1235CCFA06BF1FE587FC4D77 /* GameSession.swift */,
 				41CCFC33291F18D4B160A914 /* GameSessionView.swift */,
 				B962AC39D27E6786A9191286 /* HomeView.swift */,
+				6A48665E88B6AA1724ECC941 /* Info.plist */,
 				791C10C195794C2CCD0BF939 /* LibraryView.swift */,
+				454369D312DC6D3A154BE456 /* LiveTableView.swift */,
 				134053370B6367E2F434AB49 /* Models.swift */,
+				04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */,
+				A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */,
+				D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */,
 				F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */,
 				82A4388CE59393D107D0B6E3 /* PackStore.swift */,
 				1B8C111DC7F42CDF421D982C /* RootView.swift */,
@@ -87,6 +148,24 @@
 			productReference = 1880DCB362CE32108379444F /* CardsiOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C9C18FAF7838FC79539FB75F /* CardsiOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B840EA2869EE6ECC404B0EDE /* Build configuration list for PBXNativeTarget "CardsiOSTests" */;
+			buildPhases = (
+				DED67C5675D473A180CB6ED3 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EEF27D530AA82CF83A28C2E2 /* PBXTargetDependency */,
+			);
+			name = CardsiOSTests;
+			packageProductDependencies = (
+			);
+			productName = CardsiOSTests;
+			productReference = 1F4A75C2A75CB77C16FE570C /* CardsiOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -113,6 +192,7 @@
 			projectRoot = "";
 			targets = (
 				82BFAB60D281CF001D14A363 /* CardsiOS */,
+				C9C18FAF7838FC79539FB75F /* CardsiOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -122,12 +202,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1BD8C2A0C5F868FEBB1EC55 /* ARTableModeView.swift in Sources */,
 				24EABC1AE5E081219A17EB82 /* AppTheme.swift in Sources */,
+				121B3A0A818BE0B2DADD296E /* AppleNearbyTransport.swift in Sources */,
 				3E4C12E62409AECB6EB7EC00 /* CardsiOSApp.swift in Sources */,
+				A8F412381E419AF4C520082F /* CreatorView.swift in Sources */,
+				E726D82B23589B0468274570 /* GameDraftInterpreter.swift in Sources */,
+				47AFD3ACB253295097F86C2B /* GameSession.swift in Sources */,
 				FF098F7D26F86993749F65F4 /* GameSessionView.swift in Sources */,
 				878B2035A033911D1E938A47 /* HomeView.swift in Sources */,
 				E25D8079A93985E599A77F9B /* LibraryView.swift in Sources */,
+				F552729F3A9278134EEF80F1 /* LiveTableView.swift in Sources */,
 				6A5217969DCB705413A0F53C /* Models.swift in Sources */,
+				994D019777A790DFC8313ADD /* MultiplayerEngine.swift in Sources */,
+				EDB474DC408068AAD5FD233B /* MultiplayerModels.swift in Sources */,
+				45976F71BE3E2F3DDB688A34 /* NearbyTransport.swift in Sources */,
 				19830E438962EAA3B891192E /* PackDetailView.swift in Sources */,
 				B83F3A1CDDB99C6EC2D8C878 /* PackStore.swift in Sources */,
 				41811FE1413C78846A2867A4 /* RootView.swift in Sources */,
@@ -135,17 +224,71 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DED67C5675D473A180CB6ED3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5D3842241F2B945E1536F2D /* GameDraftInterpreterTests.swift in Sources */,
+				5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */,
+				B3D065BFE0E38D5BE54C3670 /* MultiplayerEngineTests.swift in Sources */,
+				0A8D9611DF311DF4E859755C /* NearbyTransportTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		EEF27D530AA82CF83A28C2E2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 82BFAB60D281CF001D14A363 /* CardsiOS */;
+			targetProxy = 4FC9FE6E40E8EA8D5A90C20B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		02906BB7EAC4FB582675F9F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakkuazzo.cardsios.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CardsiOS.app/CardsiOS";
+			};
+			name = Debug;
+		};
+		09B7619A23A501C34F325148 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakkuazzo.cardsios.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CardsiOS.app/CardsiOS";
+			};
+			name = Release;
+		};
 		BDE015FCE5D47EEAD7453EB6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CardsiOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -281,9 +424,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CardsiOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -303,6 +445,15 @@
 			buildConfigurations = (
 				CAB4324245A272D4745B3A54 /* Debug */,
 				F4549DEEFF4DCE0A800F9273 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B840EA2869EE6ECC404B0EDE /* Build configuration list for PBXNativeTarget "CardsiOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				02906BB7EAC4FB582675F9F3 /* Debug */,
+				09B7619A23A501C34F325148 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

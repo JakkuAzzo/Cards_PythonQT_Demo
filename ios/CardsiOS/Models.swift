@@ -10,6 +10,17 @@ struct PackRecord: Identifiable, Codable, Hashable {
     let accentEndHex: String
     let featured: Bool
     let config: [String: String]
+    let playMode: PlayMode?
+    let prompts: [String]?
+
+    enum PlayMode: String, Codable {
+        case classic
+        case prompts
+    }
+
+    var resolvedPlayMode: PlayMode {
+        playMode ?? ((prompts?.isEmpty == false) ? .prompts : .classic)
+    }
 
     var configItems: [(key: String, value: String)] {
         config.keys.sorted().map { ($0, config[$0] ?? "") }
@@ -26,6 +37,53 @@ struct PackRecord: Identifiable, Codable, Hashable {
             endPoint: .bottomTrailing
         )
     }
+}
+
+struct PlayingCard: Identifiable, Hashable {
+    enum Suit: String, CaseIterable {
+        case hearts = "♥"
+        case diamonds = "♦"
+        case clubs = "♣"
+        case spades = "♠"
+
+        var isRed: Bool { self == .hearts || self == .diamonds }
+    }
+
+    enum Rank: String, CaseIterable {
+        case ace = "A"
+        case two = "2"
+        case three = "3"
+        case four = "4"
+        case five = "5"
+        case six = "6"
+        case seven = "7"
+        case eight = "8"
+        case nine = "9"
+        case ten = "10"
+        case jack = "J"
+        case queen = "Q"
+        case king = "K"
+    }
+
+    let suit: Suit
+    let rank: Rank
+    var id: String { "\(rank.rawValue)-\(suit.rawValue)" }
+}
+
+struct SessionCard: Identifiable, Hashable {
+    enum Content: Hashable {
+        case playing(PlayingCard)
+        case prompt(String)
+    }
+
+    let id: String
+    let content: Content
+}
+
+struct PackStats: Codable, Equatable {
+    var sessionsStarted = 0
+    var cardsDrawn = 0
+    var lastPlayed: Date?
 }
 
 extension Color {

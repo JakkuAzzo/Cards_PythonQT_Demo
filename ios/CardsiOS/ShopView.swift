@@ -8,99 +8,74 @@ struct ShopView: View {
             VStack(alignment: .leading, spacing: 18) {
                 header
 
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
-                    ForEach(featuredCards) { offer in
-                        ShopCard(offer: offer)
+                ForEach(store.packs.filter(\.featured)) { pack in
+                    Button {
+                        store.select(pack)
+                    } label: {
+                        featuredCard(pack)
                     }
+                    .buttonStyle(.plain)
                 }
 
-                if let pack = store.packs.first {
-                    PackDetailView(pack: pack)
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("No account required", systemImage: "lock.shield.fill")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    Text("Every deck in this build is included and works offline. A real catalogue can replace this view when pack delivery and purchases exist.")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
                 }
+                .surfaceCard()
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .navigationTitle("Shop")
+        .navigationTitle("Discover")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Card Shop")
+            Text("Discover")
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            Text("A native store shell for featured decks and future pack drops.")
+            Text("Included decks worth trying next.")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }
     }
 
-    private var featuredCards: [ShopOffer] {
-        [
-            ShopOffer(
-                id: "featured-demo",
-                title: "Demo Pack",
-                subtitle: "Bundled starter deck",
-                note: "Loaded from the iPhone build resources.",
-                accentStartHex: "F59E0B",
-                accentEndHex: "EF4444"
-            ),
-            ShopOffer(
-                id: "featured-next",
-                title: "Next Pack Slot",
-                subtitle: "Coming soon",
-                note: "Use this slot for the first native expansion pack.",
-                accentStartHex: "60A5FA",
-                accentEndHex: "22C55E"
-            )
-        ]
-    }
-}
-
-private struct ShopOffer: Identifiable {
-    let id: String
-    let title: String
-    let subtitle: String
-    let note: String
-    let accentStartHex: String
-    let accentEndHex: String
-}
-
-private struct ShopCard: View {
-    let offer: ShopOffer
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color(hex: offer.accentStartHex), Color(hex: offer.accentEndHex)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(height: 112)
-                .overlay(
-                    VStack(alignment: .leading) {
-                        Spacer()
-                        Text(offer.subtitle.uppercased())
+    private func featuredCard(_ pack: PackRecord) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(pack.gradient)
+                .frame(height: 160)
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(pack.badge.uppercased())
                             .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .tracking(1.2)
-                            .foregroundStyle(.white.opacity(0.84))
+                            .tracking(1.3)
+                            .foregroundStyle(.white.opacity(0.76))
+                        Text(pack.name)
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
                     }
-                    .padding(14)
-                )
+                    .padding(18)
+                }
 
-            Text(offer.title)
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundStyle(AppTheme.textPrimary)
-
-            Text(offer.note)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(AppTheme.textSecondary)
-                .lineLimit(3)
+            HStack(alignment: .top) {
+                Text(pack.summary)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(AppTheme.textSecondary)
+                Spacer(minLength: 12)
+                Text(store.selectedPack?.id == pack.id ? "Selected" : "Choose")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(store.selectedPack?.id == pack.id ? Color.black : AppTheme.textPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(store.selectedPack?.id == pack.id ? AppTheme.accent : Color.white.opacity(0.10), in: Capsule())
+            }
         }
         .surfaceCard()
     }

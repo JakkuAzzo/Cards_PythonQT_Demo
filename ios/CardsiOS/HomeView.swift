@@ -41,7 +41,7 @@ struct HomeView: View {
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            Text("Pick a bundled deck, then launch into a native iPhone session shell.")
+            Text("Pick a deck, shuffle it, and start playing offline.")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }
@@ -93,7 +93,7 @@ struct HomeView: View {
             Button {
                 store.startSession()
             } label: {
-                Label("Play / Resume", systemImage: "play.fill")
+                Label("Play", systemImage: "play.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(PrimaryButtonStyle())
@@ -109,7 +109,6 @@ struct HomeView: View {
 
                 Button {
                     store.restartSession()
-                    store.startSession()
                 } label: {
                     Label("Restart", systemImage: "arrow.clockwise")
                         .frame(maxWidth: .infinity)
@@ -128,23 +127,33 @@ struct HomeView: View {
     }
 
     private func quickFacts(for pack: PackRecord) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Configuration")
+        let stats = store.stats(for: pack)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("Your activity")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            ForEach(pack.configItems.prefix(5), id: \.key) { item in
-                HStack {
-                    Text(item.key.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .foregroundStyle(AppTheme.textSecondary)
-                    Spacer()
-                    Text(item.value)
-                        .foregroundStyle(AppTheme.textPrimary)
-                }
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+            HStack(spacing: 12) {
+                statTile(value: "\(stats.sessionsStarted)", label: "Sessions")
+                statTile(value: "\(stats.cardsDrawn)", label: "Cards drawn")
             }
         }
         .surfaceCard()
+    }
+
+    private func statTile(value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.textPrimary)
+            Text(label)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(AppTheme.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var emptyState: some View {

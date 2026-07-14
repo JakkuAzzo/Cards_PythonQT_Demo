@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "tableDesigns": [
+    { "id": "green-classic", "asset": "built-in://green-classic", "label": "Green Classic" },
+    { "id": "poker-2", "asset": "built-in://poker-2", "label": "Poker Night" },
+    { "id": "midnight", "asset": "built-in://midnight", "label": "Midnight" }
+  ],
+  "cardBacks": [
+    { "id": "classic-red", "asset": "Packs/Demo/ClassicPack/BACK OF CARD.svg", "label": "Classic Red" },
+    { "id": "minimal-dark", "asset": "built-in://minimal-dark", "label": "Minimal Dark" }
+  ],
+  "cardSets": [
+    { "id": "standard-52", "asset": "Packs/Demo/ClassicPack", "label": "Standard 52" },
+    { "id": "prompt-basic", "asset": "built-in://prompt-basic", "label": "Prompt Cards" },
+    { "id": "classic-characters", "asset": "built-in://classic-characters", "label": "Classic Characters" }
+  ]
+}

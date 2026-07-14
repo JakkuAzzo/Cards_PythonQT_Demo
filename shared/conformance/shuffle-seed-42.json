@@ -1,0 +1,6 @@
+{
+  "algorithm": "splitmix64-fisher-yates",
+  "seed": 42,
+  "input": ["tt-01", "tt-02", "tt-03", "tt-04", "tt-05", "tt-06", "tt-07", "tt-08"],
+  "output": ["tt-04", "tt-02", "tt-07", "tt-03", "tt-05", "tt-01", "tt-08", "tt-06"]
+}
