@@ -54,5 +54,6 @@ struct RootView: View {
             }
             .presentationDetents([.large])
         }
+        .preferredColorScheme(.dark)
     }
 }
