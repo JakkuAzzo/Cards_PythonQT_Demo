@@ -1,7 +1,7 @@
 name: Build release artifacts
 
-on:
-  workflow_dispatch:
+"on":
+  workflow_dispatch: {}
   push:
     tags: ["v*"]
 
@@ -14,14 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: "17" }
+        with:
+          distribution: temurin
+          java-version: "17"
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: "8.1.1" }
+        with:
+          gradle-version: "8.1.1"
       - run: yes | sdkmanager "platforms;android-33" "build-tools;33.0.2"
       - run: gradle -p android assembleDebug
       - uses: actions/upload-artifact@v4
-        with: { name: Cards-Android-debug-apk, path: android/app/build/outputs/apk/debug/app-debug.apk }
+        with:
+          name: Cards-Android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
   desktop:
     strategy:
@@ -37,11 +42,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
       - run: pip install pyinstaller
       - run: pyinstaller --noconfirm --windowed --name Cards desktop/cards_desktop.py
       - uses: actions/upload-artifact@v4
-        with: { name: ${{ matrix.name }}, path: ${{ matrix.artifact }} }
+        with:
+          name: "${{ matrix.name }}"
+          path: "${{ matrix.artifact }}"
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -49,7 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
-        with: { path: release }
+        with:
+          path: release
       - run: cd release && zip -r ../Cards-Android-debug.apk.zip Cards-Android-debug-apk && zip -r ../Cards-macOS.zip Cards-macOS && zip -r ../Cards-Windows.zip Cards-Windows
       - uses: softprops/action-gh-release@v2
         with:
