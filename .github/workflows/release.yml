@@ -63,11 +63,13 @@ jobs:
         run: |
           set -euo pipefail
           apk="$(find release -type f -name '*.apk' -print -quit)"
-          app="$(find release -type d -name '*.app' -print -quit)"
+          plist="$(find release -type f -path '*/Contents/Info.plist' -print -quit)"
           exe="$(find release -type f -name 'Cards.exe' -print -quit)"
-          test -n "$apk" && test -n "$app" && test -n "$exe"
+          test -n "$apk" && test -n "$plist" && test -n "$exe"
           cp "$apk" Cards-Android-debug.apk
-          (cd "$(dirname "$app")" && zip -r "$GITHUB_WORKSPACE/Cards-macOS.zip" "$(basename "$app")")
+          mac_root="$(dirname "$(dirname "$plist")")"
+          mv "$mac_root" release/Cards.app
+          (cd release && zip -r "$GITHUB_WORKSPACE/Cards-macOS.zip" Cards.app)
           (cd "$(dirname "$exe")" && zip -j "$GITHUB_WORKSPACE/Cards-Windows.zip" "$(basename "$exe")")
       - uses: softprops/action-gh-release@v2
         with:
