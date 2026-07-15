@@ -6,9 +6,13 @@ There is deliberately no large store and no general code-generating AI. The crea
 
 ## App preview
 
-| Home | Local live table |
+| iPhone home | iPhone live table |
 | --- | --- |
 | ![Cards home screen](docs/screenshots/ios-home.png) | ![Cards local live-table screen](docs/screenshots/ios-live-table.png) |
+
+| Browser preview — desktop | Browser preview — mobile |
+| --- | --- |
+| ![Cards browser preview on desktop](docs/screenshots/web-home.png) | ![Cards browser preview on mobile](docs/screenshots/web-mobile.png) |
 
 Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It demonstrates the prompt deck, a local table flow, and constrained game-template selection; nearby transport and AR remain native-app capabilities.
 

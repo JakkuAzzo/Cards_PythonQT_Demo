@@ -1,17 +1,602 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10131c"><link rel="icon" href="data:,"><title>Cards — local table games</title>
-<style>
-:root{--ink:#f6f3eb;--muted:#b6bac7;--night:#10131c;--panel:#1a1f2b;--line:#353d50;--gold:#ffc438;--gold-deep:#e4a916;--felt:#1c6548;--shadow:0 20px 50px rgba(0,0,0,.26)}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 78% -10%,#34334e 0,transparent 28%),linear-gradient(135deg,#161a29 0,#0b0d14 68%);color:var(--ink);font:16px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,textarea{font:inherit}button{border:0;cursor:pointer;transition:transform .16s ease,background .16s ease,box-shadow .16s ease}button:focus-visible,textarea:focus-visible{outline:3px solid #fff;outline-offset:3px}.shell{max-width:1180px;margin:auto;padding:24px 28px 64px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:32px}.brand{display:flex;align-items:center;gap:12px}.mark{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--gold);color:#17130a;font-weight:950;letter-spacing:-.1em;box-shadow:inset 0 -3px rgba(0,0,0,.14)}.brand strong{letter-spacing:.1em;font-size:.9rem}.brand small{display:block;color:var(--muted);font-size:.75rem}.connection{display:flex;align-items:center;gap:8px;color:#d8dccd;font-size:.85rem}.connection i{width:9px;height:9px;border-radius:50%;background:#86d77e;box-shadow:0 0 0 4px rgba(134,215,126,.13)}
-.tabs{display:flex;gap:4px;padding:5px;background:rgba(30,35,48,.8);border:1px solid var(--line);border-radius:15px;width:max-content;margin-bottom:28px}.tabs button{color:var(--muted);background:transparent;border-radius:10px;padding:9px 14px;font-weight:750;font-size:.9rem}.tabs button.active{background:#f4f0e7;color:#1a1d22;box-shadow:0 2px 8px rgba(0,0,0,.18)}.view[hidden]{display:none}.home-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:22px}.hero{position:relative;overflow:hidden;padding:38px;border:1px solid rgba(255,211,111,.27);border-radius:28px;background:linear-gradient(132deg,#603e27,#3a2d3a 55%,#252b3d);min-height:410px;box-shadow:var(--shadow)}.hero:after{content:"";position:absolute;width:340px;height:340px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-90px;top:-120px}.eyebrow{color:var(--gold);font-size:.74rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase}.hero h1{max-width:560px;font-size:clamp(2.55rem,5vw,4.5rem);line-height:.98;letter-spacing:-.055em;margin:15px 0 18px}.hero p{max-width:470px;color:#eee4d8;font-size:1.08rem;margin:0 0 26px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.button-primary,.button-secondary{padding:13px 18px;border-radius:13px;font-weight:850}.button-primary{background:var(--gold);color:#171309;box-shadow:0 5px 0 var(--gold-deep)}.button-primary:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--gold-deep)}.button-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--gold-deep)}.button-secondary{background:rgba(18,21,30,.62);border:1px solid rgba(255,255,255,.22);color:#fff}.button-secondary:hover{background:rgba(18,21,30,.9)}.deck-preview{display:flex;position:absolute;bottom:-25px;right:30px;height:160px;align-items:end}.mini-card{width:88px;height:128px;background:#f8f5ee;border-radius:12px;border:1px solid #ded7c9;color:#1d222a;padding:11px;box-shadow:-8px 4px 14px rgba(0,0,0,.25);font-weight:900;display:flex;flex-direction:column;justify-content:space-between}.mini-card:nth-child(1){transform:rotate(-14deg) translateX(25px);background:#efdac8}.mini-card:nth-child(2){transform:rotate(-4deg)}.mini-card:nth-child(3){transform:rotate(10deg) translateX(-20px);background:#f2d3be}.mini-card span:last-child{font-size:1.35rem;align-self:end}.mini-card b{font-size:.66rem;letter-spacing:.04em}
-.lobby,.library,.creator{background:rgba(26,31,43,.9);border:1px solid var(--line);border-radius:25px;box-shadow:var(--shadow)}.lobby{padding:27px}.section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}.section-title h2{font-size:1.35rem;margin:0;letter-spacing:-.025em}.section-title p{margin:3px 0 0;color:var(--muted);font-size:.88rem}.badge{background:#2d3545;border:1px solid #434d62;border-radius:999px;padding:4px 9px;font-size:.72rem;color:#dbe5cf;font-weight:800;white-space:nowrap}.seats{display:grid;gap:11px;margin:17px 0 21px}.seat{display:flex;align-items:center;gap:11px;padding:11px;border-radius:14px;background:#202634;border:1px solid transparent}.seat.you{border-color:rgba(255,196,56,.58);background:linear-gradient(90deg,#332d20,#212633)}.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#6176a7;font-weight:900;font-size:.8rem}.avatar.avery{background:#a56478}.avatar.empty{background:transparent;border:1px dashed #596177;color:#9ca5b9}.seat b{font-size:.92rem}.seat span{color:var(--muted);font-size:.78rem;display:block}.seat .host{margin-left:auto;font-size:.68rem;color:var(--gold);font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-style:normal}.lobby-foot{padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:.82rem}.text-button{background:transparent;color:var(--gold);padding:7px 0;font-weight:850}.library{margin-top:22px;padding:26px}.deck-list{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.deck{position:relative;text-align:left;padding:18px;border-radius:17px;background:#212735;border:1px solid #3a4357;color:var(--ink);min-height:128px}.deck:hover{transform:translateY(-3px);border-color:#717d96}.deck.selected{background:linear-gradient(145deg,#4c4023,#313040);border-color:var(--gold)}.deck strong{display:block;font-size:1rem;margin-top:16px}.deck small{display:block;color:var(--muted);margin-top:2px}.deck .deck-count{position:absolute;top:14px;right:14px;color:#c8cdd9;font-size:.72rem;font-weight:800}.deck .swatch{width:33px;height:9px;border-radius:99px;background:#efb531}.deck:nth-child(2) .swatch{background:#ff9376}.deck:nth-child(3) .swatch{background:#93b1ff}
-.table-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px}.table-stage{position:relative;min-height:560px;overflow:hidden;border:13px solid #65452d;border-radius:42px;background:radial-gradient(ellipse at center,#2e805d 0,#1d6349 44%,#104232 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12),var(--shadow)}.table-stage:after{content:"";position:absolute;inset:20px;border:1px solid rgba(246,242,221,.3);border-radius:29px;pointer-events:none}.table-head{position:absolute;z-index:1;top:26px;left:32px;right:32px;display:flex;align-items:center;justify-content:space-between;gap:14px}.game-name{font-weight:900;font-size:1.1rem;letter-spacing:-.02em}.game-name small{display:block;color:#c5d8cb;font-size:.77rem;font-weight:650;letter-spacing:0}.round{padding:7px 10px;background:rgba(10,35,28,.42);border:1px solid rgba(255,255,255,.2);border-radius:99px;color:#eaf1e2;font-size:.77rem;font-weight:800}.table-seat{position:absolute;z-index:1;display:flex;align-items:center;gap:9px;color:#fff;font-size:.82rem;font-weight:800}.table-seat .avatar{box-shadow:0 3px 11px rgba(0,0,0,.2)}.table-seat.top{top:90px;left:50%;transform:translateX(-50%)}.table-seat.bottom{bottom:25px;left:50%;transform:translateX(-50%)}.table-seat.left{left:26px;top:50%;transform:translateY(-50%)}.table-seat.right{right:26px;top:50%;transform:translateY(-50%)}.turn-dot{width:8px;height:8px;background:var(--gold);border-radius:99px}.table-seat:not(.active) .turn-dot{display:none}.draw-pile{position:absolute;z-index:1;top:50%;left:calc(50% - 180px);transform:translateY(-50%);width:78px;height:108px;border-radius:12px;background:repeating-linear-gradient(-45deg,#f4c33c 0 7px,#28303f 7px 14px);border:5px solid #f5f0e6;box-shadow:7px 9px 0 rgba(12,37,29,.27),0 8px 15px rgba(0,0,0,.24)}.draw-pile span{position:absolute;inset:0;display:grid;place-items:center;color:#202735;font-weight:950;font-size:.72rem;text-align:center}.prompt-card{position:absolute;z-index:2;top:50%;left:50%;transform:translate(-34%,-50%);width:min(318px,42vw);min-height:198px;padding:25px;border-radius:17px;background:#faf6ed;color:#1c2227;box-shadow:0 17px 25px rgba(0,0,0,.27);display:flex;flex-direction:column;justify-content:space-between}.prompt-card small{color:#8a563d;font-size:.7rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase}.prompt-card p{font-family:Georgia,serif;font-size:1.32rem;font-weight:700;line-height:1.2;margin:16px 0}.prompt-card .card-no{color:#8d938c;font-size:.72rem;font-weight:800}.table-actions{position:absolute;z-index:2;bottom:26px;right:30px;display:flex;gap:8px}.table-actions button{padding:10px 13px;border-radius:11px;background:#f7f2e8;color:#172018;font-size:.83rem;font-weight:900}.table-actions button.primary{background:var(--gold)}.side-panel{padding:22px;background:rgba(26,31,43,.92);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}.side-panel h2{font-size:1.15rem;margin:0 0 5px}.side-panel>p{margin:0 0 18px;color:var(--muted);font-size:.86rem}.timeline{display:grid;gap:0}.event{display:grid;grid-template-columns:10px 1fr;gap:10px;padding:0 0 18px}.event i{width:9px;height:9px;margin-top:6px;border-radius:50%;background:#72809b}.event:first-child i{background:var(--gold);box-shadow:0 0 0 4px rgba(255,196,56,.13)}.event b{font-size:.86rem;display:block}.event span{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}.side-note{margin-top:22px;padding:13px;border-radius:14px;background:#202735;color:#cbd0dc;font-size:.78rem}.side-note b{color:var(--gold)}
-.creator{padding:30px;max-width:820px}.creator h1{font-size:2.1rem;letter-spacing:-.04em;margin:8px 0}.creator>p{color:var(--muted);max-width:620px;margin:0 0 24px}.form-label{display:flex;justify-content:space-between;gap:14px;font-size:.82rem;font-weight:850;margin-bottom:8px}.form-label span{color:var(--muted);font-weight:600}textarea{width:100%;min-height:170px;resize:vertical;background:#111620;color:#edf0f6;border:1px solid #3b4559;border-radius:15px;padding:16px;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.creator .actions{margin-top:16px}.result{display:grid;grid-template-columns:auto 1fr;gap:13px;align-items:start;margin-top:20px;padding:17px;border:1px solid #667658;border-radius:16px;background:#222b29;color:#e0eadb}.result[hidden]{display:none}.result .ok{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#91d67e;color:#193322;font-weight:950}.result b{display:block;margin-bottom:2px}.result span{font-size:.86rem;color:#c5d0c4}
-@media(max-width:820px){.shell{padding:20px 16px 48px}.home-grid,.table-wrap{grid-template-columns:1fr}.hero{min-height:385px;padding:30px}.deck-list{grid-template-columns:1fr}.table-stage{min-height:530px}.side-panel{display:none}.table-seat.left,.table-seat.right{display:none}.prompt-card{width:min(315px,62vw);transform:translate(-24%,-50%)}.draw-pile{left:15%}.deck-preview{right:12px;transform:scale(.86);transform-origin:bottom right}}@media(max-width:500px){.topbar{margin-bottom:24px}.brand small{display:none}.connection{font-size:.75rem}.tabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.tabs button{padding:10px 5px}.hero h1{font-size:2.55rem}.deck-preview{display:none}.hero{min-height:345px}.table-stage{border-width:9px;border-radius:28px}.table-head{top:18px;left:19px;right:19px}.game-name small{display:none}.prompt-card{width:190px;min-height:190px;padding:18px;left:54%;transform:translate(-26%,-50%);font-size:.94rem}.prompt-card p{font-size:1.1rem}.draw-pile{left:9%;width:60px;height:88px}.table-actions{left:17px;right:17px;bottom:16px}.table-actions button{flex:1;padding:10px 6px}.table-seat.top{top:68px}.table-seat.bottom{bottom:72px}}
-</style></head>
-<body><main class="shell"><header class="topbar"><div class="brand"><div class="mark">C</div><div><strong>CARDS</strong><small>local table games</small></div></div><div class="connection"><i></i> Browser demo · private to this device</div></header><nav class="tabs" aria-label="Main navigation"><button class="active" data-view="home">Play</button><button data-view="table">Table</button><button data-view="create">Create</button></nav>
-<section class="view" id="home"><div class="home-grid"><section class="hero"><div class="eyebrow">Tonight's table</div><h1>Bring a great question to the table.</h1><p>Start a quick prompt round, hand the turn to a friend, and keep the conversation moving. No account, no setup, no cloud.</p><div class="actions"><button class="button-primary" id="startGame">Start Table Talk</button><button class="button-secondary" id="openTable">See the table</button></div><div class="deck-preview" aria-hidden="true"><div class="mini-card"><b>TABLE TALK</b><span>01</span></div><div class="mini-card"><b>TABLE TALK</b><span>02</span></div><div class="mini-card"><b>TABLE TALK</b><span>03</span></div></div></section><aside class="lobby"><div class="section-title"><div><h2>At your table</h2><p>Invite nearby players in the native app.</p></div><span class="badge" id="seatCount">1 of 4 seats</span></div><div class="seats" id="seatList"><div class="seat you"><div class="avatar">NB</div><div><b>You</b><span>Host · ready to play</span></div><em class="host">Host</em></div><div class="seat"><div class="avatar empty">+</div><div><b>Open seat</b><span>Share the table code nearby</span></div></div></div><div class="lobby-foot"><span id="lobbyMessage">Your table is ready.</span><button class="text-button" id="addPlayer">Add demo player</button></div></aside></div><section class="library" aria-labelledby="deck-heading"><div class="section-title"><div><div class="eyebrow">Choose a deck</div><h2 id="deck-heading">A small game library, ready to play</h2></div><span class="badge" id="selectedDeck">Table Talk</span></div><div class="deck-list"><button class="deck selected" data-deck="Table Talk" data-count="36"><span class="swatch"></span><span class="deck-count">36 cards</span><strong>Table Talk</strong><small>Big questions for close company</small></button><button class="deck" data-deck="Road Trip" data-count="24"><span class="swatch"></span><span class="deck-count">24 cards</span><strong>Road Trip</strong><small>Stories for the long way home</small></button><button class="deck" data-deck="Quick Draw" data-count="18"><span class="swatch"></span><span class="deck-count">18 cards</span><strong>Quick Draw</strong><small>Short rounds, instant answers</small></button></div></section></section>
-<section class="view" id="table" hidden><div class="table-wrap"><section class="table-stage" aria-label="Table Talk game table"><div class="table-head"><div class="game-name"><span id="tableDeck">Table Talk</span><small id="tableSub">A conversation deck</small></div><span class="round" id="roundLabel">Round 1 · Your turn</span></div><div class="table-seat top" id="topSeat" hidden><div class="avatar avery">AV</div><span>Avery</span><i class="turn-dot"></i></div><div class="table-seat left"><div class="avatar empty">+</div><span>Open</span></div><div class="table-seat right"><div class="avatar empty">+</div><span>Open</span></div><div class="table-seat bottom active"><div class="avatar">NB</div><span>You</span><i class="turn-dot"></i></div><button class="draw-pile" id="drawPile" aria-label="Draw a new question"><span id="pileCount">36<br>cards</span></button><article class="prompt-card"><small id="promptDeck">TABLE TALK</small><p id="promptText">Tap the deck to draw the first question.</p><span class="card-no" id="cardNo">Ready when you are</span></article><div class="table-actions"><button id="addSeat">Add player</button><button class="primary" id="drawCard">Draw card</button><button id="endTurn">Pass turn</button></div></section><aside class="side-panel"><h2>Table activity</h2><p>What happens in this browser stays in this browser.</p><div class="timeline" id="timeline"><div class="event"><i></i><div><b>Table created</b><span>Ready for your first card</span></div></div></div><div class="side-note"><b>Native mode:</b> the iOS and Android apps add nearby discovery and shared sessions without needing a Wi-Fi network.</div></aside></div></section>
-<section class="view" id="create" hidden><section class="creator"><div class="eyebrow">Constrained game builder</div><h1>Make a game everyone understands.</h1><p>Describe a familiar game or set a few options. Cards chooses a bundled template and only accepts known table and card resources.</p><label class="form-label" for="idea">Your idea <span>YAML-style input supported</span></label><textarea id="idea">idea: a nearby conversation game&#10;multiplayer: y&#10;max_user: 4&#10;ar: n&#10;tabledesign: green_classic.svg</textarea><div class="actions"><button class="button-primary" id="build">Build game draft</button><button class="button-secondary" id="useExample">Use poker example</button></div><div class="result" id="result" hidden><div class="ok">✓</div><div><b id="resultTitle">Draft validated</b><span id="resultText"></span></div></div></section></section></main>
-<script>
-const prompts={"Table Talk":["What is a hill you are willing to die on?","What would make tonight unforgettable?","Which place would you revisit tomorrow?","What is a tiny skill everyone should learn?","When do you feel most like yourself?"],"Road Trip":["What was the best wrong turn you ever took?","What song belongs on the windows-down playlist?","Where would you stop if time did not matter?"],"Quick Draw":["Name a food you would defend forever.","What is one thing that should be easier?","What was your first thought this morning?"]};const $=s=>document.querySelector(s);let deck="Table Talk",drawn=0,turn=0,hasGuest=false,pile=36;function show(id){document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!==id);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo({top:0,behavior:'smooth'})}function addEvent(title,detail){const row=document.createElement('div');row.className='event';row.innerHTML='<i></i><div><b></b><span></span></div>';row.querySelector('b').textContent=title;row.querySelector('span').textContent=detail;$('#timeline').prepend(row)}function setGuest(){if(hasGuest)return;hasGuest=true;$('#seatCount').textContent='2 of 4 seats';$('#seatList').innerHTML='<div class="seat you"><div class="avatar">NB</div><div><b>You</b><span>Host · ready to play</span></div><em class="host">Host</em></div><div class="seat"><div class="avatar avery">AV</div><div><b>Avery</b><span>Joined this local demo</span></div></div><div class="seat"><div class="avatar empty">+</div><div><b>Open seat</b><span>Share the table code nearby</span></div></div>';$('#lobbyMessage').textContent='Avery is at the table.';$('#addPlayer').textContent='Player added';$('#addPlayer').disabled=true;$('#topSeat').hidden=false;$('#addSeat').textContent='Avery joined';$('#addSeat').disabled=true;addEvent('Avery joined the table','Two players are ready')}function draw(){const items=prompts[deck];drawn++;pile=Math.max(0,pile-1);const question=items[(drawn-1)%items.length];$('#promptText').textContent=question;$('#promptDeck').textContent=deck.toUpperCase();$('#cardNo').textContent='Card '+String(drawn).padStart(2,'0')+' · draw pile';$('#pileCount').innerHTML=pile+'<br>cards';$('#roundLabel').textContent='Round '+drawn+' · '+(turn===0?'Your turn':'Avery’s turn');addEvent('A card was drawn',question)}function selectDeck(button){deck=button.dataset.deck;drawn=0;pile=Number(button.dataset.count);$('#selectedDeck').textContent=deck;$('#tableDeck').textContent=deck;$('#tableSub').textContent=deck==='Table Talk'?'A conversation deck':deck==='Road Trip'?'Stories for the journey':'Fast questions, no waiting';$('#pileCount').innerHTML=pile+'<br>cards';$('#promptText').textContent='Tap the deck to draw the first question.';$('#cardNo').textContent='Ready when you are';document.querySelectorAll('.deck').forEach(d=>d.classList.toggle('selected',d===button))}document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));document.querySelectorAll('.deck').forEach(b=>b.addEventListener('click',()=>selectDeck(b)));$('#startGame').onclick=()=>{show('table');draw()};$('#openTable').onclick=()=>show('table');$('#drawPile').onclick=draw;$('#drawCard').onclick=draw;$('#addPlayer').onclick=setGuest;$('#addSeat').onclick=setGuest;$('#endTurn').onclick=()=>{if(!hasGuest)setGuest();turn=turn===0?1:0;$('#roundLabel').textContent='Round '+Math.max(1,drawn)+' · '+(turn===0?'Your turn':'Avery’s turn');$('.table-seat.bottom').classList.toggle('active',turn===0);$('#topSeat').classList.toggle('active',turn===1);addEvent(turn===0?'Your turn':'Avery is thinking','Pass the table when you are ready')};$('#useExample').onclick=()=>{$('#idea').value='idea: four-player poker night\nmultiplayer: y\nmax_user: 4\nar: n\ntabledesign: poker_2.png'};$('#build').onclick=()=>{const value=$('#idea').value.toLowerCase();let title='Prompt draw draft validated',text='2–6 players · green classic table · browser-playable prompt deck.';if(value.includes('poker')){title='Poker draft validated';text='2–4 players · poker-2 table · dedicated poker runtime is available in the native roadmap.'}else if(value.includes('guess')){title='Guess Who draft validated';text='2 players · character grid · dedicated private-target runtime is native-only.'}$('#resultTitle').textContent=title;$('#resultText').textContent=text;$('#result').hidden=false};
-</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cards - local table games</title>
+  <meta name="description" content="Playable local table card games with guided setup, lightweight game drafting, and multiplayer-friendly turn handling.">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --panel: rgba(255, 251, 244, 0.92);
+      --panel-strong: #fffdf8;
+      --ink: #1f2a1f;
+      --muted: #5c665f;
+      --line: rgba(31, 42, 31, 0.12);
+      --brand: #8c2f39;
+      --brand-deep: #5f1e26;
+      --gold: #d7a84a;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --display: "Avenir Next", "Segoe UI", sans-serif;
+      --body: "Avenir", "Helvetica Neue", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(215, 168, 74, 0.24), transparent 24rem),
+        radial-gradient(circle at right, rgba(140, 47, 57, 0.18), transparent 28rem),
+        linear-gradient(180deg, #f8f3e8 0%, #efe7d7 100%);
+    }
+    body { padding: 32px 18px 64px; }
+    .shell { width: min(1180px, 100%); margin: 0 auto; display: grid; gap: 22px; }
+    .topbar, .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(58, 41, 18, 0.16);
+      border-radius: var(--radius-xl);
+    }
+    .topbar {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand img { width: 56px; height: 56px; flex: 0 0 auto; }
+    .brand-copy strong, .hero h1, .section-title, .prompt-card h2, .creator-preview h3 {
+      font-family: var(--display);
+      letter-spacing: -0.03em;
+    }
+    .brand-copy strong { display: block; font-size: 1.15rem; }
+    .brand-copy span, .status-pill, .meta-line, .deck-meta, .side-note, .activity li, .player small, .creator-preview p, textarea, button { color: var(--muted); }
+    .status-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(215, 168, 74, 0.18);
+    }
+    .hero { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: 22px; }
+    .hero-copy, .hero-side, .workspace, .creator { padding: 28px; }
+    .hero-copy h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2.3rem, 5vw, 4.4rem);
+      line-height: 0.96;
+      max-width: 10ch;
+    }
+    .hero-copy p { margin: 0; max-width: 60ch; color: var(--muted); font-size: 1.04rem; line-height: 1.55; }
+    .hero-actions, .nav-tabs, .quick-stats, .deck-grid, .table-toolbar, .table-actions, .creator-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero-actions { margin-top: 20px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #fff7ef; box-shadow: 0 14px 30px rgba(95, 30, 38, 0.22); }
+    .btn-secondary { background: rgba(255,255,255,0.75); color: var(--ink); border: 1px solid var(--line); }
+    .hero-side {
+      background:
+        radial-gradient(circle at top right, rgba(215, 168, 74, 0.25), transparent 10rem),
+        linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,243,232,0.96));
+      border: 1px solid rgba(255,255,255,0.5);
+      display: grid;
+      gap: 16px;
+    }
+    .tab {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.78);
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .tab.active { color: #fffaf3; border-color: transparent; background: linear-gradient(135deg, #254737 0%, #193126 100%); }
+    .quick-stats { margin-top: auto; }
+    .stat-card {
+      flex: 1 1 160px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+    }
+    .stat-card strong { display: block; font-size: 1.6rem; margin-bottom: 6px; color: var(--brand-deep); }
+    .workspace { display: grid; gap: 20px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .section-title { margin: 0; font-size: 1.45rem; }
+    .deck-card {
+      flex: 1 1 230px;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .deck-card:hover, .deck-card.active { transform: translateY(-3px); border-color: rgba(140, 47, 57, 0.4); box-shadow: 0 18px 36px rgba(88, 57, 26, 0.12); }
+    .deck-card p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .deck-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: space-between; font-size: 0.88rem; }
+    .deck-badge {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(215, 168, 74, 0.18);
+      color: var(--brand-deep);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+    .table-layout { display: grid; grid-template-columns: 1.6fr 0.8fr; gap: 18px; }
+    .table-view {
+      min-height: 520px;
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 30%), linear-gradient(180deg, #335f49 0%, #224332 100%);
+      color: #f9f1dd;
+      position: relative;
+      overflow: hidden;
+    }
+    .table-view::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      pointer-events: none;
+    }
+    .table-toolbar { justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+    .table-toolbar .status-pill { background: rgba(8, 18, 14, 0.28); color: #f4ead6; border-color: rgba(255,255,255,0.12); }
+    .felt-stage { margin-top: 18px; display: grid; place-items: center; min-height: 385px; position: relative; z-index: 1; }
+    .prompt-card {
+      width: min(100%, 430px);
+      background: linear-gradient(180deg, #fffdf8 0%, #f8ecda 100%);
+      color: var(--ink);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 18px 40px rgba(18, 10, 6, 0.22);
+      border: 1px solid rgba(92, 64, 35, 0.16);
+    }
+    .prompt-card h2 { margin: 14px 0 10px; font-size: 1.65rem; line-height: 1.06; }
+    .prompt-card p { margin: 0; line-height: 1.55; color: #4f534e; }
+    .kicker {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(140, 47, 57, 0.1);
+      color: var(--brand-deep);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .draw-stack, .discard-stack {
+      position: absolute;
+      width: 110px;
+      height: 150px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .draw-stack { left: 12px; bottom: 14px; background: linear-gradient(180deg, #f4c977 0%, #c88f3f 100%); color: #40250d; }
+    .discard-stack { right: 12px; bottom: 14px; border: 1px dashed rgba(255,255,255,0.3); color: rgba(255,255,255,0.74); background: rgba(255,255,255,0.06); }
+    .player-ring { position: absolute; inset: 0; pointer-events: none; }
+    .player {
+      position: absolute;
+      min-width: 116px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(9, 18, 14, 0.44);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    .player strong { display: block; color: #fff7e8; margin-bottom: 4px; }
+    .player small { color: rgba(245, 233, 208, 0.78); }
+    .player.active { box-shadow: 0 0 0 2px rgba(215, 168, 74, 0.7); }
+    .p-top { top: 8px; left: 50%; transform: translateX(-50%); }
+    .p-left { left: 0; top: 50%; transform: translateY(-50%); }
+    .p-right { right: 0; top: 50%; transform: translateY(-50%); }
+    .p-bottom { left: 50%; bottom: 0; transform: translateX(-50%); }
+    .table-side { display: grid; gap: 18px; }
+    .side-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+    .activity { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+    .activity li { padding: 10px 12px; border-radius: 14px; background: rgba(244, 239, 227, 0.9); border: 1px solid rgba(31, 42, 31, 0.08); line-height: 1.4; }
+    .table-actions .btn, .creator-actions .btn { flex: 1 1 120px; }
+    .creator { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; }
+    .creator textarea {
+      width: 100%;
+      min-height: 300px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      resize: vertical;
+      background: rgba(255,255,255,0.76);
+      font: 500 0.95rem/1.55 "SFMono-Regular", "Menlo", monospace;
+    }
+    .creator-preview {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(140,47,57,0.06), rgba(215,168,74,0.12)), #fffdf8;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .preview-chip {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(31,42,31,0.08);
+    }
+    .preview-chip span { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer-note { text-align: center; color: var(--muted); font-size: 0.92rem; }
+    [hidden] { display: none !important; }
+    @media (max-width: 980px) { .hero, .table-layout, .creator { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      body { padding: 18px 12px 40px; }
+      .topbar, .hero-copy, .hero-side, .workspace, .creator { padding: 20px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .brand { align-items: flex-start; width: 100%; }
+      .brand-copy { min-width: 0; }
+      .brand-copy span { display: block; line-height: 1.35; }
+      .status-row { justify-content: flex-start; }
+      .brand img { width: 48px; height: 48px; }
+      .hero-copy h1 { max-width: 12ch; font-size: 2.45rem; }
+      .table-view { min-height: 600px; }
+      .felt-stage { min-height: 455px; padding: 60px 0 140px; }
+      .prompt-card { width: 100%; }
+      .draw-stack, .discard-stack { width: 92px; height: 126px; bottom: 10px; }
+      .player { min-width: 94px; padding: 10px 12px; }
+      .p-left { left: 4px; top: auto; bottom: 116px; transform: none; }
+      .p-right { right: 4px; top: auto; bottom: 116px; transform: none; }
+      .p-top { top: 4px; }
+      .p-bottom { bottom: 64px; }
+      .preview-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="./assets/logo-mark.svg" alt="Cards logo">
+        <div class="brand-copy">
+          <strong>Cards</strong>
+          <span>Local multiplayer table games with optional AR and lightweight drafting.</span>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="status-pill"><span class="dot"></span>Nearby play ready</div>
+        <div class="status-pill">Decks <strong>3</strong></div>
+        <div class="status-pill">Mode <strong id="modeLabel">Prompt table</strong></div>
+      </div>
+    </header>
+    <section class="hero">
+      <div class="panel hero-copy">
+        <h1>Bring the table to the people in front of you.</h1>
+        <p>Cards keeps the setup simple: choose a deck, put players at the table, and start a round. When you need a custom game, the creator only asks for the rules that matter and fills the rest with sensible defaults.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="startRoundBtn">Start round</button>
+          <button class="btn btn-secondary" data-tab-target="create">Open game creator</button>
+        </div>
+      </div>
+      <aside class="panel hero-side">
+        <div>
+          <div class="meta-line">Preview focus</div>
+          <div class="nav-tabs">
+            <button class="tab active" data-tab="play">Play</button>
+            <button class="tab" data-tab="table">Table</button>
+            <button class="tab" data-tab="create">Create</button>
+          </div>
+        </div>
+        <div class="quick-stats">
+          <div class="stat-card"><strong id="playerCount">4</strong><span>seats prepared</span></div>
+          <div class="stat-card"><strong id="cardCount">36</strong><span>cards in this deck</span></div>
+          <div class="stat-card"><strong id="turnCount">1</strong><span>current turn</span></div>
+        </div>
+      </aside>
+    </section>
+    <section class="panel workspace" id="playPanel">
+      <div class="section-head">
+        <div>
+          <p class="meta-line">Deck library</p>
+          <h2 class="section-title">Choose a game flow that fits the room</h2>
+        </div>
+        <p class="side-note">Defaults stay lightweight: the deck decides the table layout, turn pattern, and prompt style.</p>
+      </div>
+      <div class="deck-grid" id="deckGrid"></div>
+      <div class="table-layout">
+        <section class="table-view">
+          <div class="table-toolbar">
+            <div class="status-pill"><span class="dot"></span><span id="tableStatus">Avery is opening the round</span></div>
+            <div class="status-pill"><span id="tableDeck">Table Talk</span></div>
+          </div>
+          <div class="felt-stage">
+            <div class="player-ring">
+              <div class="player p-top active" id="seatTop"><strong>Avery</strong><small>Lead player</small></div>
+              <div class="player p-left" id="seatLeft"><strong>Jordan</strong><small>Nearby peer</small></div>
+              <div class="player p-right" id="seatRight"><strong>Riley</strong><small>Joined live</small></div>
+              <div class="player p-bottom" id="seatBottom"><strong>Casey</strong><small>Host device</small></div>
+            </div>
+            <article class="prompt-card">
+              <span class="kicker" id="promptTag">Warm-up prompt</span>
+              <h2 id="promptTitle">Tell the table about a tiny moment you still remember.</h2>
+              <p id="promptBody">Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.</p>
+            </article>
+            <div class="draw-stack" id="drawStack">36 left</div>
+            <div class="discard-stack">Discard</div>
+          </div>
+        </section>
+        <aside class="table-side">
+          <div class="side-card">
+            <h3>Table actions</h3>
+            <p class="side-note">Run a round, rotate turns, or add one more player without opening a setup screen.</p>
+            <div class="table-actions">
+              <button class="btn btn-primary" id="drawBtn">Draw next</button>
+              <button class="btn btn-secondary" id="passBtn">Pass turn</button>
+              <button class="btn btn-secondary" id="guestBtn">Add guest</button>
+            </div>
+          </div>
+          <div class="side-card">
+            <h3>Round activity</h3>
+            <ul class="activity" id="activityList"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="panel creator" id="createPanel" hidden>
+      <div>
+        <p class="meta-line">Game creator</p>
+        <h2 class="section-title">Describe the structure, not a whole storefront</h2>
+        <p class="side-note">The builder accepts a compact config and fills in the rest from known game families like poker, prompt decks, and identity games.</p>
+        <textarea id="configInput">game: poker night
+type: poker
+multiplayer: true
+max_users: 4
+ar: false
+tabledesign: poker_2.png
+private_hands: true
+nearby_sync: bluetooth
+notes: classic betting order, simple host-led flow</textarea>
+        <div class="creator-actions">
+          <button class="btn btn-primary" id="buildBtn">Build draft</button>
+          <button class="btn btn-secondary" id="loadGuessWhoBtn">Load guess-style example</button>
+        </div>
+      </div>
+      <div class="creator-preview">
+        <div>
+          <p class="meta-line">Resolved output</p>
+          <h3 id="previewTitle">Poker draft validated</h3>
+          <p id="previewSummary">Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.</p>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-chip"><span>Mode</span><strong id="previewMode">Nearby multiplayer</strong></div>
+          <div class="preview-chip"><span>Layout</span><strong id="previewLayout">Poker table</strong></div>
+          <div class="preview-chip"><span>AR</span><strong id="previewAr">Disabled</strong></div>
+          <div class="preview-chip"><span>Sync</span><strong id="previewSync">Bluetooth + local host</strong></div>
+        </div>
+        <div class="side-card">
+          <h3>What the interpreter inferred</h3>
+          <ul class="activity" id="inferenceList"></ul>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">This preview stays focused on nearby play, table clarity, and simple game drafting.</p>
+  </main>
+  <script>
+    const decks = [
+      { id: "table-talk", badge: "Prompt deck", name: "Table Talk", cards: 36, mode: "Prompt table", blurb: "Light prompts for quick local sessions, social icebreakers, and rotating turns.", title: "Tell the table about a tiny moment you still remember.", body: "Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.", tag: "Warm-up prompt" },
+      { id: "road-trip", badge: "Travel pack", name: "Road Trip", cards: 24, mode: "Shared screen", blurb: "Short prompts and mini-games for one phone in the middle of a group.", title: "Name a place everyone here would actually visit again.", body: "Everyone points at the same time, then explains their pick. Good for one-screen play where the host device drives the next card.", tag: "Group vote" },
+      { id: "quick-draw", badge: "Guess game", name: "Quick Draw", cards: 18, mode: "Team challenge", blurb: "Fast team prompts with clue giving, time pressure, and clear turn changes.", title: "Give one-word clues until your team guesses the hidden card.", body: "This setup assumes teams, visible timers, and a discard pile that tracks which prompts are already spent.", tag: "Timed round" }
+    ];
+    const seats = [
+      { id: "seatTop", name: "Avery" },
+      { id: "seatLeft", name: "Jordan" },
+      { id: "seatRight", name: "Riley" },
+      { id: "seatBottom", name: "Casey" }
+    ];
+    const state = { activeDeck: decks[0], pile: decks[0].cards, turn: 0, guestAdded: false };
+    const activityList = document.getElementById("activityList");
+    const inferenceList = document.getElementById("inferenceList");
+    const deckGrid = document.getElementById("deckGrid");
+    const tabs = [...document.querySelectorAll(".tab")];
+    const playPanel = document.getElementById("playPanel");
+    const createPanel = document.getElementById("createPanel");
+    const addActivity = (text) => {
+      const item = document.createElement("li");
+      item.textContent = text;
+      activityList.prepend(item);
+      while (activityList.children.length > 4) activityList.removeChild(activityList.lastChild);
+    };
+    const renderDecks = () => {
+      deckGrid.innerHTML = "";
+      decks.forEach((deck) => {
+        const card = document.createElement("button");
+        card.className = "deck-card" + (deck.id === state.activeDeck.id ? " active" : "");
+        card.innerHTML = `<span class="deck-badge">${deck.badge}</span><strong>${deck.name}</strong><p>${deck.blurb}</p><div class="deck-meta"><span>${deck.cards} cards</span><span>${deck.mode}</span></div>`;
+        card.addEventListener("click", () => selectDeck(deck.id));
+        deckGrid.appendChild(card);
+      });
+    };
+    const renderTable = () => {
+      const deck = state.activeDeck;
+      document.getElementById("modeLabel").textContent = deck.mode;
+      document.getElementById("cardCount").textContent = deck.cards;
+      document.getElementById("tableDeck").textContent = deck.name;
+      document.getElementById("promptTag").textContent = deck.tag;
+      document.getElementById("promptTitle").textContent = deck.title;
+      document.getElementById("promptBody").textContent = deck.body;
+      document.getElementById("drawStack").textContent = `${state.pile} left`;
+      document.getElementById("turnCount").textContent = String(state.turn + 1);
+      document.getElementById("playerCount").textContent = state.guestAdded ? "5" : "4";
+      document.getElementById("tableStatus").textContent = `${seats[state.turn].name} is opening the round`;
+      seats.forEach((seat, index) => document.getElementById(seat.id).classList.toggle("active", index === state.turn));
+    };
+    const selectDeck = (id) => {
+      const deck = decks.find((entry) => entry.id === id);
+      if (!deck) return;
+      state.activeDeck = deck;
+      state.pile = deck.cards;
+      state.turn = 0;
+      renderDecks();
+      renderTable();
+      addActivity(`${deck.name} loaded with ${deck.cards} cards and ${deck.mode.toLowerCase()} defaults.`);
+    };
+    const openTab = (tab) => {
+      const create = tab === "create";
+      createPanel.hidden = !create;
+      playPanel.hidden = create;
+      tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === tab));
+    };
+    const parseConfig = (raw) => {
+      const config = {};
+      raw.split("\n").forEach((line) => {
+        const index = line.indexOf(":");
+        if (index === -1) return;
+        config[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
+      });
+      return config;
+    };
+    const resolveDraft = (config) => {
+      const type = (config.type || "").toLowerCase();
+      const multiplayer = (config.multiplayer || "true").toLowerCase() !== "false";
+      const ar = (config.ar || "false").toLowerCase() === "true";
+      if (type.includes("guess")) {
+        return {
+          title: "Guess-style draft validated",
+          summary: "Defaults applied for an identity game with visible character grids, question turns, and elimination markers.",
+          mode: multiplayer ? "Shared screen multiplayer" : "Solo pass-and-play",
+          layout: "Guess board",
+          ar: ar ? "Enabled" : "Disabled",
+          sync: multiplayer ? "Bluetooth + local host" : "Single device",
+          notes: [
+            "Switched to a grid table instead of a central prompt card.",
+            "Enabled question turns and visible elimination state.",
+            "Kept the config lightweight by inferring team-free identity play."
+          ]
+        };
+      }
+      if (type.includes("poker")) {
+        return {
+          title: "Poker draft validated",
+          summary: "Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.",
+          mode: multiplayer ? "Nearby multiplayer" : "Solo practice table",
+          layout: "Poker table",
+          ar: ar ? "Enabled" : "Disabled",
+          sync: multiplayer ? "Bluetooth + local host" : "Single device",
+          notes: [
+            "Used private hands because poker implies hidden cards.",
+            "Mapped turn flow to a circular table layout with dealer rotation.",
+            "Kept camera features off because the config favors non-AR play."
+          ]
+        };
+      }
+      return {
+        title: "Prompt deck draft validated",
+        summary: "Defaults applied for a shared prompt table with rotating turns, visible draw stack, and a simple host-led round loop.",
+        mode: multiplayer ? "Nearby multiplayer" : "Solo journaling",
+        layout: "Prompt table",
+        ar: ar ? "Enabled" : "Disabled",
+        sync: multiplayer ? "Bluetooth + local host" : "Single device",
+        notes: [
+          "Chose a central prompt card because the game type reads like a social deck.",
+          "Kept rounds visible to all players on one shared table view.",
+          "Left room for AR overlays later without making them mandatory."
+        ]
+      };
+    };
+    const renderDraft = (draft) => {
+      document.getElementById("previewTitle").textContent = draft.title;
+      document.getElementById("previewSummary").textContent = draft.summary;
+      document.getElementById("previewMode").textContent = draft.mode;
+      document.getElementById("previewLayout").textContent = draft.layout;
+      document.getElementById("previewAr").textContent = draft.ar;
+      document.getElementById("previewSync").textContent = draft.sync;
+      inferenceList.innerHTML = "";
+      draft.notes.forEach((note) => {
+        const item = document.createElement("li");
+        item.textContent = note;
+        inferenceList.appendChild(item);
+      });
+    };
+    document.getElementById("startRoundBtn").addEventListener("click", () => {
+      openTab("play");
+      state.turn = 0;
+      state.pile = state.activeDeck.cards;
+      renderTable();
+      addActivity("Round reset. Everyone is synced and ready to start.");
+    });
+    document.querySelectorAll("[data-tab-target]").forEach((button) => button.addEventListener("click", () => openTab(button.dataset.tabTarget)));
+    tabs.forEach((tab) => tab.addEventListener("click", () => openTab(tab.dataset.tab)));
+    document.getElementById("drawBtn").addEventListener("click", () => {
+      if (state.pile > 0) state.pile -= 1;
+      renderTable();
+      addActivity(`${seats[state.turn].name} drew the next card. ${state.pile} remain in the stack.`);
+    });
+    document.getElementById("passBtn").addEventListener("click", () => {
+      state.turn = (state.turn + 1) % seats.length;
+      renderTable();
+      addActivity(`Turn passed to ${seats[state.turn].name}.`);
+    });
+    document.getElementById("guestBtn").addEventListener("click", () => {
+      if (state.guestAdded) {
+        addActivity("Guest seat is already enabled for this preview.");
+        return;
+      }
+      state.guestAdded = true;
+      document.getElementById("playerCount").textContent = "5";
+      addActivity("Taylor joined as a guest seat. The host can assign that player to a spare device later.");
+    });
+    document.getElementById("buildBtn").addEventListener("click", () => renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value))));
+    document.getElementById("loadGuessWhoBtn").addEventListener("click", () => {
+      document.getElementById("configInput").value = `game: family faces
+type: guess who
+multiplayer: true
+max_users: 2
+ar: false
+tabledesign: guess_grid.png
+nearby_sync: bluetooth
+notes: shared clue board, elimination markers, no hidden hands`;
+      renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
+    });
+    renderDecks();
+    renderTable();
+    renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
+    addActivity("Table Talk loaded. Four nearby seats are ready.");
+    addActivity("Host preview booted in local shared-table mode.");
+  </script>
+</body>
+</html>
