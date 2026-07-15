@@ -12,6 +12,10 @@ There is deliberately no large store and no general code-generating AI. The crea
 
 Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It demonstrates the prompt deck, a local table flow, and constrained game-template selection; nearby transport and AR remain native-app capabilities.
 
+## Preview downloads
+
+Each version tag creates a GitHub prerelease with an Android debug APK, a macOS DMG, and a Windows executable. These preview builds are not code-signed or notarized. iOS distribution needs an Apple Developer account and is therefore intentionally not included yet.
+
 ## Current implementation
 
 ### Shared

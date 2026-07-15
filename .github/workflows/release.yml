@@ -28,17 +28,23 @@ jobs:
           name: Cards-Android-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-  desktop:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            name: Cards-macOS
-            artifact: dist/Cards.app
-          - os: windows-latest
-            name: Cards-Windows
-            artifact: dist/Cards.exe
-    runs-on: ${{ matrix.os }}
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller
+      - run: pyinstaller --noconfirm --windowed --name Cards desktop/cards_desktop.py
+      - run: hdiutil create -volname Cards -srcfolder dist/Cards.app -ov -format UDZO dist/Cards-macOS.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cards-macOS-dmg
+          path: dist/Cards-macOS.dmg
+
+  windows:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -48,34 +54,41 @@ jobs:
       - run: pyinstaller --noconfirm --windowed --name Cards desktop/cards_desktop.py
       - uses: actions/upload-artifact@v4
         with:
-          name: "${{ matrix.name }}"
-          path: "${{ matrix.artifact }}"
+          name: Cards-Windows-exe
+          path: dist/Cards/Cards.exe
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [android, desktop]
+    needs: [android, macos, windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
-          path: release
-      - name: Package downloaded artifacts
+          name: Cards-Android-debug-apk
+          path: release/android
+      - uses: actions/download-artifact@v4
+        with:
+          name: Cards-macOS-dmg
+          path: release/macos
+      - uses: actions/download-artifact@v4
+        with:
+          name: Cards-Windows-exe
+          path: release/windows
+      - name: Prepare release files
         run: |
           set -euo pipefail
-          apk="$(find release -type f -name '*.apk' -print -quit)"
-          plist="$(find release -type f -path '*/Contents/Info.plist' -print -quit)"
-          exe="$(find release -type f -name 'Cards.exe' -print -quit)"
-          test -n "$apk" && test -n "$plist" && test -n "$exe"
+          apk="$(find release/android -type f -name '*.apk' -print -quit)"
+          dmg="$(find release/macos -type f -name '*.dmg' -print -quit)"
+          exe="$(find release/windows -type f -name 'Cards.exe' -print -quit)"
+          test -n "$apk" && test -n "$dmg" && test -n "$exe"
           cp "$apk" Cards-Android-debug.apk
-          mac_root="$(dirname "$(dirname "$plist")")"
-          mv "$mac_root" release/Cards.app
-          (cd release && zip -r "$GITHUB_WORKSPACE/Cards-macOS.zip" Cards.app)
-          (cd "$(dirname "$exe")" && zip -j "$GITHUB_WORKSPACE/Cards-Windows.zip" "$(basename "$exe")")
+          cp "$dmg" Cards-macOS.dmg
+          cp "$exe" Cards-Windows.exe
       - uses: softprops/action-gh-release@v2
         with:
           prerelease: true
           generate_release_notes: true
           files: |
             Cards-Android-debug.apk
-            Cards-macOS.zip
-            Cards-Windows.zip
+            Cards-macOS.dmg
+            Cards-Windows.exe
