@@ -2,18 +2,601 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#10131c">
-  <link rel="icon" href="data:,">
-  <title>Cards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cards - local table games</title>
+  <meta name="description" content="Playable local table card games with guided setup, lightweight game drafting, and multiplayer-friendly turn handling.">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --panel: rgba(255, 251, 244, 0.92);
+      --panel-strong: #fffdf8;
+      --ink: #1f2a1f;
+      --muted: #5c665f;
+      --line: rgba(31, 42, 31, 0.12);
+      --brand: #8c2f39;
+      --brand-deep: #5f1e26;
+      --gold: #d7a84a;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --display: "Avenir Next", "Segoe UI", sans-serif;
+      --body: "Avenir", "Helvetica Neue", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(215, 168, 74, 0.24), transparent 24rem),
+        radial-gradient(circle at right, rgba(140, 47, 57, 0.18), transparent 28rem),
+        linear-gradient(180deg, #f8f3e8 0%, #efe7d7 100%);
+    }
+    body { padding: 32px 18px 64px; }
+    .shell { width: min(1180px, 100%); margin: 0 auto; display: grid; gap: 22px; }
+    .topbar, .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(58, 41, 18, 0.16);
+      border-radius: var(--radius-xl);
+    }
+    .topbar {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand img { width: 56px; height: 56px; flex: 0 0 auto; }
+    .brand-copy strong, .hero h1, .section-title, .prompt-card h2, .creator-preview h3 {
+      font-family: var(--display);
+      letter-spacing: -0.03em;
+    }
+    .brand-copy strong { display: block; font-size: 1.15rem; }
+    .brand-copy span, .status-pill, .meta-line, .deck-meta, .side-note, .activity li, .player small, .creator-preview p, textarea, button { color: var(--muted); }
+    .status-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(215, 168, 74, 0.18);
+    }
+    .hero { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: 22px; }
+    .hero-copy, .hero-side, .workspace, .creator { padding: 28px; }
+    .hero-copy h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2.3rem, 5vw, 4.4rem);
+      line-height: 0.96;
+      max-width: 10ch;
+    }
+    .hero-copy p { margin: 0; max-width: 60ch; color: var(--muted); font-size: 1.04rem; line-height: 1.55; }
+    .hero-actions, .nav-tabs, .quick-stats, .deck-grid, .table-toolbar, .table-actions, .creator-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero-actions { margin-top: 20px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #fff7ef; box-shadow: 0 14px 30px rgba(95, 30, 38, 0.22); }
+    .btn-secondary { background: rgba(255,255,255,0.75); color: var(--ink); border: 1px solid var(--line); }
+    .hero-side {
+      background:
+        radial-gradient(circle at top right, rgba(215, 168, 74, 0.25), transparent 10rem),
+        linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,243,232,0.96));
+      border: 1px solid rgba(255,255,255,0.5);
+      display: grid;
+      gap: 16px;
+    }
+    .tab {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.78);
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .tab.active { color: #fffaf3; border-color: transparent; background: linear-gradient(135deg, #254737 0%, #193126 100%); }
+    .quick-stats { margin-top: auto; }
+    .stat-card {
+      flex: 1 1 160px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+    }
+    .stat-card strong { display: block; font-size: 1.6rem; margin-bottom: 6px; color: var(--brand-deep); }
+    .workspace { display: grid; gap: 20px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .section-title { margin: 0; font-size: 1.45rem; }
+    .deck-card {
+      flex: 1 1 230px;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .deck-card:hover, .deck-card.active { transform: translateY(-3px); border-color: rgba(140, 47, 57, 0.4); box-shadow: 0 18px 36px rgba(88, 57, 26, 0.12); }
+    .deck-card p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .deck-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: space-between; font-size: 0.88rem; }
+    .deck-badge {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(215, 168, 74, 0.18);
+      color: var(--brand-deep);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+    .table-layout { display: grid; grid-template-columns: 1.6fr 0.8fr; gap: 18px; }
+    .table-view {
+      min-height: 520px;
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 30%), linear-gradient(180deg, #335f49 0%, #224332 100%);
+      color: #f9f1dd;
+      position: relative;
+      overflow: hidden;
+    }
+    .table-view::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      pointer-events: none;
+    }
+    .table-toolbar { justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+    .table-toolbar .status-pill { background: rgba(8, 18, 14, 0.28); color: #f4ead6; border-color: rgba(255,255,255,0.12); }
+    .felt-stage { margin-top: 18px; display: grid; place-items: center; min-height: 385px; position: relative; z-index: 1; }
+    .prompt-card {
+      width: min(100%, 430px);
+      background: linear-gradient(180deg, #fffdf8 0%, #f8ecda 100%);
+      color: var(--ink);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 18px 40px rgba(18, 10, 6, 0.22);
+      border: 1px solid rgba(92, 64, 35, 0.16);
+    }
+    .prompt-card h2 { margin: 14px 0 10px; font-size: 1.65rem; line-height: 1.06; }
+    .prompt-card p { margin: 0; line-height: 1.55; color: #4f534e; }
+    .kicker {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(140, 47, 57, 0.1);
+      color: var(--brand-deep);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .draw-stack, .discard-stack {
+      position: absolute;
+      width: 110px;
+      height: 150px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .draw-stack { left: 12px; bottom: 14px; background: linear-gradient(180deg, #f4c977 0%, #c88f3f 100%); color: #40250d; }
+    .discard-stack { right: 12px; bottom: 14px; border: 1px dashed rgba(255,255,255,0.3); color: rgba(255,255,255,0.74); background: rgba(255,255,255,0.06); }
+    .player-ring { position: absolute; inset: 0; pointer-events: none; }
+    .player {
+      position: absolute;
+      min-width: 116px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(9, 18, 14, 0.44);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    .player strong { display: block; color: #fff7e8; margin-bottom: 4px; }
+    .player small { color: rgba(245, 233, 208, 0.78); }
+    .player.active { box-shadow: 0 0 0 2px rgba(215, 168, 74, 0.7); }
+    .p-top { top: 8px; left: 50%; transform: translateX(-50%); }
+    .p-left { left: 0; top: 50%; transform: translateY(-50%); }
+    .p-right { right: 0; top: 50%; transform: translateY(-50%); }
+    .p-bottom { left: 50%; bottom: 0; transform: translateX(-50%); }
+    .table-side { display: grid; gap: 18px; }
+    .side-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+    .activity { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+    .activity li { padding: 10px 12px; border-radius: 14px; background: rgba(244, 239, 227, 0.9); border: 1px solid rgba(31, 42, 31, 0.08); line-height: 1.4; }
+    .table-actions .btn, .creator-actions .btn { flex: 1 1 120px; }
+    .creator { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; }
+    .creator textarea {
+      width: 100%;
+      min-height: 300px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      resize: vertical;
+      background: rgba(255,255,255,0.76);
+      font: 500 0.95rem/1.55 "SFMono-Regular", "Menlo", monospace;
+    }
+    .creator-preview {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(140,47,57,0.06), rgba(215,168,74,0.12)), #fffdf8;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .preview-chip {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(31,42,31,0.08);
+    }
+    .preview-chip span { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer-note { text-align: center; color: var(--muted); font-size: 0.92rem; }
+    [hidden] { display: none !important; }
+    @media (max-width: 980px) { .hero, .table-layout, .creator { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      body { padding: 18px 12px 40px; }
+      .topbar, .hero-copy, .hero-side, .workspace, .creator { padding: 20px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .brand { align-items: flex-start; width: 100%; }
+      .brand-copy { min-width: 0; }
+      .brand-copy span { display: block; line-height: 1.35; }
+      .status-row { justify-content: flex-start; }
+      .brand img { width: 48px; height: 48px; }
+      .hero-copy h1 { max-width: 12ch; font-size: 2.45rem; }
+      .table-view { min-height: 600px; }
+      .felt-stage { min-height: 455px; padding: 60px 0 140px; }
+      .prompt-card { width: 100%; }
+      .draw-stack, .discard-stack { width: 92px; height: 126px; bottom: 10px; }
+      .player { min-width: 94px; padding: 10px 12px; }
+      .p-left { left: 4px; top: auto; bottom: 116px; transform: none; }
+      .p-right { right: 4px; top: auto; bottom: 116px; transform: none; }
+      .p-top { top: 4px; }
+      .p-bottom { bottom: 64px; }
+      .preview-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <main>Loading Cards…</main>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="./assets/logo-mark.svg" alt="Cards logo">
+        <div class="brand-copy">
+          <strong>Cards</strong>
+          <span>Local multiplayer table games with optional AR and lightweight drafting.</span>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="status-pill"><span class="dot"></span>Nearby play ready</div>
+        <div class="status-pill">Decks <strong>3</strong></div>
+        <div class="status-pill">Mode <strong id="modeLabel">Prompt table</strong></div>
+      </div>
+    </header>
+    <section class="hero">
+      <div class="panel hero-copy">
+        <h1>Bring the table to the people in front of you.</h1>
+        <p>Cards keeps the setup simple: choose a deck, put players at the table, and start a round. When you need a custom game, the creator only asks for the rules that matter and fills the rest with sensible defaults.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="startRoundBtn">Start round</button>
+          <button class="btn btn-secondary" data-tab-target="create">Open game creator</button>
+        </div>
+      </div>
+      <aside class="panel hero-side">
+        <div>
+          <div class="meta-line">Preview focus</div>
+          <div class="nav-tabs">
+            <button class="tab active" data-tab="play">Play</button>
+            <button class="tab" data-tab="table">Table</button>
+            <button class="tab" data-tab="create">Create</button>
+          </div>
+        </div>
+        <div class="quick-stats">
+          <div class="stat-card"><strong id="playerCount">4</strong><span>seats prepared</span></div>
+          <div class="stat-card"><strong id="cardCount">36</strong><span>cards in this deck</span></div>
+          <div class="stat-card"><strong id="turnCount">1</strong><span>current turn</span></div>
+        </div>
+      </aside>
+    </section>
+    <section class="panel workspace" id="playPanel">
+      <div class="section-head">
+        <div>
+          <p class="meta-line">Deck library</p>
+          <h2 class="section-title">Choose a game flow that fits the room</h2>
+        </div>
+        <p class="side-note">Defaults stay lightweight: the deck decides the table layout, turn pattern, and prompt style.</p>
+      </div>
+      <div class="deck-grid" id="deckGrid"></div>
+      <div class="table-layout">
+        <section class="table-view">
+          <div class="table-toolbar">
+            <div class="status-pill"><span class="dot"></span><span id="tableStatus">Avery is opening the round</span></div>
+            <div class="status-pill"><span id="tableDeck">Table Talk</span></div>
+          </div>
+          <div class="felt-stage">
+            <div class="player-ring">
+              <div class="player p-top active" id="seatTop"><strong>Avery</strong><small>Lead player</small></div>
+              <div class="player p-left" id="seatLeft"><strong>Jordan</strong><small>Nearby peer</small></div>
+              <div class="player p-right" id="seatRight"><strong>Riley</strong><small>Joined live</small></div>
+              <div class="player p-bottom" id="seatBottom"><strong>Casey</strong><small>Host device</small></div>
+            </div>
+            <article class="prompt-card">
+              <span class="kicker" id="promptTag">Warm-up prompt</span>
+              <h2 id="promptTitle">Tell the table about a tiny moment you still remember.</h2>
+              <p id="promptBody">Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.</p>
+            </article>
+            <div class="draw-stack" id="drawStack">36 left</div>
+            <div class="discard-stack">Discard</div>
+          </div>
+        </section>
+        <aside class="table-side">
+          <div class="side-card">
+            <h3>Table actions</h3>
+            <p class="side-note">Run a round, rotate turns, or add one more player without opening a setup screen.</p>
+            <div class="table-actions">
+              <button class="btn btn-primary" id="drawBtn">Draw next</button>
+              <button class="btn btn-secondary" id="passBtn">Pass turn</button>
+              <button class="btn btn-secondary" id="guestBtn">Add guest</button>
+            </div>
+          </div>
+          <div class="side-card">
+            <h3>Round activity</h3>
+            <ul class="activity" id="activityList"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="panel creator" id="createPanel" hidden>
+      <div>
+        <p class="meta-line">Game creator</p>
+        <h2 class="section-title">Describe the structure, not a whole storefront</h2>
+        <p class="side-note">The builder accepts a compact config and fills in the rest from known game families like poker, prompt decks, and identity games.</p>
+        <textarea id="configInput">game: poker night
+type: poker
+multiplayer: true
+max_users: 4
+ar: false
+tabledesign: poker_2.png
+private_hands: true
+nearby_sync: bluetooth
+notes: classic betting order, simple host-led flow</textarea>
+        <div class="creator-actions">
+          <button class="btn btn-primary" id="buildBtn">Build draft</button>
+          <button class="btn btn-secondary" id="loadGuessWhoBtn">Load guess-style example</button>
+        </div>
+      </div>
+      <div class="creator-preview">
+        <div>
+          <p class="meta-line">Resolved output</p>
+          <h3 id="previewTitle">Poker draft validated</h3>
+          <p id="previewSummary">Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.</p>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-chip"><span>Mode</span><strong id="previewMode">Nearby multiplayer</strong></div>
+          <div class="preview-chip"><span>Layout</span><strong id="previewLayout">Poker table</strong></div>
+          <div class="preview-chip"><span>AR</span><strong id="previewAr">Disabled</strong></div>
+          <div class="preview-chip"><span>Sync</span><strong id="previewSync">Bluetooth + local host</strong></div>
+        </div>
+        <div class="side-card">
+          <h3>What the interpreter inferred</h3>
+          <ul class="activity" id="inferenceList"></ul>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">This preview stays focused on nearby play, table clarity, and simple game drafting.</p>
+  </main>
   <script>
-    fetch("https://raw.githubusercontent.com/JakkuAzzo/Cards_PythonQT_Demo/xcode/web/index.html", { cache: "no-cache" })
-      .then(response => response.ok ? response.text() : Promise.reject(new Error("Preview unavailable")))
-      .then(html => { document.open(); document.write(html); document.close(); })
-      .catch(() => { document.querySelector("main").textContent = "Cards is temporarily unavailable. Please refresh."; });
+    const decks = [
+      { id: "table-talk", badge: "Prompt deck", name: "Table Talk", cards: 36, mode: "Prompt table", blurb: "Light prompts for quick local sessions, social icebreakers, and rotating turns.", title: "Tell the table about a tiny moment you still remember.", body: "Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.", tag: "Warm-up prompt" },
+      { id: "road-trip", badge: "Travel pack", name: "Road Trip", cards: 24, mode: "Shared screen", blurb: "Short prompts and mini-games for one phone in the middle of a group.", title: "Name a place everyone here would actually visit again.", body: "Everyone points at the same time, then explains their pick. Good for one-screen play where the host device drives the next card.", tag: "Group vote" },
+      { id: "quick-draw", badge: "Guess game", name: "Quick Draw", cards: 18, mode: "Team challenge", blurb: "Fast team prompts with clue giving, time pressure, and clear turn changes.", title: "Give one-word clues until your team guesses the hidden card.", body: "This setup assumes teams, visible timers, and a discard pile that tracks which prompts are already spent.", tag: "Timed round" }
+    ];
+    const seats = [
+      { id: "seatTop", name: "Avery" },
+      { id: "seatLeft", name: "Jordan" },
+      { id: "seatRight", name: "Riley" },
+      { id: "seatBottom", name: "Casey" }
+    ];
+    const state = { activeDeck: decks[0], pile: decks[0].cards, turn: 0, guestAdded: false };
+    const activityList = document.getElementById("activityList");
+    const inferenceList = document.getElementById("inferenceList");
+    const deckGrid = document.getElementById("deckGrid");
+    const tabs = [...document.querySelectorAll(".tab")];
+    const playPanel = document.getElementById("playPanel");
+    const createPanel = document.getElementById("createPanel");
+    const addActivity = (text) => {
+      const item = document.createElement("li");
+      item.textContent = text;
+      activityList.prepend(item);
+      while (activityList.children.length > 4) activityList.removeChild(activityList.lastChild);
+    };
+    const renderDecks = () => {
+      deckGrid.innerHTML = "";
+      decks.forEach((deck) => {
+        const card = document.createElement("button");
+        card.className = "deck-card" + (deck.id === state.activeDeck.id ? " active" : "");
+        card.innerHTML = `<span class="deck-badge">${deck.badge}</span><strong>${deck.name}</strong><p>${deck.blurb}</p><div class="deck-meta"><span>${deck.cards} cards</span><span>${deck.mode}</span></div>`;
+        card.addEventListener("click", () => selectDeck(deck.id));
+        deckGrid.appendChild(card);
+      });
+    };
+    const renderTable = () => {
+      const deck = state.activeDeck;
+      document.getElementById("modeLabel").textContent = deck.mode;
+      document.getElementById("cardCount").textContent = deck.cards;
+      document.getElementById("tableDeck").textContent = deck.name;
+      document.getElementById("promptTag").textContent = deck.tag;
+      document.getElementById("promptTitle").textContent = deck.title;
+      document.getElementById("promptBody").textContent = deck.body;
+      document.getElementById("drawStack").textContent = `${state.pile} left`;
+      document.getElementById("turnCount").textContent = String(state.turn + 1);
+      document.getElementById("playerCount").textContent = state.guestAdded ? "5" : "4";
+      document.getElementById("tableStatus").textContent = `${seats[state.turn].name} is opening the round`;
+      seats.forEach((seat, index) => document.getElementById(seat.id).classList.toggle("active", index === state.turn));
+    };
+    const selectDeck = (id) => {
+      const deck = decks.find((entry) => entry.id === id);
+      if (!deck) return;
+      state.activeDeck = deck;
+      state.pile = deck.cards;
+      state.turn = 0;
+      renderDecks();
+      renderTable();
+      addActivity(`${deck.name} loaded with ${deck.cards} cards and ${deck.mode.toLowerCase()} defaults.`);
+    };
+    const openTab = (tab) => {
+      const create = tab === "create";
+      createPanel.hidden = !create;
+      playPanel.hidden = create;
+      tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === tab));
+    };
+    const parseConfig = (raw) => {
+      const config = {};
+      raw.split("\n").forEach((line) => {
+        const index = line.indexOf(":");
+        if (index === -1) return;
+        config[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
+      });
+      return config;
+    };
+    const resolveDraft = (config) => {
+      const type = (config.type || "").toLowerCase();
+      const multiplayer = (config.multiplayer || "true").toLowerCase() !== "false";
+      const ar = (config.ar || "false").toLowerCase() === "true";
+      if (type.includes("guess")) {
+        return {
+          title: "Guess-style draft validated",
+          summary: "Defaults applied for an identity game with visible character grids, question turns, and elimination markers.",
+          mode: multiplayer ? "Shared screen multiplayer" : "Solo pass-and-play",
+          layout: "Guess board",
+          ar: ar ? "Enabled" : "Disabled",
+          sync: multiplayer ? "Bluetooth + local host" : "Single device",
+          notes: [
+            "Switched to a grid table instead of a central prompt card.",
+            "Enabled question turns and visible elimination state.",
+            "Kept the config lightweight by inferring team-free identity play."
+          ]
+        };
+      }
+      if (type.includes("poker")) {
+        return {
+          title: "Poker draft validated",
+          summary: "Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.",
+          mode: multiplayer ? "Nearby multiplayer" : "Solo practice table",
+          layout: "Poker table",
+          ar: ar ? "Enabled" : "Disabled",
+          sync: multiplayer ? "Bluetooth + local host" : "Single device",
+          notes: [
+            "Used private hands because poker implies hidden cards.",
+            "Mapped turn flow to a circular table layout with dealer rotation.",
+            "Kept camera features off because the config favors non-AR play."
+          ]
+        };
+      }
+      return {
+        title: "Prompt deck draft validated",
+        summary: "Defaults applied for a shared prompt table with rotating turns, visible draw stack, and a simple host-led round loop.",
+        mode: multiplayer ? "Nearby multiplayer" : "Solo journaling",
+        layout: "Prompt table",
+        ar: ar ? "Enabled" : "Disabled",
+        sync: multiplayer ? "Bluetooth + local host" : "Single device",
+        notes: [
+          "Chose a central prompt card because the game type reads like a social deck.",
+          "Kept rounds visible to all players on one shared table view.",
+          "Left room for AR overlays later without making them mandatory."
+        ]
+      };
+    };
+    const renderDraft = (draft) => {
+      document.getElementById("previewTitle").textContent = draft.title;
+      document.getElementById("previewSummary").textContent = draft.summary;
+      document.getElementById("previewMode").textContent = draft.mode;
+      document.getElementById("previewLayout").textContent = draft.layout;
+      document.getElementById("previewAr").textContent = draft.ar;
+      document.getElementById("previewSync").textContent = draft.sync;
+      inferenceList.innerHTML = "";
+      draft.notes.forEach((note) => {
+        const item = document.createElement("li");
+        item.textContent = note;
+        inferenceList.appendChild(item);
+      });
+    };
+    document.getElementById("startRoundBtn").addEventListener("click", () => {
+      openTab("play");
+      state.turn = 0;
+      state.pile = state.activeDeck.cards;
+      renderTable();
+      addActivity("Round reset. Everyone is synced and ready to start.");
+    });
+    document.querySelectorAll("[data-tab-target]").forEach((button) => button.addEventListener("click", () => openTab(button.dataset.tabTarget)));
+    tabs.forEach((tab) => tab.addEventListener("click", () => openTab(tab.dataset.tab)));
+    document.getElementById("drawBtn").addEventListener("click", () => {
+      if (state.pile > 0) state.pile -= 1;
+      renderTable();
+      addActivity(`${seats[state.turn].name} drew the next card. ${state.pile} remain in the stack.`);
+    });
+    document.getElementById("passBtn").addEventListener("click", () => {
+      state.turn = (state.turn + 1) % seats.length;
+      renderTable();
+      addActivity(`Turn passed to ${seats[state.turn].name}.`);
+    });
+    document.getElementById("guestBtn").addEventListener("click", () => {
+      if (state.guestAdded) {
+        addActivity("Guest seat is already enabled for this preview.");
+        return;
+      }
+      state.guestAdded = true;
+      document.getElementById("playerCount").textContent = "5";
+      addActivity("Taylor joined as a guest seat. The host can assign that player to a spare device later.");
+    });
+    document.getElementById("buildBtn").addEventListener("click", () => renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value))));
+    document.getElementById("loadGuessWhoBtn").addEventListener("click", () => {
+      document.getElementById("configInput").value = `game: family faces
+type: guess who
+multiplayer: true
+max_users: 2
+ar: false
+tabledesign: guess_grid.png
+nearby_sync: bluetooth
+notes: shared clue board, elimination markers, no hidden hands`;
+      renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
+    });
+    renderDecks();
+    renderTable();
+    renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
+    addActivity("Table Talk loaded. Four nearby seats are ready.");
+    addActivity("Host preview booted in local shared-table mode.");
   </script>
 </body>
 </html>

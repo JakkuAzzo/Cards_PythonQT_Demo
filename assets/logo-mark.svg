@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Cards logo</title>
+  <desc id="desc">A layered playing card mark with a burgundy crest and golden star.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8c2f39"/>
+      <stop offset="100%" stop-color="#5f1e26"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffdf8"/>
+      <stop offset="100%" stop-color="#f3e5c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="64" fill="#f6efe0"/>
+  <rect x="44" y="58" width="118" height="148" rx="20" transform="rotate(-10 44 58)" fill="url(#bg)"/>
+  <rect x="90" y="42" width="122" height="156" rx="20" fill="url(#face)" stroke="#d7a84a" stroke-width="8"/>
+  <path d="M151 76l12 25 28 4-20 19 5 28-25-13-25 13 5-28-20-19 28-4z" fill="#d7a84a"/>
+  <path d="M126 172c15-18 35-18 50 0" fill="none" stroke="#8c2f39" stroke-width="10" stroke-linecap="round"/>
+</svg>
