@@ -30,6 +30,20 @@ public final class EngineSelfTest {
             rejected = error.error == MultiplayerEngine.Error.NOT_PLAYERS_TURN;
         }
         require(rejected, "out-of-turn command rejection");
+
+        GameState hostSnapshot = engine.state();
+        MultiplayerEngine guest = new MultiplayerEngine();
+        guest.applyHostSnapshot(hostSnapshot);
+        require(guest.state().revision == hostSnapshot.revision, "guest snapshot revision");
+        require(guest.state().activePlayer().id.equals("guest"), "guest snapshot player");
+
+        GameState stale = new GameState();
+        stale.revision = 1;
+        guest.applyHostSnapshot(stale);
+        require(guest.state().revision == hostSnapshot.revision, "stale snapshot rejection");
+
+        guest.reset();
+        require(guest.state().phase == GameState.Phase.LOBBY && guest.state().players.isEmpty(), "engine reset");
         System.out.println("Android core conformance tests passed.");
     }
 

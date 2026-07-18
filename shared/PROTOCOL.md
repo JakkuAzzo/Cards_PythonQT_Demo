@@ -26,4 +26,4 @@ The 2D table and AR table consume the same public state. AR coordinates are pres
 
 ## Transport
 
-The preferred mixed-platform nearby topology is host-and-guests. The transport interface carries encoded envelopes and reports peers joining, leaving, and reconnecting. The first production adapter should use Google Nearby Connections on both iOS and Android; loopback transports remain available for deterministic automated tests.
+The preferred nearby topology is host-and-guests. The transport interface carries encoded envelopes and reports peers joining, leaving, and reconnecting. Android uses Google Nearby Connections with Bluetooth/Wi-Fi-assisted transport. Apple devices currently use encrypted Multipeer Connectivity for Apple-to-Apple sessions. The current Google Swift package supports iOS over Wi-Fi LAN only, so it must not be presented as a Bluetooth-capable mixed-platform transport; a dedicated cross-platform BLE transport is required before claiming no-Wi-Fi iPhone/Android play. Loopback transports remain available for deterministic automated tests.

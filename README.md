@@ -43,7 +43,7 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 
 - The same deterministic multiplayer engine and seed-42 conformance result as iOS.
 - A conventional live-table activity.
-- A Google Nearby Connections `P2P_STAR` adapter for Bluetooth/Wi-Fi-assisted nearby sessions.
+- A Google Nearby Connections `P2P_STAR` host/join flow with visible authentication digits, table-code validation, host-authoritative commands, and public snapshots.
 - Optional ARCore installation and session lifecycle with a non-AR fallback.
 
 ## Lightweight creator format
@@ -123,4 +123,4 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Wire Android's host/join screen to the same authenticated protocol envelopes and run a mixed iPhone/Android Table Talk session on real hardware. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.
+Run Android host/join on real hardware, then add a dedicated cross-platform BLE transport for iPhone/Android play without Wi-Fi infrastructure. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.

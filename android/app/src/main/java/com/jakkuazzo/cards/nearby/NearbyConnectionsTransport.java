@@ -78,6 +78,10 @@ public final class NearbyConnectionsTransport {
         publishPeers();
     }
 
+    public int connectedPeerCount() {
+        return connected.size();
+    }
+
     private final EndpointDiscoveryCallback discovery = new EndpointDiscoveryCallback() {
         @Override public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
             client.requestConnection(localName, endpointId, lifecycle)

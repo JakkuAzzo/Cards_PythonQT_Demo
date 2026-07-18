@@ -82,6 +82,33 @@ public final class MultiplayerEngine {
 
     public List<CardRecord> sourceDeck() { return new ArrayList<>(sourceDeck); }
 
+    /** Guests only apply snapshots authored by the host and never mutate state directly. */
+    public void applyHostSnapshot(GameState snapshot) {
+        if (snapshot.revision < state.revision) return;
+        state.revision = snapshot.revision;
+        state.phase = snapshot.phase;
+        state.players.clear();
+        state.players.addAll(snapshot.players);
+        state.activePlayerIndex = snapshot.activePlayerIndex;
+        state.drawPile.clear();
+        state.drawPile.addAll(snapshot.drawPile);
+        state.discardPile.clear();
+        state.discardPile.addAll(snapshot.discardPile);
+        state.currentCard = snapshot.currentCard;
+        state.seed = snapshot.seed;
+    }
+
+    public void reset() {
+        state.revision = 0;
+        state.phase = GameState.Phase.LOBBY;
+        state.players.clear();
+        state.activePlayerIndex = 0;
+        state.drawPile.clear();
+        state.discardPile.clear();
+        state.currentCard = null;
+        state.seed = null;
+    }
+
     private void requireTurn(String playerId) throws RuleException {
         require(state.activePlayer() != null && state.activePlayer().id.equals(playerId), Error.NOT_PLAYERS_TURN);
     }
@@ -90,4 +117,3 @@ public final class MultiplayerEngine {
         if (!condition) throw new RuleException(error);
     }
 }
-

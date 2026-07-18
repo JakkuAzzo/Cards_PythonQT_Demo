@@ -30,6 +30,8 @@
     </array>
     <key>NSCameraUsageDescription</key>
     <string>Cards uses the camera to place an optional digital card table on a nearby surface.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Cards uses Bluetooth to discover and connect people playing together nearby.</string>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Cards uses nearby connections so people in the same room can play together.</string>
     <key>UILaunchScreen</key>
