@@ -1,0 +1,61 @@
+name: Verify Cards
+
+on:
+  push:
+    branches: [xcode]
+  pull_request:
+    branches: [xcode]
+
+permissions:
+  contents: read
+
+jobs:
+  shared:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest discover -s shared/tests -v
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify preview assets and response
+        run: |
+          test -f web/index.html
+          test -f web/assets/icon.svg
+          test -f web/assets/logo-mark.svg
+          python3 -m http.server 4173 --directory web >/tmp/cards-web.log 2>&1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --retry 5 http://127.0.0.1:4173/ | grep -F "Cards - local table games"
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test iOS simulator app
+        run: |
+          xcodebuild \
+            -project ios/CardsiOS.xcodeproj \
+            -scheme CardsiOS \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            test CODE_SIGNING_ALLOWED=NO
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.1.1"
+      - run: yes | sdkmanager "platforms;android-33" "build-tools;33.0.2"
+      - run: gradle -p android assembleDebug
