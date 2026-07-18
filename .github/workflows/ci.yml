@@ -31,7 +31,14 @@ jobs:
           python3 -m http.server 4173 --directory web >/tmp/cards-web.log 2>&1 &
           server=$!
           trap 'kill "$server"' EXIT
-          curl --fail --retry 5 http://127.0.0.1:4173/ | grep -F "Cards - local table games"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent http://127.0.0.1:4173/ | grep -Fq "Cards - local table games"; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/cards-web.log
+          exit 1
 
   ios:
     runs-on: macos-latest
@@ -42,7 +49,7 @@ jobs:
           xcodebuild \
             -project ios/CardsiOS.xcodeproj \
             -scheme CardsiOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             test CODE_SIGNING_ALLOWED=NO
 
   android:
