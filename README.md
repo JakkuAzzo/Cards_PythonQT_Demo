@@ -34,8 +34,8 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 
 - Existing offline classic and prompt decks.
 - A working two-dimensional multiplayer Table Talk preview.
-- Simulated nearby joins over a tested loopback transport.
-- An encrypted Apple Multipeer Connectivity adapter for nearby Apple devices.
+- Host/join controls for encrypted Apple-to-Apple nearby tables, with a shareable table code, host-authoritative commands, and revisioned snapshots.
+- A tested loopback transport retained for deterministic automated tests.
 - An ARKit/RealityKit table that finds a horizontal surface and renders the digital table/card state.
 - A minimal creator that accepts an idea or YAML-style settings and previews validated prompt games.
 
@@ -123,4 +123,4 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Wire real host/join screens to the production nearby adapters, exchange authenticated protocol envelopes, and run a mixed iPhone/Android Table Talk session. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.
+Wire Android's host/join screen to the same authenticated protocol envelopes and run a mixed iPhone/Android Table Talk session on real hardware. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.

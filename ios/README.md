@@ -14,8 +14,8 @@ open CardsiOS.xcodeproj
 
 - Offline classic and prompt deck play.
 - A host-authoritative multiplayer engine with deterministic shuffling and turn validation.
-- A live Table Talk preview with simulated nearby players.
-- Loopback transport tests and an encrypted Apple Multipeer Connectivity adapter.
+- A live Table Talk preview with local one-device play plus real nearby host/join controls.
+- A shareable table code, host-authoritative commands, revisioned snapshots, loopback transport tests, and encrypted Apple Multipeer Connectivity for nearby Apple devices.
 - ARKit/RealityKit horizontal-surface table placement.
 - A lightweight template creator for poker, Guess Who, and custom prompt games.
 - Manifest, creator, engine, transport, and deck XCTest sources.
@@ -28,4 +28,4 @@ The creator produces data, not Swift code. It selects from `ResourceCatalog`, ap
 
 ## Production nearby work
 
-`AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. Cross-platform sessions should use the same JSON envelopes through Google Nearby Connections on both platforms. The current screen uses loopback transport until connection verification and host/join UX are wired.
+`AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. The live-table screen now creates and joins code-filtered nearby sessions, with the host admitting players and broadcasting state snapshots. Cross-platform sessions should use the same JSON envelopes through Google Nearby Connections on both platforms; that Android UI integration remains outstanding.

@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct LiveTableView: View {
-    @StateObject private var engine: MultiplayerEngine
+    @StateObject private var session: NearbyTableSession
     @State private var nextGuestNumber = 1
     @State private var errorMessage: String?
     @State private var showingAR = false
+    @State private var joinCode = ""
 
     init(manifest: GameManifest = .tableTalk) {
-        _engine = StateObject(wrappedValue: MultiplayerEngine(manifest: manifest))
+        _session = StateObject(wrappedValue: NearbyTableSession(manifest: manifest))
     }
 
     var body: some View {
@@ -16,7 +17,7 @@ struct LiveTableView: View {
                 header
                 connectionCard
 
-                if engine.state.phase == .lobby {
+                if session.state.phase == .lobby {
                     lobby
                 } else {
                     table
@@ -27,7 +28,9 @@ struct LiveTableView: View {
         }
         .navigationTitle("Live Table")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(perform: addHostIfNeeded)
+        .onAppear {
+            perform { try session.beginLocalPreview() }
+        }
         .alert("Cannot continue", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
@@ -37,38 +40,71 @@ struct LiveTableView: View {
             Text(errorMessage ?? "Unknown error")
         }
         .sheet(isPresented: $showingAR) {
-            ARTableModeView(card: engine.state.currentCard, manifest: engine.manifest)
+            ARTableModeView(card: session.state.currentCard, manifest: session.manifest)
         }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(engine.manifest.name)
+            Text(session.manifest.name)
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
-            Text("A host-authoritative multiplayer preview using the same state that nearby devices and AR will render.")
+            Text("Host nearby games without a Wi-Fi network, or keep play on one device.")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }
     }
 
     private var connectionCard: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "antenna.radiowaves.left.and.right")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(AppTheme.accent)
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Local protocol preview")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppTheme.textPrimary)
-                Text("Loopback transport · revision \(engine.state.revision)")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "antenna.radiowaves.left.and.right")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(AppTheme.accent)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(session.role.label)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    Text(session.statusMessage)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+                Spacer()
+                Circle()
+                    .fill(session.role == .localPreview ? Color.orange : Color.green)
+                    .frame(width: 10, height: 10)
             }
-            Spacer()
-            Circle()
-                .fill(Color.green)
-                .frame(width: 10, height: 10)
+            if session.role == .localPreview {
+                Button {
+                    perform { try session.host() }
+                } label: {
+                    Label("Host nearby table", systemImage: "dot.radiowaves.left.and.right")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(TablePrimaryButtonStyle())
+
+                HStack(spacing: 10) {
+                    TextField("Table code", text: $joinCode)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .textFieldStyle(.roundedBorder)
+                    Button("Join") { session.join(code: joinCode) }
+                        .buttonStyle(TableSecondaryButtonStyle())
+                }
+            } else {
+                HStack {
+                    if session.role == .host {
+                        Label(session.sessionCode, systemImage: "number")
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppTheme.accent)
+                    }
+                    Spacer()
+                    Text("\(session.connectedPeers.count) connected")
+                        .foregroundStyle(AppTheme.textSecondary)
+                    Button("Leave") { session.disconnect() }
+                        .buttonStyle(TableSecondaryButtonStyle())
+                }
+            }
         }
         .surfaceCard()
     }
@@ -79,7 +115,7 @@ struct LiveTableView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            ForEach(engine.state.players) { player in
+            ForEach(session.state.players) { player in
                 HStack {
                     Image(systemName: player.isHost ? "crown.fill" : "person.fill")
                         .foregroundStyle(player.isHost ? AppTheme.accent : AppTheme.textSecondary)
@@ -93,23 +129,24 @@ struct LiveTableView: View {
             }
 
             HStack(spacing: 12) {
-                Button {
-                    addGuest()
-                } label: {
-                    Label("Simulate join", systemImage: "person.badge.plus")
-                        .frame(maxWidth: .infinity)
+                if session.role == .localPreview {
+                    Button {
+                        addGuest()
+                    } label: {
+                        Label("Add local player", systemImage: "person.badge.plus")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(TableSecondaryButtonStyle())
+                    .disabled(session.state.players.count >= session.manifest.players.maximum)
                 }
-                .buttonStyle(TableSecondaryButtonStyle())
-                .disabled(engine.state.players.count >= engine.manifest.players.maximum)
-
                 Button {
-                    perform { try engine.handle(.start(seed: 42)) }
+                    perform { try session.start() }
                 } label: {
-                    Label("Start", systemImage: "play.fill")
+                    Label(session.role == .guest ? "Ask host to start" : "Start", systemImage: "play.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(TablePrimaryButtonStyle())
-                .disabled(engine.state.players.count < engine.manifest.players.minimum)
+                .disabled(session.state.players.count < session.manifest.players.minimum || session.role == .guest)
             }
         }
         .surfaceCard()
@@ -118,15 +155,15 @@ struct LiveTableView: View {
     private var table: some View {
         VStack(spacing: 16) {
             HStack {
-                Label(engine.state.activePlayer?.name ?? "Finished", systemImage: "person.crop.circle.fill")
+                Label(session.state.activePlayer?.name ?? "Finished", systemImage: "person.crop.circle.fill")
                 Spacer()
-                Text("\(engine.state.drawPile.count) cards left")
+                Text("\(session.state.drawPile.count) cards left")
             }
             .font(.system(size: 13, weight: .semibold, design: .rounded))
             .foregroundStyle(AppTheme.textSecondary)
 
             Group {
-                if let card = engine.state.currentCard {
+                if let card = session.state.currentCard {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("CURRENT CARD")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -142,7 +179,7 @@ struct LiveTableView: View {
                     .frame(maxWidth: .infinity, minHeight: 320, alignment: .leading)
                     .background(
                         LinearGradient(
-                            colors: [Color(hex: engine.manifest.presentation.accentStartHex), Color(hex: engine.manifest.presentation.accentEndHex)],
+                            colors: [Color(hex: session.manifest.presentation.accentStartHex), Color(hex: session.manifest.presentation.accentEndHex)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -150,10 +187,10 @@ struct LiveTableView: View {
                     )
                 } else {
                     VStack(spacing: 14) {
-                        Image(systemName: engine.state.phase == .finished ? "checkmark.circle.fill" : "rectangle.stack.fill")
+                        Image(systemName: session.state.phase == .finished ? "checkmark.circle.fill" : "rectangle.stack.fill")
                             .font(.system(size: 44, weight: .semibold))
                             .foregroundStyle(AppTheme.accent)
-                        Text(engine.state.phase == .finished ? "Game complete" : "Ready to draw")
+                        Text(session.state.phase == .finished ? "Game complete" : "Ready to draw")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
                     }
@@ -162,17 +199,17 @@ struct LiveTableView: View {
                 }
             }
 
-            if engine.state.phase == .waitingForDraw, let playerID = engine.state.activePlayer?.id {
+            if session.state.phase == .waitingForDraw, session.state.activePlayer != nil {
                 Button {
-                    perform { try engine.handle(.draw(playerID: playerID)) }
+                    perform { try session.draw() }
                 } label: {
-                    Label("Draw for \(engine.state.activePlayer?.name ?? "player")", systemImage: "hand.tap.fill")
+                    Label("Draw for \(session.state.activePlayer?.name ?? "player")", systemImage: "hand.tap.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(TablePrimaryButtonStyle())
-            } else if engine.state.phase == .showingCard, let playerID = engine.state.activePlayer?.id {
+            } else if session.state.phase == .showingCard, session.state.activePlayer != nil {
                 Button {
-                    perform { try engine.handle(.endTurn(playerID: playerID)) }
+                    perform { try session.endTurn() }
                 } label: {
                     Label("End turn", systemImage: "arrow.right.circle.fill")
                         .frame(maxWidth: .infinity)
@@ -188,11 +225,10 @@ struct LiveTableView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(TableSecondaryButtonStyle())
-                .disabled(!engine.manifest.presentation.supportsAR)
+                .disabled(!session.manifest.presentation.supportsAR)
 
                 Button {
-                    engine.reset()
-                    addHostIfNeeded()
+                    perform { try session.beginLocalPreview() }
                 } label: {
                     Label("Reset", systemImage: "arrow.clockwise")
                         .frame(maxWidth: .infinity)
@@ -202,20 +238,17 @@ struct LiveTableView: View {
         }
     }
 
-    private func addHostIfNeeded() {
-        guard engine.state.players.isEmpty else { return }
-        perform { try engine.handle(.join(id: "host", name: "You")) }
-    }
-
     private func addGuest() {
         let number = nextGuestNumber
         nextGuestNumber += 1
-        perform { try engine.handle(.join(id: "guest-\(number)", name: "Player \(number + 1)")) }
+        // Local preview stays available for one-device sessions and screenshots.
+        // Actual nearby participants are admitted by the host after a hello envelope.
+        perform { try session.addLocalPreviewGuest(id: "guest-\(number)", name: "Player \(number + 1)") }
     }
 
-    private func perform(_ operation: () throws -> MultiplayerEvent) {
+    private func perform(_ operation: () throws -> Void) {
         do {
-            _ = try operation()
+            try operation()
         } catch {
             errorMessage = String(describing: error)
         }

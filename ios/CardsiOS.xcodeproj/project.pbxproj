@@ -14,6 +14,7 @@
 		3E4C12E62409AECB6EB7EC00 /* CardsiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */; };
 		41811FE1413C78846A2867A4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8C111DC7F42CDF421D982C /* RootView.swift */; };
 		45976F71BE3E2F3DDB688A34 /* NearbyTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */; };
+		C4D5108A770D47D2A3C72E55 /* NearbyTableSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D5108B770D47D2A3C72E55 /* NearbyTableSession.swift */; };
 		47AFD3ACB253295097F86C2B /* GameSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1235CCFA06BF1FE587FC4D77 /* GameSession.swift */; };
 		560710217367EE752A21C8F8 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79EE95A532797CC934CFBCAD /* ShopView.swift */; };
 		5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A5D6BDF63E934918504B23 /* GameSessionTests.swift */; };
@@ -66,6 +67,7 @@
 		B962AC39D27E6786A9191286 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		D14A95AEE25B417D778A1A2B /* CreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorView.swift; sourceTree = "<group>"; };
 		D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransport.swift; sourceTree = "<group>"; };
+		C4D5108B770D47D2A3C72E55 /* NearbyTableSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTableSession.swift; sourceTree = "<group>"; };
 		F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackDetailView.swift; sourceTree = "<group>"; };
 		FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardsiOSApp.swift; sourceTree = "<group>"; };
 		FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARTableModeView.swift; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 				04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */,
 				A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */,
 				D2B6E5E6CC4598FD2C45CBBF /* NearbyTransport.swift */,
+				C4D5108B770D47D2A3C72E55 /* NearbyTableSession.swift */,
 				F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */,
 				82A4388CE59393D107D0B6E3 /* PackStore.swift */,
 				1B8C111DC7F42CDF421D982C /* RootView.swift */,
@@ -217,6 +220,7 @@
 				994D019777A790DFC8313ADD /* MultiplayerEngine.swift in Sources */,
 				EDB474DC408068AAD5FD233B /* MultiplayerModels.swift in Sources */,
 				45976F71BE3E2F3DDB688A34 /* NearbyTransport.swift in Sources */,
+				C4D5108A770D47D2A3C72E55 /* NearbyTableSession.swift in Sources */,
 				19830E438962EAA3B891192E /* PackDetailView.swift in Sources */,
 				B83F3A1CDDB99C6EC2D8C878 /* PackStore.swift in Sources */,
 				41811FE1413C78846A2867A4 /* RootView.swift in Sources */,

@@ -128,7 +128,7 @@ struct MultiplayerPlayer: Codable, Equatable, Identifiable {
     let isHost: Bool
 }
 
-struct MultiplayerGameState: Equatable {
+struct MultiplayerGameState: Codable, Equatable {
     enum Phase: String, Codable {
         case lobby
         case waitingForDraw

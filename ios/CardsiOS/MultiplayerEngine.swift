@@ -68,6 +68,12 @@ final class MultiplayerEngine: ObservableObject {
         eventLog = []
     }
 
+    /// Applies a host-authored snapshot. Guests never mutate game state directly.
+    func applyHostSnapshot(_ snapshot: MultiplayerGameState) {
+        guard snapshot.revision >= state.revision else { return }
+        state = snapshot
+    }
+
     private func requireTurn(_ playerID: String) throws {
         guard state.activePlayer?.id == playerID else { throw MultiplayerRuleError.notPlayersTurn }
     }

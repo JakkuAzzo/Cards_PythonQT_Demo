@@ -12,6 +12,7 @@ final class AppleNearbyTransport: NSObject, NearbyTransport {
     private let session: MCSession
     private var advertiser: MCNearbyServiceAdvertiser?
     private var browser: MCNearbyServiceBrowser?
+    private var targetSessionID: String?
 
     init(localPeerID: String, displayName: String) {
         self.localPeerID = localPeerID
@@ -23,6 +24,7 @@ final class AppleNearbyTransport: NSObject, NearbyTransport {
 
     func host(sessionID: String) {
         disconnectDiscovery()
+        targetSessionID = sessionID
         let advertiser = MCNearbyServiceAdvertiser(
             peer: peerID,
             discoveryInfo: ["session": sessionID, "protocol": "1"],
@@ -35,6 +37,7 @@ final class AppleNearbyTransport: NSObject, NearbyTransport {
 
     func join(sessionID: String) {
         disconnectDiscovery()
+        targetSessionID = sessionID
         let browser = MCNearbyServiceBrowser(peer: peerID, serviceType: Self.serviceType)
         browser.delegate = self
         browser.startBrowsingForPeers()
@@ -44,14 +47,14 @@ final class AppleNearbyTransport: NSObject, NearbyTransport {
     func send(_ envelope: NearbyEnvelope) {
         guard !session.connectedPeers.isEmpty,
               let data = try? JSONEncoder().encode(envelope) else { return }
-        let peers = envelope.recipientID.map { recipient in
-            session.connectedPeers.filter { $0.displayName == recipient }
-        } ?? session.connectedPeers
-        try? session.send(data, toPeers: peers, with: .reliable)
+        // Multipeer display names are not protocol identities. The envelope remains
+        // recipient-addressed, while all connected peers receive it and filter by ID.
+        try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
     }
 
     func disconnect() {
         disconnectDiscovery()
+        targetSessionID = nil
         session.disconnect()
         onPeersChanged?([])
     }
@@ -88,6 +91,7 @@ extension AppleNearbyTransport: MCNearbyServiceAdvertiserDelegate {
 extension AppleNearbyTransport: MCNearbyServiceBrowserDelegate {
     nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         Task { @MainActor in
+            guard info?["session"] == targetSessionID else { return }
             browser.invitePeer(peerID, to: session, withContext: nil, timeout: 20)
         }
     }
