@@ -116,11 +116,13 @@ public final class GameRoomNetworkSession {
                 if (callbacks.onHostCommand(command)) revision++;
             } else if (role == Role.GUEST && "snapshot".equals(envelope.type) && envelope.revision >= revision) {
                 revision = envelope.revision;
-                callbacks.onPublicSnapshot(new JSONObject(new String(unbase64(envelope.payload.getString("state")), StandardCharsets.UTF_8))));
+                String publicState = new String(unbase64(envelope.payload.getString("state")), StandardCharsets.UTF_8);
+                callbacks.onPublicSnapshot(new JSONObject(publicState));
                 callbacks.onStatus("Synced at revision " + revision);
             } else if (role == Role.GUEST && "private-event".equals(envelope.type) && envelope.revision >= revision) {
                 revision = envelope.revision;
-                callbacks.onPrivateState(new JSONObject(new String(unbase64(envelope.payload.getString("state")), StandardCharsets.UTF_8))));
+                String privateState = new String(unbase64(envelope.payload.getString("state")), StandardCharsets.UTF_8);
+                callbacks.onPrivateState(new JSONObject(privateState));
             }
         } catch (Exception error) { callbacks.onStatus("Ignored invalid room message: " + error.getMessage()); }
     }
