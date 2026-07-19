@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.jakkuazzo.cards.core.GameState;
 import com.jakkuazzo.cards.core.MultiplayerEngine;
 import com.jakkuazzo.cards.nearby.GameSnapshotCodec;
+import com.jakkuazzo.cards.nearby.BluetoothGattTransport;
 import com.jakkuazzo.cards.nearby.NearbyConnectionsTransport;
 import com.jakkuazzo.cards.nearby.NearbyEnvelope;
 
@@ -28,7 +29,7 @@ import org.json.JSONObject;
 import java.util.Locale;
 import java.util.UUID;
 
-public final class MainActivity extends Activity implements NearbyConnectionsTransport.Listener {
+public final class MainActivity extends Activity implements NearbyConnectionsTransport.Listener, BluetoothGattTransport.Listener {
     private final MultiplayerEngine engine = new MultiplayerEngine();
     private final String localPlayerId = UUID.randomUUID().toString();
     private final String localName = "Android player";
@@ -38,10 +39,13 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     private LinearLayout actions;
     private EditText joinCode;
     private NearbyConnectionsTransport nearby;
+    private BluetoothGattTransport bluetooth;
+    private boolean bluetoothMode;
     private boolean hosting;
     private boolean localPreview;
     private String sessionCode = "";
     private int guestNumber = 1;
+    private int nearbyPeerCount;
     private String connectionMessage = "Choose a nearby table or start a one-device preview.";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +153,10 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
             host.setOnClickListener(view -> startHosting());
             sessionControls.addView(host);
 
+            Button bluetoothHost = button("Host with Bluetooth (experimental)");
+            bluetoothHost.setOnClickListener(view -> startBluetoothHosting());
+            sessionControls.addView(bluetoothHost);
+
             LinearLayout joinRow = new LinearLayout(this);
             joinRow.setOrientation(LinearLayout.HORIZONTAL);
             joinCode = new EditText(this);
@@ -160,11 +168,15 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
             joinRow.addView(join, new LinearLayout.LayoutParams(-2, -2));
             sessionControls.addView(joinRow);
 
+            Button bluetoothJoin = button("Join with Bluetooth (use the same table code)");
+            bluetoothJoin.setOnClickListener(view -> startBluetoothJoining(joinCode.getText().toString()));
+            sessionControls.addView(bluetoothJoin);
+
             Button local = button("One-device preview");
             local.setOnClickListener(view -> startLocalPreview());
             sessionControls.addView(local);
         } else {
-            TextView players = text("Players: " + engine.state().players.size() + " · Nearby peers: " + (nearby == null ? 0 : nearby.connectedPeerCount()), 14, Color.LTGRAY);
+            TextView players = text("Players: " + engine.state().players.size() + " · Nearby peers: " + nearbyPeerCount, 14, Color.LTGRAY);
             sessionControls.addView(players);
             Button leave = button("Leave table");
             leave.setOnClickListener(view -> leaveTable());
@@ -203,6 +215,39 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         render();
     }
 
+    private void startBluetoothHosting() {
+        leaveTable();
+        hosting = true;
+        bluetoothMode = true;
+        sessionCode = "CARDS-" + String.format(Locale.US, "%04d", (int) (Math.random() * 10000));
+        try {
+            engine.join(localPlayerId, "Host");
+            bluetooth = new BluetoothGattTransport(this, this);
+            bluetooth.host();
+            connectionMessage = "Bluetooth host ready. Share " + sessionCode + " and compare the table code before joining.";
+        } catch (Exception error) {
+            connectionMessage = "Could not host with Bluetooth: " + error.getMessage();
+        }
+        render();
+    }
+
+    private void startBluetoothJoining(String enteredCode) {
+        String code = enteredCode.toUpperCase(Locale.US).replaceAll("[^A-Z0-9-]", "");
+        if (!code.startsWith("CARDS-") || code.length() != 10) {
+            connectionMessage = "Enter the Bluetooth host’s CARDS-1234 table code.";
+            render();
+            return;
+        }
+        leaveTable();
+        sessionCode = code;
+        bluetoothMode = true;
+        hosting = false;
+        bluetooth = new BluetoothGattTransport(this, this);
+        bluetooth.join();
+        connectionMessage = "Scanning nearby Bluetooth tables for " + sessionCode + "…";
+        render();
+    }
+
     private void startLocalPreview() {
         leaveTable();
         localPreview = true;
@@ -217,7 +262,11 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
 
     private void leaveTable() {
         if (nearby != null) nearby.stop();
+        if (bluetooth != null) bluetooth.stop();
         nearby = null;
+        bluetooth = null;
+        bluetoothMode = false;
+        nearbyPeerCount = 0;
         engine.reset();
         hosting = false;
         localPreview = false;
@@ -274,7 +323,8 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     }
 
     private void send(NearbyEnvelope envelope) throws JSONException {
-        if (nearby != null) nearby.send(envelope.encode());
+        if (bluetoothMode && bluetooth != null) bluetooth.send(envelope.encode());
+        else if (nearby != null) nearby.send(envelope.encode());
     }
 
     @Override public void onVerificationRequired(String endpointId, String endpointName, String digits) {
@@ -289,6 +339,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
 
     @Override public void onPeersChanged(java.util.Set<String> endpointIds) {
         runOnUiThread(() -> {
+            nearbyPeerCount = endpointIds.size();
             if (!hosting && !sessionCode.isEmpty() && !endpointIds.isEmpty()) sendHello();
             if (hosting) connectionMessage = endpointIds.isEmpty() ? "Waiting for nearby players." : endpointIds.size() + " nearby peer(s) connected. Waiting for valid table code.";
             render();
