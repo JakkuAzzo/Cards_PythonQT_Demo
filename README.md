@@ -41,7 +41,7 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 - A working two-dimensional multiplayer Table Talk preview.
 - Host/join controls for encrypted Apple-to-Apple nearby tables, with a shareable table code, host-authoritative commands, and revisioned snapshots.
 - A tested loopback transport retained for deterministic automated tests.
-- An ARKit/RealityKit table that finds a horizontal surface, recognises the bundled 160 mm printed table marker, and reports locally anchored shared-surface readiness.
+- An ARKit/RealityKit table that can be placed ahead of the player or locked to any tapped horizontal surface; the bundled 160 mm printed marker is optional precision alignment for a shared physical table.
 - A minimal creator that accepts an idea or YAML-style settings and opens playable Poker, Guess Who, or prompt-game previews.
 - Every supported game has a digital room with separate Table and Your deck pages or a Combined view; AR opens the same shared state on a detected surface when available.
 

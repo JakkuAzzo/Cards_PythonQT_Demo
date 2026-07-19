@@ -16,7 +16,7 @@ open CardsiOS.xcodeproj
 - A host-authoritative multiplayer engine with deterministic shuffling and turn validation.
 - A live Table Talk preview with local one-device play plus real nearby host/join controls.
 - A shareable table code, host-authoritative commands, revisioned snapshots, loopback transport tests, and encrypted Apple Multipeer Connectivity for nearby Apple devices.
-- ARKit/RealityKit horizontal-surface table placement plus recognition of the bundled 160 mm printed shared-table marker.
+- ARKit/RealityKit table placement ahead of the player or on a tapped horizontal surface, plus recognition of the optional bundled 160 mm printed shared-table marker.
 - A lightweight template creator for poker, Guess Who, and custom prompt games.
 - Playable Poker and Guess Who rooms: choose the shared Table, private Your deck, or Combined view; AR renders the same shared state on a surface when available.
 - Manifest, creator, engine, transport, and deck XCTest sources.
