@@ -38,6 +38,7 @@
 		E52D30321351A78B83FC9F58 /* NearbyTableSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25D6126F94651B8D0723B85 /* NearbyTableSession.swift */; };
 		E726D82B23589B0468274570 /* GameDraftInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */; };
 		EDB474DC408068AAD5FD233B /* MultiplayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */; };
+		EF798FF6CE218437F4161143 /* GameRoomSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C80B26C02590982820FE499 /* GameRoomSyncController.swift */; };
 		F552729F3A9278134EEF80F1 /* LiveTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454369D312DC6D3A154BE456 /* LiveTableView.swift */; };
 		FF098F7D26F86993749F65F4 /* GameSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CCFC33291F18D4B160A914 /* GameSessionView.swift */; };
 /* End PBXBuildFile section */
@@ -78,6 +79,7 @@
 		82A4388CE59393D107D0B6E3 /* PackStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackStore.swift; sourceTree = "<group>"; };
 		858F76A66AFDA4C55EBA78D5 /* GameRoomNetworkSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomNetworkSessionTests.swift; sourceTree = "<group>"; };
 		8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreter.swift; sourceTree = "<group>"; };
+		9C80B26C02590982820FE499 /* GameRoomSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSyncController.swift; sourceTree = "<group>"; };
 		A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerModels.swift; sourceTree = "<group>"; };
 		ABED054878F396E69A2E8A77 /* MultiplayerEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerEngineTests.swift; sourceTree = "<group>"; };
 		AED68690C47A03BD383DDE17 /* CustomGameRuntimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomGameRuntimeView.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				AED68690C47A03BD383DDE17 /* CustomGameRuntimeView.swift */,
 				8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */,
 				7994D230042AA47BF8B1F372 /* GameRoomNetworkSession.swift */,
+				9C80B26C02590982820FE499 /* GameRoomSyncController.swift */,
 				DBD739F0B2F502A663642667 /* GameRoomWire.swift */,
 				2E6B9C7DB0515F5B24ACE4A3 /* GameRuntimes.swift */,
 				1235CCFA06BF1FE587FC4D77 /* GameSession.swift */,
@@ -242,6 +245,7 @@
 				48B3EDD91E1FBE6BEE9A4A83 /* CustomGameRuntimeView.swift in Sources */,
 				E726D82B23589B0468274570 /* GameDraftInterpreter.swift in Sources */,
 				80496C88B81D5D3FDD4B23BF /* GameRoomNetworkSession.swift in Sources */,
+				EF798FF6CE218437F4161143 /* GameRoomSyncController.swift in Sources */,
 				C1F17FDDCBE19EEC56774A3E /* GameRoomWire.swift in Sources */,
 				096F59FD101A26AEF5B4131E /* GameRuntimes.swift in Sources */,
 				47AFD3ACB253295097F86C2B /* GameSession.swift in Sources */,

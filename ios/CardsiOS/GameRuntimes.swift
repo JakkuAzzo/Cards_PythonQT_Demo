@@ -3,7 +3,7 @@ import Combine
 
 @MainActor
 final class PokerGame: ObservableObject {
-    enum Street: String, CaseIterable {
+    enum Street: String, CaseIterable, Codable {
         case preflop = "Pre-flop"
         case flop = "Flop"
         case turn = "Turn"
@@ -54,6 +54,16 @@ final class PokerGame: ObservableObject {
     @Published private(set) var actionMessage = "Deal a hand to begin."
 
     private var deck: [PlayingCard] = []
+
+    struct PublicSnapshot: Codable, Equatable {
+        struct PlayerState: Codable, Equatable { let chips: Int; let folded: Bool }
+        let street: Street
+        let communityCards: [PlayingCard]
+        let pot: Int
+        let dealerIndex: Int
+        let players: [PlayerState]
+        let actionMessage: String
+    }
 
     init(playerNames: [String]) {
         players = playerNames.prefix(8).map { Player(id: UUID(), name: $0, hand: [], chips: 1_000) }
@@ -124,6 +134,28 @@ final class PokerGame: ObservableObject {
         } else {
             actionMessage = "\(players[index].name) folded."
         }
+    }
+
+    func publicSnapshot() -> PublicSnapshot {
+        PublicSnapshot(street: street, communityCards: communityCards, pot: pot, dealerIndex: dealerIndex, players: players.map { .init(chips: $0.chips, folded: $0.folded) }, actionMessage: actionMessage)
+    }
+
+    func apply(publicSnapshot: PublicSnapshot) {
+        guard publicSnapshot.players.count == players.count else { return }
+        street = publicSnapshot.street
+        communityCards = publicSnapshot.communityCards
+        pot = publicSnapshot.pot
+        dealerIndex = min(max(publicSnapshot.dealerIndex, 0), max(players.count - 1, 0))
+        actionMessage = publicSnapshot.actionMessage
+        for index in players.indices {
+            players[index].chips = publicSnapshot.players[index].chips
+            players[index].folded = publicSnapshot.players[index].folded
+        }
+    }
+
+    func applyPrivateHand(_ hand: [PlayingCard]) {
+        guard !players.isEmpty, hand.count == 2 else { return }
+        players[0].hand = hand
     }
 
     func score(for player: Player) -> HandScore {
@@ -248,6 +280,30 @@ final class GuessWhoGame: ObservableObject {
     private func assignTargets() {
         let shuffled = characters.shuffled()
         for (index, player) in players.enumerated() { targets[player] = shuffled[index] }
+    }
+
+    struct PublicSnapshot: Codable, Equatable {
+        let eliminated: Set<String>
+        let activePlayerIndex: Int
+        let winnerName: String?
+        let message: String
+    }
+
+    func publicSnapshot() -> PublicSnapshot {
+        PublicSnapshot(eliminated: eliminated, activePlayerIndex: activePlayerIndex, winnerName: winnerName, message: message)
+    }
+
+    func apply(publicSnapshot: PublicSnapshot) {
+        guard players.indices.contains(publicSnapshot.activePlayerIndex) else { return }
+        eliminated = publicSnapshot.eliminated
+        activePlayerIndex = publicSnapshot.activePlayerIndex
+        winnerName = publicSnapshot.winnerName
+        message = publicSnapshot.message
+    }
+
+    func applyPrivateTarget(id: String) {
+        guard let character = characters.first(where: { $0.id == id }), let localName = players.first else { return }
+        targets[localName] = character
     }
 
     static let defaultNames = ["Alex", "Blair", "Casey", "Drew", "Emery", "Frankie", "Gray", "Harper", "Indigo", "Jules", "Kai", "Lane"]

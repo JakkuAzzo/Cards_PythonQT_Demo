@@ -19,9 +19,11 @@ final class GameRoomNetworkSessionTests: XCTestCase {
 
         guest.submit(GameRoomCommand(action: "bet", playerID: "guest", characterID: nil, amount: 20))
         XCTAssertEqual(hostCommand, GameRoomCommand(action: "bet", playerID: "guest", characterID: nil, amount: 20))
+        XCTAssertEqual(host.revision, 0, "Only the host snapshot publication advances a game revision")
 
         host.publish(publicState: Data("public".utf8), privateStates: ["guest": Data("K♥ K♣".utf8), "other": Data("secret".utf8)])
         XCTAssertEqual(publicState, Data("public".utf8))
         XCTAssertEqual(privateState, Data("K♥ K♣".utf8))
+        XCTAssertEqual(host.revision, 1)
     }
 }

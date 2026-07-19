@@ -30,6 +30,7 @@ private struct PokerRuntimeView: View {
     @State private var showHands = false
     @State private var roomMode: DigitalRoomMode = .combined
     @State private var showingAR = false
+    @StateObject private var sync = GameRoomSyncController()
 
     var body: some View {
         ScrollView {
@@ -42,6 +43,7 @@ private struct PokerRuntimeView: View {
                     .foregroundStyle(AppTheme.textSecondary)
 
                 DigitalRoomModePicker(selection: $roomMode)
+                GameRoomSyncPanel(sync: sync)
                 Button {
                     showingAR = true
                 } label: {
@@ -62,6 +64,7 @@ private struct PokerRuntimeView: View {
             .padding(20)
         }
         .background(AppTheme.background.ignoresSafeArea())
+        .onAppear(perform: configureSync)
         .navigationTitle("Poker table")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.foregroundStyle(AppTheme.accent) } }
@@ -153,18 +156,48 @@ private struct PokerRuntimeView: View {
             .padding(.bottom, 4)
             .surfaceCard()
             HStack(spacing: 12) {
-                Button(game.street.nextLabel) { game.advanceStreet() }
+                Button(game.street.nextLabel) { pokerAction("advance-street") }
                         .frame(maxWidth: .infinity)
                         .buttonStyle(TablePrimaryButtonStyle())
-                Button("Bet 20") { game.placeBet(for: game.players[0].id) }
+                Button("Bet 20") { pokerAction("bet", amount: 20) }
                         .buttonStyle(TableSecondaryButtonStyle())
                         .disabled(game.street == .showdown || game.players[0].folded)
                 }
-            Button("Fold your hand") { game.fold(playerID: game.players[0].id) }
+            Button("Fold your hand") { pokerAction("fold") }
                     .frame(maxWidth: .infinity)
                 .buttonStyle(TableSecondaryButtonStyle())
                 .disabled(game.street == .showdown || game.players[0].folded)
         }
+    }
+
+    private func pokerAction(_ action: String, amount: Int? = nil) {
+        if sync.isGuest { sync.submit(action: action, amount: amount); return }
+        switch action {
+        case "advance-street": game.advanceStreet()
+        case "bet": game.placeBet(for: game.players[0].id, amount: amount ?? 20)
+        case "fold": game.fold(playerID: game.players[0].id)
+        default: break
+        }
+        sync.publish()
+    }
+
+    private func configureSync() {
+        sync.configure(
+            kind: .poker,
+            onHostCommand: { command in
+                switch command.action {
+                case "advance-street": game.advanceStreet()
+                case "bet": game.placeBet(for: game.players[1].id, amount: command.amount ?? 20)
+                case "fold": game.fold(playerID: game.players[1].id)
+                default: return false
+                }
+                return true
+            },
+            makePublicState: { (try? JSONEncoder().encode(game.publicSnapshot())) ?? Data() },
+            makePrivateState: { (try? JSONEncoder().encode(game.players.dropFirst().first?.hand ?? [])) },
+            applyPublicState: { data in if let snapshot = try? JSONDecoder().decode(PokerGame.PublicSnapshot.self, from: data) { game.apply(publicSnapshot: snapshot) } },
+            applyPrivateState: { data in if let hand = try? JSONDecoder().decode([PlayingCard].self, from: data) { game.applyPrivateHand(hand) } }
+        )
     }
 }
 
@@ -176,6 +209,7 @@ private struct GuessWhoRuntimeView: View {
     @State private var roomMode: DigitalRoomMode = .combined
     @State private var showingAR = false
     @State private var revealTarget = false
+    @StateObject private var sync = GameRoomSyncController()
     private let columns = [GridItem(.adaptive(minimum: 92), spacing: 10)]
 
     var body: some View {
@@ -189,6 +223,7 @@ private struct GuessWhoRuntimeView: View {
                     .foregroundStyle(AppTheme.textSecondary)
 
                 DigitalRoomModePicker(selection: $roomMode)
+                GameRoomSyncPanel(sync: sync)
                 Button {
                     showingAR = true
                 } label: {
@@ -209,6 +244,7 @@ private struct GuessWhoRuntimeView: View {
             .padding(20)
         }
         .background(AppTheme.background.ignoresSafeArea())
+        .onAppear(perform: configureSync)
         .navigationTitle("Guess Who")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.foregroundStyle(AppTheme.accent) } }
@@ -266,7 +302,7 @@ private struct GuessWhoRuntimeView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Your deck")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                if let target = game.targets[game.activePlayer] {
+                if let target = game.targets[game.players.first ?? "You"] {
                     Text(revealTarget ? target.name : "Private target hidden")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundStyle(AppTheme.textPrimary)
@@ -281,24 +317,54 @@ private struct GuessWhoRuntimeView: View {
 
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
-                    Button("Ask question") { game.askQuestion() }
+                    Button("Ask question") { guessAction("ask-question") }
                         .frame(maxWidth: .infinity)
                         .buttonStyle(TablePrimaryButtonStyle())
-                    Button("Eliminate") { if let selected { game.toggleElimination(selected) } }
+                    Button("Eliminate") { if let selected { guessAction("toggle-elimination", character: selected) } }
                         .buttonStyle(TableSecondaryButtonStyle())
                         .disabled(selected == nil || game.winnerName != nil)
                 }
-                Button("Guess selected character") { if let selected { game.guess(selected) } }
+                Button("Guess selected character") { if let selected { guessAction("guess", character: selected) } }
                     .frame(maxWidth: .infinity)
                     .buttonStyle(TableSecondaryButtonStyle())
                     .disabled(selected == nil || game.winnerName != nil)
-                Button("New game") { selected = nil; game.restart() }
+                Button("New game") { selected = nil; if sync.isGuest { sync.submit(action: "restart") } else { game.restart(); sync.publish() } }
                     .frame(maxWidth: .infinity)
                     .buttonStyle(TableSecondaryButtonStyle())
+            }
         }
     }
-}
 
+    private func guessAction(_ action: String, character: GuessWhoGame.Character? = nil) {
+        if sync.isGuest { sync.submit(action: action, characterID: character?.id); return }
+        switch action {
+        case "ask-question": game.askQuestion()
+        case "toggle-elimination": if let character { game.toggleElimination(character) }
+        case "guess": if let character { game.guess(character) }
+        default: break
+        }
+        sync.publish()
+    }
+
+    private func configureSync() {
+        sync.configure(
+            kind: .guessWho,
+            onHostCommand: { command in
+                switch command.action {
+                case "ask-question": game.askQuestion()
+                case "toggle-elimination": guard let id = command.characterID, let character = game.characters.first(where: { $0.id == id }) else { return false }; game.toggleElimination(character)
+                case "guess": guard let id = command.characterID, let character = game.characters.first(where: { $0.id == id }) else { return false }; game.guess(character)
+                case "restart": game.restart()
+                default: return false
+                }
+                return true
+            },
+            makePublicState: { (try? JSONEncoder().encode(game.publicSnapshot())) ?? Data() },
+            makePrivateState: { guard let target = game.targets[game.players.dropFirst().first ?? ""] else { return nil }; return try? JSONEncoder().encode(target.id) },
+            applyPublicState: { data in if let snapshot = try? JSONDecoder().decode(GuessWhoGame.PublicSnapshot.self, from: data) { game.apply(publicSnapshot: snapshot) } },
+            applyPrivateState: { data in if let id = try? JSONDecoder().decode(String.self, from: data) { game.applyPrivateTarget(id: id) } }
+        )
+    }
 }
 
 private struct PokerCardTile: View {
@@ -341,5 +407,55 @@ private struct DigitalRoomModePicker: View {
         }
         .pickerStyle(.segmented)
         .accessibilityLabel("Digital game room view")
+    }
+}
+
+private struct GameRoomSyncPanel: View {
+    @ObservedObject var sync: GameRoomSyncController
+    @State private var transport: GameRoomSyncController.TransportKind = .bluetooth
+    @State private var joinCode = ""
+    @State private var joinSecret = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Nearby room", systemImage: "dot.radiowaves.left.and.right")
+                Spacer()
+                Picker("Transport", selection: $transport) {
+                    ForEach(GameRoomSyncController.TransportKind.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+            }
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .foregroundStyle(AppTheme.accent)
+
+            Text(sync.status)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(AppTheme.textSecondary)
+            if !sync.roomCode.isEmpty {
+                Text("Room: \(sync.roomCode)" + (sync.pairingSecret.isEmpty ? "" : " · Secret: \(sync.pairingSecret)"))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .textSelection(.enabled)
+            }
+            HStack(spacing: 10) {
+                Button("Host") { sync.host(using: transport) }
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(TablePrimaryButtonStyle())
+                Button("Leave") { sync.disconnect() }
+                    .buttonStyle(TableSecondaryButtonStyle())
+            }
+            TextField("Room code", text: $joinCode)
+                .textInputAutocapitalization(.characters)
+                .textFieldStyle(.roundedBorder)
+            if transport == .bluetooth {
+                SecureField("Pairing secret", text: $joinSecret)
+                    .textFieldStyle(.roundedBorder)
+            }
+            Button("Join nearby room") { sync.join(code: joinCode, pairingSecret: joinSecret, using: transport) }
+                .frame(maxWidth: .infinity)
+                .buttonStyle(TableSecondaryButtonStyle())
+        }
+        .surfaceCard()
     }
 }

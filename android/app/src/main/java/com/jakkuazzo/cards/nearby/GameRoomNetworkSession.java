@@ -82,7 +82,7 @@ public final class GameRoomNetworkSession {
     public void submit(Command command) {
         if (!localPlayerId.equals(command.playerId)) return;
         if (role == Role.HOST) {
-            if (callbacks.onHostCommand(command)) revision++;
+            callbacks.onHostCommand(command);
             return;
         }
         try {
@@ -113,7 +113,7 @@ public final class GameRoomNetworkSession {
             } else if (role == Role.HOST && "command".equals(envelope.type)) {
                 Command command = Command.decode(new JSONObject(new String(unbase64(envelope.payload.getString("command")), StandardCharsets.UTF_8)));
                 if (!envelope.senderId.equals(command.playerId)) return;
-                if (callbacks.onHostCommand(command)) revision++;
+                callbacks.onHostCommand(command);
             } else if (role == Role.GUEST && "snapshot".equals(envelope.type) && envelope.revision >= revision) {
                 revision = envelope.revision;
                 String publicState = new String(unbase64(envelope.payload.getString("state")), StandardCharsets.UTF_8);

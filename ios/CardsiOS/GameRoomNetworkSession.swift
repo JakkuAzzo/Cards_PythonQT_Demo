@@ -29,6 +29,7 @@ final class GameRoomNetworkSession: ObservableObject {
     let sessionCode: String
     let role: Role
     var onHostCommand: ((GameRoomCommand) -> Bool)?
+    var onPeerJoined: (() -> Void)?
     var onPublicSnapshot: ((Data) -> Void)?
     var onPrivateState: ((Data) -> Void)?
 
@@ -70,7 +71,7 @@ final class GameRoomNetworkSession: ObservableObject {
     func submit(_ command: GameRoomCommand) {
         guard command.playerID == localPlayerID else { return }
         if role == .host {
-            if onHostCommand?(command) == true { revision += 1 }
+            _ = onHostCommand?(command)
         } else {
             send(type: .command, payload: encode(command))
             status = "Command sent to host"
@@ -95,9 +96,10 @@ final class GameRoomNetworkSession: ObservableObject {
         switch envelope.type {
         case .hello where role == .host:
             status = "\(envelope.payload["name"] ?? "Guest") joined \(roomKind.rawValue)"
+            onPeerJoined?()
         case .command where role == .host:
             guard let command = decode(GameRoomCommand.self, from: envelope.payload), command.playerID == envelope.senderID else { return }
-            if onHostCommand?(command) == true { revision += 1 }
+            _ = onHostCommand?(command)
         case .snapshot where role == .guest:
             guard envelope.revision >= revision, let state = decodeState(envelope.payload) else { return }
             revision = envelope.revision

@@ -39,8 +39,8 @@ struct PackRecord: Identifiable, Codable, Hashable {
     }
 }
 
-struct PlayingCard: Identifiable, Hashable {
-    enum Suit: String, CaseIterable {
+struct PlayingCard: Identifiable, Hashable, Codable {
+    enum Suit: String, CaseIterable, Codable {
         case hearts = "♥"
         case diamonds = "♦"
         case clubs = "♣"
@@ -49,7 +49,7 @@ struct PlayingCard: Identifiable, Hashable {
         var isRed: Bool { self == .hearts || self == .diamonds }
     }
 
-    enum Rank: String, CaseIterable {
+    enum Rank: String, CaseIterable, Codable {
         case ace = "A"
         case two = "2"
         case three = "3"
