@@ -39,6 +39,7 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
     private final float[] projection = new float[16];
     private final float[] view = new float[16];
     private final float[] model = new float[16];
+    private final float[] projectionView = new float[16];
     private final float[] mvp = new float[16];
     private volatile Session session;
     private int cameraProgram;
@@ -150,7 +151,8 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
         tableAnchor.getPose().toMatrix(model, 0);
         camera.getProjectionMatrix(projection, 0, 0.05f, 20f);
         camera.getViewMatrix(view, 0);
-        Matrix.multiplyMM(mvp, 0, projection, 0, view, 0, model, 0);
+        Matrix.multiplyMM(projectionView, 0, projection, 0, view, 0);
+        Matrix.multiplyMM(mvp, 0, projectionView, 0, model, 0);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -172,7 +174,12 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
         int rotation = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
         active.setDisplayGeometry(rotation, width, height);
     }
-    private static FloatBuffer floats(float[] values) { return ByteBuffer.allocateDirect(values.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer().put(values).position(0); }
+    private static FloatBuffer floats(float[] values) {
+        FloatBuffer buffer = ByteBuffer.allocateDirect(values.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        buffer.put(values);
+        buffer.position(0);
+        return buffer;
+    }
     private static int program(String vertex, String fragment) {
         int vertexShader = shader(GLES20.GL_VERTEX_SHADER, vertex), fragmentShader = shader(GLES20.GL_FRAGMENT_SHADER, fragment);
         int program = GLES20.glCreateProgram(); GLES20.glAttachShader(program, vertexShader); GLES20.glAttachShader(program, fragmentShader); GLES20.glLinkProgram(program); return program;
