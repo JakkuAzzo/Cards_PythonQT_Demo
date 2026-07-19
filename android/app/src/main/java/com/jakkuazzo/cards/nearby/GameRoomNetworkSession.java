@@ -20,6 +20,7 @@ public final class GameRoomNetworkSession {
     public interface Sender { void send(NearbyEnvelope envelope) throws JSONException; }
     public interface Callbacks {
         boolean onHostCommand(Command command);
+        void onPeerJoined(String playerId);
         void onPublicSnapshot(JSONObject state);
         void onPrivateState(JSONObject state);
         void onStatus(String status);
@@ -110,6 +111,7 @@ public final class GameRoomNetworkSession {
         try {
             if (role == Role.HOST && "hello".equals(envelope.type)) {
                 callbacks.onStatus(envelope.payload.optString("name", "Guest") + " joined " + game);
+                callbacks.onPeerJoined(envelope.senderId);
             } else if (role == Role.HOST && "command".equals(envelope.type)) {
                 Command command = Command.decode(new JSONObject(new String(unbase64(envelope.payload.getString("command")), StandardCharsets.UTF_8)));
                 if (!envelope.senderId.equals(command.playerId)) return;
