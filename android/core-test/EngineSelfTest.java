@@ -1,7 +1,9 @@
 import com.jakkuazzo.cards.core.CardRecord;
+import com.jakkuazzo.cards.core.BlePacketFramer;
 import com.jakkuazzo.cards.core.GameState;
 import com.jakkuazzo.cards.core.MultiplayerEngine;
 import com.jakkuazzo.cards.core.SeededShuffle;
+import com.jakkuazzo.cards.core.SharedArAlignment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +46,29 @@ public final class EngineSelfTest {
 
         guest.reset();
         require(guest.state().phase == GameState.Phase.LOBBY && guest.state().players.isEmpty(), "engine reset");
+        testBleFraming();
+        testSharedAlignment();
         System.out.println("Android core conformance tests passed.");
+    }
+
+    private static void testBleFraming() {
+        byte[] first = "first-envelope".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] second = new byte[400];
+        Arrays.fill(second, (byte) 0x42);
+        BlePacketFramer receiver = new BlePacketFramer();
+        java.util.List<byte[]> decoded = new java.util.ArrayList<>();
+        for (byte[] packet : BlePacketFramer.packets(first)) decoded.addAll(receiver.append(packet));
+        for (byte[] packet : BlePacketFramer.packets(second)) decoded.addAll(receiver.append(packet));
+        require(decoded.size() == 2, "BLE framing count");
+        require(Arrays.equals(decoded.get(0), first), "BLE first envelope");
+        require(Arrays.equals(decoded.get(1), second), "BLE second envelope");
+    }
+
+    private static void testSharedAlignment() {
+        SharedArAlignment valid = new SharedArAlignment(SharedArAlignment.MARKER_ID, 0.16, 2, new float[] {0, 0, 0}, new float[] {0, 0, 0, 1});
+        SharedArAlignment invalid = new SharedArAlignment("other", 0.16, 2, new float[] {0, 0, 0}, new float[] {0, 0, 0, 1});
+        require(valid.isValid(), "shared marker valid");
+        require(!invalid.isValid(), "shared marker rejected");
     }
 
     private static void require(boolean condition, String name) {

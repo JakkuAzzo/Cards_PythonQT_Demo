@@ -32,7 +32,7 @@ jobs:
           server=$!
           trap 'kill "$server"' EXIT
           for attempt in 1 2 3 4 5; do
-            if curl --fail --silent http://127.0.0.1:4173/ | grep -Fq "Cards - local table games"; then
+            if curl --fail --silent http://127.0.0.1:4173/ | grep -Fq "Cards — local multiplayer, real tables"; then
               exit 0
             fi
             sleep 1

@@ -3,636 +3,149 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cards - local table games</title>
-  <meta name="description" content="Playable local table card games with guided setup, lightweight game drafting, and multiplayer-friendly turn handling.">
-  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <meta name="description" content="Cards is a local-first, native multiplayer card-game app for iPhone, Android, macOS, and Windows.">
+  <title>Cards — local multiplayer, real tables</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <style>
-    :root {
-      --panel: rgba(255, 251, 244, 0.92);
-      --panel-strong: #fffdf8;
-      --ink: #1f2a1f;
-      --muted: #5c665f;
-      --line: rgba(31, 42, 31, 0.12);
-      --brand: #8c2f39;
-      --brand-deep: #5f1e26;
-      --gold: #d7a84a;
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --display: "Avenir Next", "Segoe UI", sans-serif;
-      --body: "Avenir", "Helvetica Neue", sans-serif;
-    }
+    :root { --ink: #1b281f; --muted: #5e6961; --paper: #fffaf0; --canvas: #eee4d2; --brand: #7e2430; --green: #194d39; --gold: #e8b94b; --line: rgba(27, 40, 31, .14); --shadow: 0 18px 52px rgba(49, 37, 18, .13); }
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      font-family: var(--body);
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(215, 168, 74, 0.24), transparent 24rem),
-        radial-gradient(circle at right, rgba(140, 47, 57, 0.18), transparent 28rem),
-        linear-gradient(180deg, #f8f3e8 0%, #efe7d7 100%);
-    }
-    body { padding: 32px 18px 64px; }
-    .shell { width: min(1180px, 100%); margin: 0 auto; display: grid; gap: 22px; }
-    .topbar, .panel {
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 20px 60px rgba(58, 41, 18, 0.16);
-      border-radius: var(--radius-xl);
-    }
-    .topbar {
-      padding: 18px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .brand img { width: 56px; height: 56px; flex: 0 0 auto; }
-    .brand-copy strong, .hero h1, .section-title, .prompt-card h2, .creator-preview h3 {
-      font-family: var(--display);
-      letter-spacing: -0.03em;
-    }
-    .brand-copy strong { display: block; font-size: 1.15rem; }
-    .brand-copy span, .status-pill, .meta-line, .deck-meta, .side-note, .activity li, .player small, .creator-preview p, textarea, button { color: var(--muted); }
-    .status-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid var(--line);
-      font-size: 0.92rem;
-      white-space: nowrap;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 4px rgba(215, 168, 74, 0.18);
-    }
-    .hero { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: 22px; }
-    .hero-copy, .hero-side, .workspace, .creator { padding: 28px; }
-    .hero-copy h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2.3rem, 5vw, 4.4rem);
-      line-height: 0.96;
-      max-width: 10ch;
-    }
-    .hero-copy p { margin: 0; max-width: 60ch; color: var(--muted); font-size: 1.04rem; line-height: 1.55; }
-    .hero-actions, .nav-tabs, .quick-stats, .deck-grid, .table-toolbar, .table-actions, .creator-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-    .hero-actions { margin-top: 20px; }
-    .btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 13px 18px;
-      font: inherit;
-      cursor: pointer;
-      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #fff7ef; box-shadow: 0 14px 30px rgba(95, 30, 38, 0.22); }
-    .btn-secondary { background: rgba(255,255,255,0.75); color: var(--ink); border: 1px solid var(--line); }
-    .hero-side {
-      background:
-        radial-gradient(circle at top right, rgba(215, 168, 74, 0.25), transparent 10rem),
-        linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,243,232,0.96));
-      border: 1px solid rgba(255,255,255,0.5);
-      display: grid;
-      gap: 16px;
-    }
-    .tab {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.78);
-      cursor: pointer;
-      color: var(--muted);
-    }
-    .tab.active { color: #fffaf3; border-color: transparent; background: linear-gradient(135deg, #254737 0%, #193126 100%); }
-    .quick-stats { margin-top: auto; }
-    .stat-card {
-      flex: 1 1 160px;
-      padding: 16px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.72);
-      border: 1px solid var(--line);
-    }
-    .stat-card strong { display: block; font-size: 1.6rem; margin-bottom: 6px; color: var(--brand-deep); }
-    .workspace { display: grid; gap: 20px; }
-    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
-    .section-title { margin: 0; font-size: 1.45rem; }
-    .deck-card {
-      flex: 1 1 230px;
-      padding: 20px;
-      border-radius: var(--radius-lg);
-      background: var(--panel-strong);
-      border: 1px solid var(--line);
-      display: grid;
-      gap: 12px;
-      cursor: pointer;
-      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-    }
-    .deck-card:hover, .deck-card.active { transform: translateY(-3px); border-color: rgba(140, 47, 57, 0.4); box-shadow: 0 18px 36px rgba(88, 57, 26, 0.12); }
-    .deck-card p { margin: 0; color: var(--muted); line-height: 1.45; }
-    .deck-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: space-between; font-size: 0.88rem; }
-    .deck-badge {
-      width: fit-content;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(215, 168, 74, 0.18);
-      color: var(--brand-deep);
-      font-size: 0.84rem;
-      font-weight: 600;
-    }
-    .table-layout { display: grid; grid-template-columns: 1.6fr 0.8fr; gap: 18px; }
-    .room-switch { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 2px; }
-    .room-switch button { border: 1px solid var(--line); background: #fffdf8; color: var(--ink); border-radius: 999px; padding: 9px 14px; font: 700 0.9rem/1 var(--body); cursor: pointer; }
-    .room-switch button.active { background: var(--brand-deep); color: #fffaf3; border-color: var(--brand-deep); }
-    .private-deck { display: grid; gap: 12px; }
-    .private-card-back { min-height: 118px; border-radius: 18px; background: #852a34 url("assets/classic-pack-back.svg") center / cover no-repeat; border: 3px solid #fffaf0; box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); }
-    .table-layout.mode-deck .table-view, .table-layout.mode-deck #sharedActions, .table-layout.mode-deck #activityCard { display: none; }
-    .table-layout.mode-deck { grid-template-columns: 1fr; }
-    .table-layout.mode-table #privateDeck { display: none; }
-    .table-view {
-      min-height: 520px;
-      padding: 22px;
-      border-radius: var(--radius-xl);
-      background: radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 30%), linear-gradient(180deg, #335f49 0%, #224332 100%);
-      color: #f9f1dd;
-      position: relative;
-      overflow: hidden;
-    }
-    .table-view::after {
-      content: "";
-      position: absolute;
-      inset: 18px;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      pointer-events: none;
-    }
-    .table-toolbar { justify-content: space-between; align-items: center; position: relative; z-index: 1; }
-    .table-toolbar .status-pill { background: rgba(8, 18, 14, 0.28); color: #f4ead6; border-color: rgba(255,255,255,0.12); }
-    .felt-stage { margin-top: 18px; display: grid; place-items: center; min-height: 385px; position: relative; z-index: 1; }
-    .prompt-card {
-      width: min(100%, 430px);
-      background: linear-gradient(180deg, #fffdf8 0%, #f8ecda 100%);
-      color: var(--ink);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 18px 40px rgba(18, 10, 6, 0.22);
-      border: 1px solid rgba(92, 64, 35, 0.16);
-    }
-    .prompt-card h2 { margin: 14px 0 10px; font-size: 1.65rem; line-height: 1.06; }
-    .prompt-card p { margin: 0; line-height: 1.55; color: #4f534e; }
-    .kicker {
-      display: inline-block;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(140, 47, 57, 0.1);
-      color: var(--brand-deep);
-      font-size: 0.82rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-    .draw-stack, .discard-stack {
-      position: absolute;
-      width: 110px;
-      height: 150px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .draw-stack { left: 12px; bottom: 14px; background: linear-gradient(180deg, #f4c977 0%, #c88f3f 100%); color: #40250d; }
-    .discard-stack { right: 12px; bottom: 14px; border: 1px dashed rgba(255,255,255,0.3); color: rgba(255,255,255,0.74); background: rgba(255,255,255,0.06); }
-    .player-ring { position: absolute; inset: 0; pointer-events: none; }
-    .player {
-      position: absolute;
-      min-width: 116px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(9, 18, 14, 0.44);
-      border: 1px solid rgba(255,255,255,0.14);
-      backdrop-filter: blur(10px);
-      text-align: center;
-    }
-    .player strong { display: block; color: #fff7e8; margin-bottom: 4px; }
-    .player small { color: rgba(245, 233, 208, 0.78); }
-    .player.active { box-shadow: 0 0 0 2px rgba(215, 168, 74, 0.7); }
-    .p-top { top: 8px; left: 50%; transform: translateX(-50%); }
-    .p-left { left: 0; top: 50%; transform: translateY(-50%); }
-    .p-right { right: 0; top: 50%; transform: translateY(-50%); }
-    .p-bottom { left: 50%; bottom: 0; transform: translateX(-50%); }
-    .table-side { display: grid; gap: 18px; }
-    .side-card {
-      padding: 20px;
-      border-radius: var(--radius-lg);
-      background: var(--panel-strong);
-      border: 1px solid var(--line);
-    }
-    .activity { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
-    .activity li { padding: 10px 12px; border-radius: 14px; background: rgba(244, 239, 227, 0.9); border: 1px solid rgba(31, 42, 31, 0.08); line-height: 1.4; }
-    .table-actions .btn, .creator-actions .btn { flex: 1 1 120px; }
-    .creator { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; }
-    .creator textarea {
-      width: 100%;
-      min-height: 300px;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 18px;
-      resize: vertical;
-      background: rgba(255,255,255,0.76);
-      font: 500 0.95rem/1.55 "SFMono-Regular", "Menlo", monospace;
-    }
-    .creator-preview {
-      padding: 22px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(180deg, rgba(140,47,57,0.06), rgba(215,168,74,0.12)), #fffdf8;
-      border: 1px solid var(--line);
-      display: grid;
-      gap: 14px;
-      align-content: start;
-    }
-    .preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .preview-chip {
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid rgba(31,42,31,0.08);
-    }
-    .preview-chip span { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .footer-note { text-align: center; color: var(--muted); font-size: 0.92rem; }
-    [hidden] { display: none !important; }
-    @media (max-width: 980px) { .hero, .table-layout, .creator { grid-template-columns: 1fr; } }
-    @media (max-width: 760px) {
-      body { padding: 18px 12px 40px; }
-      .topbar, .hero-copy, .hero-side, .workspace, .creator { padding: 20px; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      .brand { align-items: flex-start; width: 100%; }
-      .brand-copy { min-width: 0; }
-      .brand-copy span { display: block; line-height: 1.35; }
-      .status-row { justify-content: flex-start; }
-      .brand img { width: 48px; height: 48px; }
-      .hero-copy h1 { max-width: 12ch; font-size: 2.45rem; }
-      .table-view { min-height: 600px; }
-      .felt-stage { min-height: 455px; padding: 60px 0 140px; }
-      .prompt-card { width: 100%; }
-      .draw-stack, .discard-stack { width: 92px; height: 126px; bottom: 10px; }
-      .player { min-width: 94px; padding: 10px 12px; }
-      .p-left { left: 4px; top: auto; bottom: 116px; transform: none; }
-      .p-right { right: 4px; top: auto; bottom: 116px; transform: none; }
-      .p-top { top: 4px; }
-      .p-bottom { bottom: 64px; }
-      .preview-grid { grid-template-columns: 1fr; }
-    }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: radial-gradient(circle at 88% 8%, #fff7df 0, transparent 25rem), var(--canvas); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: inherit; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 24px 0 0; }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 18px; border: 1px solid rgba(255,255,255,.85); border-radius: 22px; background: rgba(255, 253, 248, .88); box-shadow: 0 8px 28px rgba(49, 37, 18, .07); backdrop-filter: blur(12px); }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 800; letter-spacing: -.03em; }
+    .brand img { width: 34px; height: 34px; }
+    .links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .links a, .minor-link { padding: 9px 12px; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 700; border-radius: 999px; }
+    .links a:hover, .minor-link:hover { background: #f5eedf; color: var(--ink); }
+    .hero { display: grid; grid-template-columns: 1.12fr .88fr; gap: 42px; align-items: center; min-height: 570px; padding: 72px 28px 62px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 999px; background: #f8edcf; color: #673b18; font-size: .82rem; font-weight: 800; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(232,185,75,.2); }
+    h1 { max-width: 720px; margin: 18px 0; font-size: clamp(3rem, 7vw, 6.25rem); line-height: .9; letter-spacing: -.075em; }
+    .lede { max-width: 590px; margin: 0; color: var(--muted); font-size: 1.17rem; line-height: 1.65; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 18px; border: 1px solid transparent; border-radius: 15px; background: var(--brand); color: white; box-shadow: 0 9px 19px rgba(126,36,48,.2); text-decoration: none; font-weight: 800; }
+    .button:hover { transform: translateY(-1px); background: #671b25; }
+    .button.secondary { border-color: var(--line); background: rgba(255,253,248,.65); color: var(--ink); box-shadow: none; }
+    .button.secondary:hover { background: #fffaf0; }
+    .hero-card { position: relative; overflow: hidden; min-height: 410px; padding: 25px; border: 1px solid rgba(255,255,255,.3); border-radius: 30px; color: #fffdf6; background: linear-gradient(145deg, #246149, #123b2c); box-shadow: var(--shadow); }
+    .hero-card::before { content: ""; position: absolute; inset: 15px; border: 1px solid rgba(255,255,255,.17); border-radius: 23px; }
+    .hero-card > * { position: relative; }
+    .room-label { display: flex; justify-content: space-between; gap: 14px; color: rgba(255,255,255,.77); font-size: .82rem; font-weight: 750; }
+    .cards { display: flex; align-items: flex-end; justify-content: center; gap: clamp(-8px, 1vw, 10px); min-height: 250px; padding: 28px 12px 9px; }
+    .card { width: 120px; height: 174px; padding: 15px; border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 12px 24px rgba(0,0,0,.18); font-size: 2rem; font-weight: 900; }
+    .card:nth-child(1) { transform: rotate(-12deg) translate(13px, 13px); color: var(--brand); }
+    .card:nth-child(2) { z-index: 2; transform: translateY(-17px); }
+    .card:nth-child(3) { transform: rotate(12deg) translate(-13px, 13px); color: var(--brand); }
+    .card small { display: block; margin-top: 70px; font-size: .65rem; letter-spacing: .06em; }
+    .hero-status { padding: 14px 16px; border-radius: 15px; background: rgba(7,25,18,.36); color: rgba(255,255,255,.9); font-size: .93rem; }
+    .hero-status strong { color: #ffdc75; }
+    section { padding: 86px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 26px; }
+    h2 { max-width: 700px; margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1; letter-spacing: -.055em; }
+    .section-head p { max-width: 410px; margin: 0; color: var(--muted); line-height: 1.55; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .panel { padding: 25px; border: 1px solid rgba(255,255,255,.7); border-radius: 22px; background: rgba(255,253,248,.72); box-shadow: 0 9px 28px rgba(49,37,18,.05); }
+    .panel h3 { margin: 14px 0 8px; font-size: 1.15rem; letter-spacing: -.02em; }
+    .panel p { margin: 0; color: var(--muted); line-height: 1.55; font-size: .95rem; }
+    .number { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #f8edcf; color: var(--brand); font-weight: 900; }
+    .release { display: grid; grid-template-columns: 1fr auto; gap: 25px; align-items: center; padding: 34px; border-radius: 28px; background: #fffaf0; box-shadow: var(--shadow); }
+    .release h2 { margin-bottom: 10px; }
+    .release p { max-width: 600px; margin: 0; color: var(--muted); line-height: 1.6; }
+    .updates { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .update { display: block; min-height: 180px; padding: 25px; border-radius: 22px; background: var(--ink); color: white; text-decoration: none; transition: transform .18s ease; }
+    .update:nth-child(2) { background: var(--brand); }
+    .update:hover { transform: translateY(-3px); }
+    .update span { color: rgba(255,255,255,.7); font-size: .82rem; font-weight: 750; }
+    .update strong { display: block; margin: 17px 0 10px; font-size: 1.33rem; letter-spacing: -.03em; }
+    .update p { margin: 0; color: rgba(255,255,255,.75); font-size: .92rem; line-height: 1.5; }
+    .feedback { display: grid; grid-template-columns: .82fr 1.18fr; gap: 28px; padding: 32px; border: 1px solid rgba(255,255,255,.72); border-radius: 28px; background: rgba(255,253,248,.72); box-shadow: 0 9px 28px rgba(49,37,18,.05); }
+    .feedback h2 { margin-bottom: 14px; }
+    .feedback p { margin: 0; color: var(--muted); line-height: 1.6; }
+    form { display: grid; gap: 12px; }
+    label { display: grid; gap: 6px; color: var(--ink); font-size: .85rem; font-weight: 800; }
+    input, textarea { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: #fffdf8; font: inherit; }
+    input:focus, textarea:focus { outline: 3px solid rgba(232,185,75,.35); border-color: var(--gold); }
+    textarea { min-height: 126px; resize: vertical; }
+    .form-note { color: var(--muted); font-size: .78rem; line-height: 1.45; }
+    footer { display: flex; justify-content: space-between; gap: 18px; padding: 30px 0 44px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 780px) { .links a:not(.release-nav) { display: none; } .hero { grid-template-columns: 1fr; min-height: 0; padding: 54px 0; } .hero-card { min-height: 355px; } .section-head, .release { grid-template-columns: 1fr; display: grid; align-items: start; } .grid, .feedback { grid-template-columns: 1fr; } .updates { grid-template-columns: 1fr; } section { padding: 56px 0; } footer { flex-direction: column; } }
+    @media (max-width: 430px) { .shell { width: min(100% - 20px, 1120px); } .nav { padding: 12px; } .links a { padding: 8px; } .hero { padding-top: 42px; } .card { width: 96px; height: 145px; } }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <img src="./assets/logo-mark.svg" alt="Cards logo">
-        <div class="brand-copy">
-          <strong>Cards</strong>
-          <span>Local multiplayer table games with optional AR and lightweight drafting.</span>
-        </div>
+  <header class="shell">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Cards home"><img src="assets/logo-mark.svg" alt=""><span>Cards</span></a>
+      <div class="links">
+        <a href="#about">About</a>
+        <a href="#updates">Updates</a>
+        <a class="release-nav" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo/releases">Releases ↗</a>
       </div>
-      <div class="status-row">
-        <div class="status-pill"><span class="dot"></span>Nearby play ready</div>
-        <div class="status-pill">Decks <strong>4</strong></div>
-        <div class="status-pill">Mode <strong id="modeLabel">Prompt table</strong></div>
-      </div>
-    </header>
-    <section class="hero">
-      <div class="panel hero-copy">
-        <h1>Bring the table to the people in front of you.</h1>
-        <p>Cards keeps the setup simple: choose a deck, put players at the table, and start a round. When you need a custom game, the creator only asks for the rules that matter and fills the rest with sensible defaults.</p>
-        <div class="hero-actions">
-          <button class="btn btn-primary" id="startRoundBtn">Start round</button>
-          <button class="btn btn-secondary" data-tab-target="create">Open game creator</button>
-        </div>
-      </div>
-      <aside class="panel hero-side">
-        <div>
-          <div class="meta-line">Preview focus</div>
-          <div class="nav-tabs">
-            <button class="tab active" data-tab="play">Play</button>
-            <button class="tab" data-tab="table">Table</button>
-            <button class="tab" data-tab="create">Create</button>
-          </div>
-        </div>
-        <div class="quick-stats">
-          <div class="stat-card"><strong id="playerCount">4</strong><span>seats prepared</span></div>
-          <div class="stat-card"><strong id="cardCount">36</strong><span>cards in this deck</span></div>
-          <div class="stat-card"><strong id="turnCount">1</strong><span>current turn</span></div>
-        </div>
-      </aside>
-    </section>
-    <section class="panel workspace" id="playPanel">
-      <div class="section-head">
-        <div>
-          <p class="meta-line">Deck library</p>
-          <h2 class="section-title">Choose a game flow that fits the room</h2>
-        </div>
-        <p class="side-note">Defaults stay lightweight: the deck decides the table layout, turn pattern, and prompt style.</p>
-      </div>
-      <div class="deck-grid" id="deckGrid"></div>
-      <div class="room-switch" aria-label="Digital game room view">
-        <button class="active" data-room-mode="combined">Combined</button>
-        <button data-room-mode="table">Table</button>
-        <button data-room-mode="deck">Your deck</button>
-      </div>
-      <div class="table-layout" id="tableLayout">
-        <section class="table-view" id="sharedTable">
-          <div class="table-toolbar">
-            <div class="status-pill"><span class="dot"></span><span id="tableStatus">Avery is opening the round</span></div>
-            <div class="status-pill"><span id="tableDeck">Table Talk</span></div>
-          </div>
-          <div class="felt-stage">
-            <div class="player-ring">
-              <div class="player p-top active" id="seatTop"><strong>Avery</strong><small>Lead player</small></div>
-              <div class="player p-left" id="seatLeft"><strong>Jordan</strong><small>Nearby peer</small></div>
-              <div class="player p-right" id="seatRight"><strong>Riley</strong><small>Joined live</small></div>
-              <div class="player p-bottom" id="seatBottom"><strong>Casey</strong><small>Host device</small></div>
-            </div>
-            <article class="prompt-card">
-              <span class="kicker" id="promptTag">Warm-up prompt</span>
-              <h2 id="promptTitle">Tell the table about a tiny moment you still remember.</h2>
-              <p id="promptBody">Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.</p>
-            </article>
-            <div class="draw-stack" id="drawStack">36 left</div>
-            <div class="discard-stack">Discard</div>
-          </div>
-        </section>
-        <aside class="table-side">
-          <div class="side-card" id="sharedActions">
-            <h3>Table actions</h3>
-            <p class="side-note">Run a round, rotate turns, or add one more player without opening a setup screen.</p>
-            <div class="table-actions">
-              <button class="btn btn-primary" id="drawBtn">Draw next</button>
-              <button class="btn btn-secondary" id="passBtn">Pass turn</button>
-              <button class="btn btn-secondary" id="guestBtn">Add guest</button>
-            </div>
-          </div>
-          <div class="side-card" id="activityCard">
-            <h3>Round activity</h3>
-            <ul class="activity" id="activityList"></ul>
-          </div>
-          <div class="side-card private-deck" id="privateDeck">
-            <h3>Your deck</h3>
-            <div class="private-card-back" aria-hidden="true"></div>
-            <strong id="handTitle">Classic Pack 52 is ready</strong>
-            <p class="side-note" id="handNote">Private cards stay here; the shared table only shows public state.</p>
-            <button class="btn btn-secondary" id="arModeBtn">Open AR table preview</button>
-          </div>
-        </aside>
-      </div>
-    </section>
-    <section class="panel creator" id="createPanel" hidden>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
       <div>
-        <p class="meta-line">Game creator</p>
-        <h2 class="section-title">Describe the structure, not a whole storefront</h2>
-        <p class="side-note">The builder accepts a compact config and fills in the rest from known game families like poker, prompt decks, and identity games.</p>
-        <textarea id="configInput">game: poker night
-type: poker
-multiplayer: true
-max_users: 4
-ar: false
-tabledesign: poker_2.png
-private_hands: true
-nearby_sync: bluetooth
-notes: classic betting order, simple host-led flow</textarea>
-        <div class="creator-actions">
-          <button class="btn btn-primary" id="buildBtn">Build draft</button>
-          <button class="btn btn-secondary" id="loadGuessWhoBtn">Load guess-style example</button>
+        <span class="eyebrow"><span class="dot"></span> Native app preview</span>
+        <h1>Real games.<br>Real table.<br>Close by.</h1>
+        <p class="lede">Cards is a local-first app for creating and playing card games together. It keeps the shared table public, each player’s deck private, and AR entirely optional.</p>
+        <div class="actions">
+          <a class="button" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo/releases">Get preview builds ↗</a>
+          <a class="button secondary" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo">View the project ↗</a>
         </div>
       </div>
-      <div class="creator-preview">
-        <div>
-          <p class="meta-line">Resolved output</p>
-          <h3 id="previewTitle">Poker draft validated</h3>
-          <p id="previewSummary">Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.</p>
-        </div>
-        <div class="preview-grid">
-          <div class="preview-chip"><span>Mode</span><strong id="previewMode">Nearby multiplayer</strong></div>
-          <div class="preview-chip"><span>Layout</span><strong id="previewLayout">Poker table</strong></div>
-          <div class="preview-chip"><span>AR</span><strong id="previewAr">Disabled</strong></div>
-          <div class="preview-chip"><span>Sync</span><strong id="previewSync">Bluetooth + local host</strong></div>
-        </div>
-        <div class="side-card">
-          <h3>What the interpreter inferred</h3>
-          <ul class="activity" id="inferenceList"></ul>
-        </div>
+      <aside class="hero-card" aria-label="Cards app overview">
+        <div class="room-label"><span>CLASSIC PACK 52</span><span>4 seats ready</span></div>
+        <div class="cards" aria-hidden="true"><div class="card">A♠<small>YOUR DECK</small></div><div class="card">Q♥<small>TABLE</small></div><div class="card">K♣<small>COMBINED</small></div></div>
+        <div class="hero-status"><strong>Choose your view:</strong> Table · Your deck · Combined · AR</div>
+      </aside>
+    </div>
+
+    <section id="about" class="shell">
+      <div class="section-head"><h2>The app is where play happens.</h2><p>This page is deliberately simple: it explains Cards, points to builds, and records what is moving forward. Games, nearby connections, and AR stay in the native apps.</p></div>
+      <div class="grid">
+        <article class="panel"><div class="number">01</div><h3>Private cards, shared state</h3><p>Move between a shared Table, private Your deck, and Combined view. Board games can turn the table into a score tracker or leaderboard.</p></article>
+        <article class="panel"><div class="number">02</div><h3>Templates, not a store</h3><p>Start with the original Classic Pack, Poker, Guess Who, or a prompt deck. Lightweight templates select safe resources and sensible multiplayer defaults.</p></article>
+        <article class="panel"><div class="number">03</div><h3>Nearby by design</h3><p>Use a conventional screen anywhere; open AR only when a surface adds something. Local connections are designed to work without cloud accounts.</p></article>
       </div>
     </section>
-    <p class="footer-note">This preview stays focused on nearby play, table clarity, and simple game drafting.</p>
+
+    <section class="shell" aria-labelledby="downloads-title">
+      <div class="release"><div><h2 id="downloads-title">Preview builds</h2><p>Android APK, macOS DMG, and Windows executable builds are published as GitHub prereleases. They are for testing and are not yet code-signed or notarized. iOS distribution follows when an Apple Developer account is connected.</p></div><a class="button" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo/releases/latest">Open latest release ↗</a></div>
+    </section>
+
+    <section id="updates" class="shell">
+      <div class="section-head"><h2>Follow development where it is happening.</h2><p>Release notes remain the download source of truth. The project repository contains implementation progress, issues, and the full technical roadmap.</p></div>
+      <div class="updates">
+        <a class="update" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo/releases"><span>DOWNLOADS &amp; RELEASE NOTES</span><strong>Preview releases</strong><p>APK, DMG, Windows build, presentation assets, and release notes.</p></a>
+        <a class="update" href="https://github.com/JakkuAzzo/Cards_PythonQT_Demo"><span>SOURCE, ROADMAP &amp; ISSUES</span><strong>Project updates</strong><p>See the native apps, shared protocol, tests, and the work still in progress.</p></a>
+      </div>
+    </section>
+
+    <section id="comments" class="shell">
+      <div class="feedback">
+        <div>
+          <span class="eyebrow">Early feedback</span>
+          <h2>Help shape the table.</h2>
+          <p>Tell us which game, device, or nearby-play scenario you want tested next. Feedback goes directly to the Cards inbox; it is not displayed publicly on this site.</p>
+        </div>
+        <form action="https://formsubmit.co/nathanbrown-bennett+cards@hotmail.com" method="POST">
+          <input type="hidden" name="_subject" value="Cards app feedback">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://jakkuazzo.github.io/Cards_PythonQT_Demo/#comments">
+          <label>Your name <input name="name" autocomplete="name" maxlength="100" placeholder="Optional"></label>
+          <label>Email for a reply <input name="email" type="email" autocomplete="email" maxlength="254" placeholder="Optional"></label>
+          <label>Your comment <textarea name="message" required maxlength="4000" placeholder="What should Cards do next?"></textarea></label>
+          <button class="button" type="submit">Send feedback</button>
+          <span class="form-note">The first FormSubmit message requires inbox activation by the Cards owner. Please do not include passwords, payment details, or sensitive personal information.</span>
+        </form>
+      </div>
+    </section>
   </main>
-  <script>
-    const decks = [
-      { id: "classic-pack-52", badge: "Original deck", name: "Classic Pack 52", cards: 52, mode: "Digital card room", blurb: "The original designed 52-card pack, ready for poker, tricks, and custom tables.", title: "A♠", body: "Classic Pack faces and back are the default resource for standard card games. Keep private cards on Your deck and public cards on the shared table.", tag: "Classic Pack card", kind: "classic" },
-      { id: "table-talk", badge: "Prompt deck", name: "Table Talk", cards: 36, mode: "Prompt table", blurb: "Light prompts for quick local sessions, social icebreakers, and rotating turns.", title: "Tell the table about a tiny moment you still remember.", body: "Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.", tag: "Warm-up prompt" },
-      { id: "road-trip", badge: "Travel pack", name: "Road Trip", cards: 24, mode: "Shared screen", blurb: "Short prompts and mini-games for one phone in the middle of a group.", title: "Name a place everyone here would actually visit again.", body: "Everyone points at the same time, then explains their pick. Good for one-screen play where the host device drives the next card.", tag: "Group vote" },
-      { id: "quick-draw", badge: "Guess game", name: "Quick Draw", cards: 18, mode: "Team challenge", blurb: "Fast team prompts with clue giving, time pressure, and clear turn changes.", title: "Give one-word clues until your team guesses the hidden card.", body: "This setup assumes teams, visible timers, and a discard pile that tracks which prompts are already spent.", tag: "Timed round" }
-    ];
-    const seats = [
-      { id: "seatTop", name: "Avery" },
-      { id: "seatLeft", name: "Jordan" },
-      { id: "seatRight", name: "Riley" },
-      { id: "seatBottom", name: "Casey" }
-    ];
-    const classicFaces = ["A♠", "K♠", "Q♠", "J♠", "10♠", "9♠", "8♠", "7♠", "6♠", "5♠", "4♠", "3♠", "2♠", "A♥", "K♥", "Q♥", "J♥", "10♥", "9♥", "8♥", "7♥", "6♥", "5♥", "4♥", "3♥", "2♥", "A♦", "K♦", "Q♦", "J♦", "10♦", "9♦", "8♦", "7♦", "6♦", "5♦", "4♦", "3♦", "2♦", "A♣", "K♣", "Q♣", "J♣", "10♣", "9♣", "8♣", "7♣", "6♣", "5♣", "4♣", "3♣", "2♣"];
-    const state = { activeDeck: decks[0], pile: decks[0].cards, turn: 0, guestAdded: false, drawn: 0, roomMode: "combined" };
-    const activityList = document.getElementById("activityList");
-    const inferenceList = document.getElementById("inferenceList");
-    const deckGrid = document.getElementById("deckGrid");
-    const tabs = [...document.querySelectorAll(".tab")];
-    const playPanel = document.getElementById("playPanel");
-    const createPanel = document.getElementById("createPanel");
-    const addActivity = (text) => {
-      const item = document.createElement("li");
-      item.textContent = text;
-      activityList.prepend(item);
-      while (activityList.children.length > 4) activityList.removeChild(activityList.lastChild);
-    };
-    const renderDecks = () => {
-      deckGrid.innerHTML = "";
-      decks.forEach((deck) => {
-        const card = document.createElement("button");
-        card.className = "deck-card" + (deck.id === state.activeDeck.id ? " active" : "");
-        card.innerHTML = `<span class="deck-badge">${deck.badge}</span><strong>${deck.name}</strong><p>${deck.blurb}</p><div class="deck-meta"><span>${deck.cards} cards</span><span>${deck.mode}</span></div>`;
-        card.addEventListener("click", () => selectDeck(deck.id));
-        deckGrid.appendChild(card);
-      });
-    };
-    const renderTable = () => {
-      const deck = state.activeDeck;
-      const classicCard = classicFaces[state.drawn % classicFaces.length];
-      const title = deck.kind === "classic" ? classicCard : deck.title;
-      const body = deck.kind === "classic" ? "This is a private Classic Pack card. Switch to Table for shared community cards, score, and turn state." : deck.body;
-      const tag = deck.kind === "classic" ? "Classic Pack private card" : deck.tag;
-      document.getElementById("modeLabel").textContent = deck.mode;
-      document.getElementById("cardCount").textContent = deck.cards;
-      document.getElementById("tableDeck").textContent = deck.name;
-      document.getElementById("promptTag").textContent = tag;
-      document.getElementById("promptTitle").textContent = title;
-      document.getElementById("promptBody").textContent = body;
-      document.getElementById("drawStack").textContent = `${state.pile} left`;
-      document.getElementById("turnCount").textContent = String(state.turn + 1);
-      document.getElementById("playerCount").textContent = state.guestAdded ? "5" : "4";
-      document.getElementById("tableStatus").textContent = `${seats[state.turn].name} is opening the round`;
-      seats.forEach((seat, index) => document.getElementById(seat.id).classList.toggle("active", index === state.turn));
-      document.getElementById("handTitle").textContent = deck.kind === "classic" ? `Your card: ${classicCard}` : `${deck.name} hand`;
-      document.getElementById("handNote").textContent = deck.kind === "classic" ? "Classic Pack 52 is the default deck. The card face stays private until you choose to play it." : "Use this private deck page for hidden prompts, targets, or hands.";
-    };
-    const selectDeck = (id) => {
-      const deck = decks.find((entry) => entry.id === id);
-      if (!deck) return;
-      state.activeDeck = deck;
-      state.pile = deck.cards;
-      state.turn = 0;
-      state.drawn = 0;
-      renderDecks();
-      renderTable();
-      addActivity(`${deck.name} loaded with ${deck.cards} cards and ${deck.mode.toLowerCase()} defaults.`);
-    };
-    const openTab = (tab) => {
-      const create = tab === "create";
-      createPanel.hidden = !create;
-      playPanel.hidden = create;
-      tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === tab));
-    };
-    const parseConfig = (raw) => {
-      const config = {};
-      raw.split("\n").forEach((line) => {
-        const index = line.indexOf(":");
-        if (index === -1) return;
-        config[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
-      });
-      return config;
-    };
-    const resolveDraft = (config) => {
-      const type = (config.type || "").toLowerCase();
-      const multiplayer = (config.multiplayer || "true").toLowerCase() !== "false";
-      const ar = (config.ar || "false").toLowerCase() === "true";
-      if (type.includes("guess")) {
-        return {
-          title: "Guess-style draft validated",
-          summary: "Defaults applied for an identity game with visible character grids, question turns, and elimination markers.",
-          mode: multiplayer ? "Shared screen multiplayer" : "Solo pass-and-play",
-          layout: "Guess board",
-          ar: ar ? "Enabled" : "Disabled",
-          sync: multiplayer ? "Bluetooth + local host" : "Single device",
-          notes: [
-            "Switched to a grid table instead of a central prompt card.",
-            "Enabled question turns and visible elimination state.",
-            "Kept the config lightweight by inferring team-free identity play."
-          ]
-        };
-      }
-      if (type.includes("poker")) {
-        return {
-          title: "Poker draft validated",
-          summary: "Defaults applied for a four-seat local poker table with private hands, host rotation, and no camera dependency.",
-          mode: multiplayer ? "Nearby multiplayer" : "Solo practice table",
-          layout: "Poker table",
-          ar: ar ? "Enabled" : "Disabled",
-          sync: multiplayer ? "Bluetooth + local host" : "Single device",
-          notes: [
-            "Used private hands because poker implies hidden cards.",
-            "Mapped turn flow to a circular table layout with dealer rotation.",
-            "Kept camera features off because the config favors non-AR play."
-          ]
-        };
-      }
-      return {
-        title: "Prompt deck draft validated",
-        summary: "Defaults applied for a shared prompt table with rotating turns, visible draw stack, and a simple host-led round loop.",
-        mode: multiplayer ? "Nearby multiplayer" : "Solo journaling",
-        layout: "Prompt table",
-        ar: ar ? "Enabled" : "Disabled",
-        sync: multiplayer ? "Bluetooth + local host" : "Single device",
-        notes: [
-          "Chose a central prompt card because the game type reads like a social deck.",
-          "Kept rounds visible to all players on one shared table view.",
-          "Left room for AR overlays later without making them mandatory."
-        ]
-      };
-    };
-    const renderDraft = (draft) => {
-      document.getElementById("previewTitle").textContent = draft.title;
-      document.getElementById("previewSummary").textContent = draft.summary;
-      document.getElementById("previewMode").textContent = draft.mode;
-      document.getElementById("previewLayout").textContent = draft.layout;
-      document.getElementById("previewAr").textContent = draft.ar;
-      document.getElementById("previewSync").textContent = draft.sync;
-      inferenceList.innerHTML = "";
-      draft.notes.forEach((note) => {
-        const item = document.createElement("li");
-        item.textContent = note;
-        inferenceList.appendChild(item);
-      });
-    };
-    document.getElementById("startRoundBtn").addEventListener("click", () => {
-      openTab("play");
-      state.turn = 0;
-      state.pile = state.activeDeck.cards;
-      renderTable();
-      addActivity("Round reset. Everyone is synced and ready to start.");
-    });
-    document.querySelectorAll("[data-tab-target]").forEach((button) => button.addEventListener("click", () => openTab(button.dataset.tabTarget)));
-    tabs.forEach((tab) => tab.addEventListener("click", () => openTab(tab.dataset.tab)));
-    document.getElementById("drawBtn").addEventListener("click", () => {
-      if (state.pile > 0) { state.pile -= 1; state.drawn += 1; }
-      renderTable();
-      addActivity(`${seats[state.turn].name} drew the next card. ${state.pile} remain in the stack.`);
-    });
-    document.getElementById("passBtn").addEventListener("click", () => {
-      state.turn = (state.turn + 1) % seats.length;
-      renderTable();
-      addActivity(`Turn passed to ${seats[state.turn].name}.`);
-    });
-    document.getElementById("guestBtn").addEventListener("click", () => {
-      if (state.guestAdded) {
-        addActivity("Guest seat is already enabled for this preview.");
-        return;
-      }
-      state.guestAdded = true;
-      document.getElementById("playerCount").textContent = "5";
-      addActivity("Taylor joined as a guest seat. The host can assign that player to a spare device later.");
-    });
-    document.getElementById("buildBtn").addEventListener("click", () => renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value))));
-    document.getElementById("loadGuessWhoBtn").addEventListener("click", () => {
-      document.getElementById("configInput").value = `game: family faces
-type: guess who
-multiplayer: true
-max_users: 2
-ar: false
-tabledesign: guess_grid.png
-nearby_sync: bluetooth
-notes: shared clue board, elimination markers, no hidden hands`;
-      renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
-    });
-    document.querySelectorAll("[data-room-mode]").forEach((button) => button.addEventListener("click", () => {
-      state.roomMode = button.dataset.roomMode;
-      document.getElementById("tableLayout").className = `table-layout mode-${state.roomMode}`;
-      document.querySelectorAll("[data-room-mode]").forEach((item) => item.classList.toggle("active", item === button));
-      addActivity(state.roomMode === "deck" ? "Private deck view opened." : state.roomMode === "table" ? "Shared table view opened." : "Combined table and deck view opened.");
-    }));
-    document.getElementById("arModeBtn").addEventListener("click", () => addActivity("AR is a native mobile mode. This web preview keeps the same shared table state on screen."));
-    renderDecks();
-    renderTable();
-    renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
-    addActivity("Table Talk loaded. Four nearby seats are ready.");
-    addActivity("Host preview booted in local shared-table mode.");
-  </script>
+  <footer class="shell"><span>Cards · local-first table games</span><span>Made for the people already in the room.</span></footer>
 </body>
 </html>

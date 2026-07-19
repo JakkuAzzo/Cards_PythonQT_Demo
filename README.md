@@ -18,7 +18,7 @@ There is deliberately no large store and no general code-generating AI. The crea
 | --- |
 | ![Cards browser game room showing a shared table and private deck](docs/screenshots/web-game-room.png) |
 
-Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It ships with the original Classic Pack as its default deck and lets a player switch between the shared Table, private Your deck, and Combined room views. Nearby transport and camera AR remain native-app capabilities.
+Visit [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/) for a lightweight product home with download and project-update links. Cards gameplay, nearby transport, and camera AR remain native-app capabilities rather than a reduced browser imitation.
 
 ## Preview downloads
 

@@ -36,7 +36,7 @@ class ContractTests(unittest.TestCase):
         self.assertRegex(game["presentation"]["accentEndHex"], r"^[0-9A-Fa-f]{6}$")
 
     def test_schema_documents_are_valid_json_and_closed_at_root(self):
-        for name in ("game-manifest.schema.json", "protocol.schema.json"):
+        for name in ("game-manifest.schema.json", "protocol.schema.json", "game-room-wire.schema.json", "ar-alignment.schema.json"):
             schema = json.loads((ROOT / name).read_text())
             self.assertEqual(schema["type"], "object")
             self.assertFalse(schema["additionalProperties"])
@@ -58,6 +58,19 @@ class ContractTests(unittest.TestCase):
         self.assertEqual({template["id"] for template in catalog["templates"]}, {"poker-holdem", "guess-who-board", "prompt-table"})
         self.assertTrue(all(template["tableDesign"] in table_ids for template in catalog["templates"]))
         self.assertTrue(all(template["digitalModes"] == ["combined", "table", "deck"] for template in catalog["templates"]))
+
+    def test_game_room_wire_and_ar_alignment_contracts_are_bounded(self):
+        room_schema = json.loads((ROOT / "game-room-wire.schema.json").read_text())
+        alignment_schema = json.loads((ROOT / "ar-alignment.schema.json").read_text())
+        fixture = json.loads((ROOT / "conformance" / "game-room-wire-v1.json").read_text())
+
+        self.assertEqual(room_schema["properties"]["game"]["enum"], ["poker", "guess-who"])
+        self.assertEqual(fixture["maximumFramePayloadBytes"], 160)
+        self.assertEqual(fixture["bleServiceUUID"], "B9BB2D71-0B11-4E39-A5DF-0F17C4E81001")
+        self.assertEqual(fixture["poker"]["privateState"]["privateState"]["hand"], ["K♥", "K♣"])
+        self.assertNotIn("hand", fixture["poker"]["publicSnapshot"]["publicState"])
+        self.assertEqual(alignment_schema["properties"]["markerID"]["const"], "cards-table-marker-v1")
+        self.assertEqual(len(fixture["alignment"]["orientation"]), 4)
 
 
 if __name__ == "__main__":
