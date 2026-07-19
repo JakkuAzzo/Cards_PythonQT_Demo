@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160mm" height="160mm" viewBox="0 0 160 160">
+  <rect width="160" height="160" fill="#fff"/>
+  <rect x="4" y="4" width="152" height="152" rx="3" fill="#10131d"/>
+  <rect x="10" y="10" width="140" height="140" fill="#fff"/>
+  <rect x="15" y="15" width="32" height="32" fill="#10131d"/>
+  <rect x="20" y="20" width="22" height="22" fill="#fff"/>
+  <rect x="25" y="25" width="12" height="12" fill="#10131d"/>
+  <rect x="113" y="15" width="32" height="32" fill="#10131d"/>
+  <rect x="118" y="20" width="22" height="22" fill="#fff"/>
+  <rect x="123" y="25" width="12" height="12" fill="#10131d"/>
+  <rect x="15" y="113" width="32" height="32" fill="#10131d"/>
+  <rect x="20" y="118" width="22" height="22" fill="#fff"/>
+  <rect x="25" y="123" width="12" height="12" fill="#10131d"/>
+  <g fill="#10131d">
+    <rect x="56" y="18" width="9" height="9"/><rect x="74" y="18" width="9" height="9"/><rect x="92" y="18" width="9" height="9"/>
+    <rect x="56" y="36" width="9" height="9"/><rect x="83" y="36" width="9" height="9"/><rect x="101" y="36" width="9" height="9"/>
+    <rect x="56" y="54" width="9" height="9"/><rect x="74" y="54" width="9" height="9"/><rect x="101" y="54" width="9" height="9"/>
+    <rect x="18" y="56" width="9" height="9"/><rect x="36" y="56" width="9" height="9"/><rect x="56" y="72" width="9" height="9"/><rect x="74" y="72" width="9" height="9"/><rect x="92" y="72" width="9" height="9"/><rect x="110" y="72" width="9" height="9"/><rect x="128" y="56" width="9" height="9"/>
+    <rect x="18" y="74" width="9" height="9"/><rect x="36" y="74" width="9" height="9"/><rect x="56" y="90" width="9" height="9"/><rect x="83" y="90" width="9" height="9"/><rect x="101" y="90" width="9" height="9"/><rect x="128" y="74" width="9" height="9"/>
+    <rect x="18" y="92" width="9" height="9"/><rect x="36" y="92" width="9" height="9"/><rect x="56" y="108" width="9" height="9"/><rect x="74" y="108" width="9" height="9"/><rect x="92" y="108" width="9" height="9"/><rect x="110" y="108" width="9" height="9"/><rect x="128" y="92" width="9" height="9"/>
+    <rect x="56" y="126" width="9" height="9"/><rect x="74" y="126" width="9" height="9"/><rect x="101" y="126" width="9" height="9"/>
+  </g>
+  <text x="80" y="154" text-anchor="middle" font-family="Arial,sans-serif" font-size="4" font-weight="bold" fill="#10131d">CARDS TABLE MARKER V1 · PRINT AT 160 MM</text>
+</svg>

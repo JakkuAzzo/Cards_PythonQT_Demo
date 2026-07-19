@@ -12,8 +12,8 @@ final class GameRoomWireTests: XCTestCase {
     }
 
     func testAlignmentOnlyAcceptsTheSharedMarkerContract() {
-        let valid = SharedARAlignment(markerID: SharedARAlignment.markerID, markerWidthMetres: 0.16, revision: 3, position: [0, 0, 0], orientation: [0, 0, 0, 1])
-        let invalid = SharedARAlignment(markerID: "other", markerWidthMetres: 0.16, revision: 3, position: [0, 0, 0], orientation: [0, 0, 0, 1])
+        let valid = SharedARAlignment(markerID: SharedARAlignment.markerID, markerWidthMetres: 0.16, revision: 3, status: .ready)
+        let invalid = SharedARAlignment(markerID: "other", markerWidthMetres: 0.16, revision: 3, status: .ready)
         XCTAssertTrue(valid.isValid)
         XCTAssertFalse(invalid.isValid)
     }

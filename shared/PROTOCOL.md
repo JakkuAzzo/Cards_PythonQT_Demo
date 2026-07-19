@@ -34,7 +34,7 @@ Poker supports `advance-street`, `bet`, and `fold`. Guess Who supports `toggle-e
 
 The cross-platform BLE service UUID, stream characteristic UUID, and 160-byte packet payload are fixed in `conformance/game-room-wire-v1.json`. Envelopes are length-prefixed before being split across BLE writes so iPhone and Android can reconstruct the same stream without Wi-Fi.
 
-`ar-alignment.schema.json` defines the `cards-table-marker-v1` origin. Once a phone recognizes the printed 160 mm marker, it may publish a marker-relative position and quaternion in an `alignment` envelope. Alignment is presentation-only: it never changes a game revision or game rules.
+`ar-alignment.schema.json` defines the `cards-table-marker-v1` contract. Once a phone recognizes the printed 160 mm marker, it may publish only its marker identifier, physical width, readiness status, and the current game revision in an `alignment` envelope. It must not send an AR world position or quaternion: each phone has a separate AR world coordinate system and independently anchors its board to the same physical marker. Alignment is presentation-only: it never changes a game revision or game rules.
 
 ## Transport
 

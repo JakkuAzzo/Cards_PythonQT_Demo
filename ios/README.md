@@ -16,7 +16,7 @@ open CardsiOS.xcodeproj
 - A host-authoritative multiplayer engine with deterministic shuffling and turn validation.
 - A live Table Talk preview with local one-device play plus real nearby host/join controls.
 - A shareable table code, host-authoritative commands, revisioned snapshots, loopback transport tests, and encrypted Apple Multipeer Connectivity for nearby Apple devices.
-- ARKit/RealityKit horizontal-surface table placement.
+- ARKit/RealityKit horizontal-surface table placement plus recognition of the bundled 160 mm printed shared-table marker.
 - A lightweight template creator for poker, Guess Who, and custom prompt games.
 - Playable Poker and Guess Who rooms: choose the shared Table, private Your deck, or Combined view; AR renders the same shared state on a surface when available.
 - Manifest, creator, engine, transport, and deck XCTest sources.
@@ -29,4 +29,4 @@ The creator produces data, not Swift code. It selects from `ResourceCatalog`, ap
 
 ## Production nearby work
 
-`AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. The live-table screen now creates and joins code-filtered nearby sessions, with the host admitting players and broadcasting state snapshots. Wiring Poker and Guess Who room commands to those snapshots, then sharing the same JSON envelopes with Android, remains outstanding.
+`AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. The live-table screen now creates and joins code-filtered nearby sessions, with the host admitting players and broadcasting state snapshots. `BluetoothLETransport` adds encrypted cross-platform BLE framing for a nearby room. Wiring Poker and Guess Who room commands to those snapshots, then validating the iPhone/Android BLE round on real devices, remains outstanding. Print the [`cards-table-marker-v1`](../docs/ar-marker/README.md) at 100% scale to test shared AR; every phone anchors locally to it rather than sending incompatible AR-world coordinates.

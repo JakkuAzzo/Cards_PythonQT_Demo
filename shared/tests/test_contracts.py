@@ -70,7 +70,9 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(fixture["poker"]["privateState"]["privateState"]["hand"], ["K♥", "K♣"])
         self.assertNotIn("hand", fixture["poker"]["publicSnapshot"]["publicState"])
         self.assertEqual(alignment_schema["properties"]["markerID"]["const"], "cards-table-marker-v1")
-        self.assertEqual(len(fixture["alignment"]["orientation"]), 4)
+        self.assertEqual(fixture["alignment"]["status"], "ready")
+        self.assertNotIn("position", fixture["alignment"])
+        self.assertNotIn("orientation", fixture["alignment"])
 
 
 if __name__ == "__main__":

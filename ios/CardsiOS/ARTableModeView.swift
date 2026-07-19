@@ -6,20 +6,21 @@ struct ARTableModeView: View {
     @Environment(\.dismiss) private var dismiss
     let card: GameManifest.Deck.Card?
     let manifest: GameManifest
+    @State private var markerStatus = "Find the printed Cards table marker to align this shared surface."
 
     var body: some View {
         NavigationStack {
             Group {
                 if ARWorldTrackingConfiguration.isSupported {
                     ZStack(alignment: .bottom) {
-                        ARTableContainer(card: card, manifest: manifest)
+                        ARTableContainer(card: card, manifest: manifest, markerStatus: $markerStatus)
                             .ignoresSafeArea()
 
                         VStack(spacing: 6) {
                             Text(card?.text ?? "Move the phone until a horizontal surface is found.")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 .multilineTextAlignment(.center)
-                            Text("Offline preview · shared-marker alignment is the next transport milestone")
+                            Text(markerStatus)
                                 .font(.system(size: 11, weight: .medium, design: .rounded))
                                 .foregroundStyle(.secondary)
                         }
@@ -49,12 +50,17 @@ struct ARTableModeView: View {
 private struct ARTableContainer: UIViewRepresentable {
     let card: GameManifest.Deck.Card?
     let manifest: GameManifest
+    @Binding var markerStatus: String
+
+    func makeCoordinator() -> Coordinator { Coordinator(markerStatus: $markerStatus) }
 
     func makeUIView(context: Context) -> ARView {
         let view = ARView(frame: .zero)
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.horizontal]
         configuration.environmentTexturing = .automatic
+        configuration.detectionImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: .main) ?? []
+        view.session.delegate = context.coordinator
         view.session.run(configuration)
 
         let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.25, 0.25)))
@@ -75,6 +81,24 @@ private struct ARTableContainer: UIViewRepresentable {
     func updateUIView(_ view: ARView, context: Context) {
         guard let entity = view.scene.findEntity(named: "current-card") as? ModelEntity else { return }
         entity.model?.materials = [cardMaterial()]
+    }
+
+    final class Coordinator: NSObject, ARSessionDelegate {
+        @Binding private var markerStatus: String
+
+        init(markerStatus: Binding<String>) { _markerStatus = markerStatus }
+
+        func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
+            guard anchors.contains(where: { ($0 as? ARImageAnchor)?.referenceImage.name == "cards-table-marker-v1" }) else { return }
+            Task { @MainActor in
+                markerStatus = "Shared marker ready · every phone is anchored to the same physical table."
+            }
+        }
+
+        func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
+            guard anchors.contains(where: { ($0 as? ARImageAnchor)?.referenceImage.name == "cards-table-marker-v1" }) else { return }
+            Task { @MainActor in markerStatus = "Marker lost · keep the printed marker in view to realign." }
+        }
     }
 
     private func makeCardEntity() -> ModelEntity {

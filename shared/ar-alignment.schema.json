@@ -4,15 +4,11 @@
   "title": "Cards Shared AR Marker Alignment",
   "type": "object",
   "additionalProperties": false,
-  "required": ["markerID", "markerWidthMetres", "revision", "position", "orientation"],
+  "required": ["markerID", "markerWidthMetres", "revision", "status"],
   "properties": {
     "markerID": { "const": "cards-table-marker-v1" },
     "markerWidthMetres": { "type": "number", "minimum": 0.08, "maximum": 0.5 },
     "revision": { "type": "integer", "minimum": 0 },
-    "position": { "$ref": "#/$defs/vector3" },
-    "orientation": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 }
-  },
-  "$defs": {
-    "vector3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+    "status": { "enum": ["ready", "lost"] }
   }
 }

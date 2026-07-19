@@ -41,7 +41,7 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 - A working two-dimensional multiplayer Table Talk preview.
 - Host/join controls for encrypted Apple-to-Apple nearby tables, with a shareable table code, host-authoritative commands, and revisioned snapshots.
 - A tested loopback transport retained for deterministic automated tests.
-- An ARKit/RealityKit table that finds a horizontal surface and renders the digital table/card state.
+- An ARKit/RealityKit table that finds a horizontal surface, recognises the bundled 160 mm printed table marker, and reports locally anchored shared-surface readiness.
 - A minimal creator that accepts an idea or YAML-style settings and opens playable Poker, Guess Who, or prompt-game previews.
 - Every supported game has a digital room with separate Table and Your deck pages or a Combined view; AR opens the same shared state on a detected surface when available.
 
@@ -50,7 +50,7 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 - The same deterministic multiplayer engine and seed-42 conformance result as iOS.
 - A conventional live-table activity plus Poker and Guess Who game rooms with Table, Your deck, Combined, and optional AR entry points.
 - A Google Nearby Connections `P2P_STAR` host/join flow with visible authentication digits, table-code validation, host-authoritative commands, and public snapshots.
-- Optional ARCore installation and session lifecycle with a non-AR fallback.
+- Optional ARCore installation, the same 160 mm marker database, and a non-AR fallback.
 
 ## Lightweight creator format
 
@@ -129,4 +129,8 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Run the new Poker and Guess Who rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. Next, add a dedicated cross-platform BLE transport for iPhone/Android play without Wi-Fi infrastructure and offline visual-marker alignment so both AR platforms share the same table origin.
+Run the new Poker and Guess Who rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. The cross-platform BLE framing/encryption layer and printed-marker contract are present; the remaining release blocker is a real-device validation pass for encrypted BLE, marker recognition, and host-authoritative Poker/Guess Who state binding.
+
+## Shared AR marker
+
+Print [Cards table marker v1](docs/ar-marker/cards-table-marker-v1.svg) at 100% scale (160 mm square) before using shared AR. Each phone creates its own local AR anchor from that physical marker; raw AR-world positions are never sent between devices. See [marker instructions](docs/ar-marker/README.md).

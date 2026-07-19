@@ -13,5 +13,5 @@
     "privateState": { "game": "guess-who", "kind": "private-state", "revision": 7, "publicState": {}, "privateState": { "targetID": "character-4" } },
     "command": { "game": "guess-who", "kind": "command", "revision": 7, "publicState": {}, "command": { "action": "toggle-elimination", "playerID": "guest", "characterID": "character-3" } }
   },
-  "alignment": { "markerID": "cards-table-marker-v1", "markerWidthMetres": 0.16, "revision": 7, "position": [0.0, 0.0, 0.0], "orientation": [0.0, 0.0, 0.0, 1.0] }
+  "alignment": { "markerID": "cards-table-marker-v1", "markerWidthMetres": 0.16, "revision": 7, "status": "ready" }
 }

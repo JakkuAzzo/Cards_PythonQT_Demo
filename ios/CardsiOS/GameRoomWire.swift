@@ -41,10 +41,11 @@ struct SharedARAlignment: Codable, Equatable {
     let markerID: String
     let markerWidthMetres: Double
     let revision: Int
-    let position: [Float]
-    let orientation: [Float]
+    let status: Status
+
+    enum Status: String, Codable { case ready, lost }
 
     var isValid: Bool {
-        markerID == Self.markerID && markerWidthMetres == Self.markerWidthMetres && revision >= 0 && position.count == 3 && orientation.count == 4
+        markerID == Self.markerID && markerWidthMetres == Self.markerWidthMetres && revision >= 0
     }
 }

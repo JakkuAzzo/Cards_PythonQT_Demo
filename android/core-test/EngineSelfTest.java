@@ -65,8 +65,8 @@ public final class EngineSelfTest {
     }
 
     private static void testSharedAlignment() {
-        SharedArAlignment valid = new SharedArAlignment(SharedArAlignment.MARKER_ID, 0.16, 2, new float[] {0, 0, 0}, new float[] {0, 0, 0, 1});
-        SharedArAlignment invalid = new SharedArAlignment("other", 0.16, 2, new float[] {0, 0, 0}, new float[] {0, 0, 0, 1});
+        SharedArAlignment valid = new SharedArAlignment(SharedArAlignment.MARKER_ID, 0.16, 2, "ready");
+        SharedArAlignment invalid = new SharedArAlignment("other", 0.16, 2, "ready");
         require(valid.isValid(), "shared marker valid");
         require(!invalid.isValid(), "shared marker rejected");
     }
