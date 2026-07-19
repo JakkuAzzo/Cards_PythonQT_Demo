@@ -2,135 +2,152 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var store: PackStore
-    @State private var showingStats = false
+    @State private var showingDetails = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 22) {
                 header
 
                 if let selectedPack = store.selectedPack {
                     selectedPackCard(selectedPack)
+                    actionButtons
+                    quickFacts(for: selectedPack)
                 } else {
                     emptyState
                 }
-
-                actionButtons
-
-                if let selectedPack = store.selectedPack {
-                    quickFacts(for: selectedPack)
-                }
             }
             .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
         }
         .navigationTitle("Cards")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showingStats) {
+        .sheet(isPresented: $showingDetails) {
             if let selectedPack = store.selectedPack {
-                NavigationStack {
-                    PackDetailView(pack: selectedPack)
-                }
+                NavigationStack { PackDetailView(pack: selectedPack) }
             }
         }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Cards Home")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
+        VStack(alignment: .leading, spacing: 9) {
+            Label("READY WHEN YOU ARE", systemImage: "sparkles")
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(AppTheme.accent)
+
+            Text("Deal yourself in.")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            Text("Pick a deck, shuffle it, and start playing offline.")
+            Text("Pick a deck and make the next card the moment.")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }
-        .padding(.top, 8)
     }
 
     private func selectedPackCard(_ pack: PackRecord) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(pack.badge.uppercased())
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .tracking(1.4)
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(.white.opacity(0.68))
 
                     Text(pack.name)
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppTheme.textPrimary)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
 
                     Text(pack.summary)
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(.white.opacity(0.76))
+                        .lineLimit(3)
                 }
 
                 Spacer()
-
-                Circle()
-                    .fill(pack.gradient)
-                    .frame(width: 54, height: 54)
-                    .overlay(
-                        Image(systemName: "suit.heart.fill")
-                            .foregroundStyle(.white)
-                    )
+                deckPreview
             }
 
-            Label(pack.titleLine, systemImage: "sparkles")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(AppTheme.textPrimary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.white.opacity(0.10), in: Capsule())
+            HStack {
+                Label(pack.titleLine, systemImage: "rectangle.stack.fill")
+                Spacer()
+                Label("Offline ready", systemImage: "checkmark.circle.fill")
+            }
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.84))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.12), in: Capsule())
         }
-        .surfaceCard()
-        .background(pack.gradient.opacity(0.30), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .padding(20)
+        .background(pack.gradient, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.28), radius: 20, x: 0, y: 12)
+    }
+
+    private var deckPreview: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .fill(Color.white.opacity(0.20))
+                .frame(width: 65, height: 86)
+                .rotationEffect(.degrees(8))
+                .offset(x: 7, y: 4)
+
+            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                .fill(Color.white)
+                .frame(width: 65, height: 86)
+                .overlay(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: -2) {
+                        Text("A")
+                        Image(systemName: "suit.spade.fill")
+                            .font(.system(size: 13))
+                    }
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppTheme.ink)
+                    .padding(9)
+                }
+                .overlay {
+                    Image(systemName: "suit.spade.fill")
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(AppTheme.ink)
+                }
+        }
+        .accessibilityHidden(true)
     }
 
     private var actionButtons: some View {
         VStack(spacing: 12) {
-            Button {
-                store.startSession()
-            } label: {
-                Label("Play", systemImage: "play.fill")
+            Button { store.startSession() } label: {
+                Label("Start a solo game", systemImage: "play.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(PrimaryButtonStyle())
 
             HStack(spacing: 12) {
-                Button {
-                    showingStats = true
-                } label: {
-                    Label("View Stats", systemImage: "chart.bar.fill")
+                Button { store.restartSession() } label: {
+                    Label("Shuffle", systemImage: "shuffle")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SecondaryButtonStyle())
 
-                Button {
-                    store.restartSession()
-                } label: {
-                    Label("Restart", systemImage: "arrow.clockwise")
+                Button { showingDetails = true } label: {
+                    Label("Deck details", systemImage: "info.circle")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SecondaryButtonStyle())
             }
-
-            Button(role: .destructive) {
-                store.closeSession()
-            } label: {
-                Label("Close Game", systemImage: "xmark.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(DestructiveButtonStyle())
         }
     }
 
     private func quickFacts(for pack: PackRecord) -> some View {
         let stats = store.stats(for: pack)
-
         return VStack(alignment: .leading, spacing: 12) {
-            Text("Your activity")
+            Text("Your table, so far")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
@@ -138,6 +155,10 @@ struct HomeView: View {
                 statTile(value: "\(stats.sessionsStarted)", label: "Sessions")
                 statTile(value: "\(stats.cardsDrawn)", label: "Cards drawn")
             }
+
+            Text("Want a different feel? Browse your deck library from the tab bar.")
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(AppTheme.textSecondary)
         }
         .surfaceCard()
     }
@@ -167,11 +188,11 @@ private struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .bold, design: .rounded))
-            .foregroundStyle(Color.black)
-            .padding(.vertical, 14)
+            .foregroundStyle(AppTheme.ink)
+            .padding(.vertical, 15)
             .padding(.horizontal, 16)
-            .background(AppTheme.accent.opacity(configuration.isPressed ? 0.78 : 1.0), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .background(AppTheme.accent.opacity(configuration.isPressed ? 0.78 : 1), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
 }
 
@@ -183,20 +204,6 @@ private struct SecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, 13)
             .padding(.horizontal, 14)
             .background(Color.white.opacity(configuration.isPressed ? 0.08 : 0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
-            )
-    }
-}
-
-private struct DestructiveButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .foregroundStyle(Color.white)
-            .padding(.vertical, 13)
-            .padding(.horizontal, 14)
-            .background(Color.red.opacity(configuration.isPressed ? 0.60 : 0.78), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.10), lineWidth: 1))
     }
 }

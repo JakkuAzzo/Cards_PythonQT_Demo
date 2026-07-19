@@ -5,9 +5,6 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            AppTheme.background
-                .ignoresSafeArea()
-
             TabView {
                 NavigationStack {
                     HomeView()
@@ -46,6 +43,7 @@ struct RootView: View {
             }
             .tint(AppTheme.accent)
         }
+        .appBackground()
         .sheet(item: $store.activeSessionPack, onDismiss: {
             store.closeSession()
         }) { pack in
