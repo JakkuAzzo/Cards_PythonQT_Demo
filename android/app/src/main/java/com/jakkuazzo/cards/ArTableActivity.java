@@ -3,57 +3,72 @@ package com.jakkuazzo.cards;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.ar.core.ArCoreApk;
-import com.google.ar.core.AugmentedImage;
 import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.Config;
-import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
 
+/** Camera-backed AR table: place a digital table ahead or on any scanned surface. */
 public final class ArTableActivity extends Activity {
     public static final String EXTRA_SURFACE_TITLE = "surface_title";
     private Session session;
     private boolean installRequested;
     private TextView status;
+    private GLSurfaceView surface;
+    private ArTableRenderer renderer;
     private String surfaceTitle = "Shared table";
-    private final Handler markerHandler = new Handler();
-    private final Runnable markerCheck = new Runnable() {
-        @Override public void run() {
-            if (session == null) return;
-            try {
-                Frame frame = session.update();
-                for (AugmentedImage image : frame.getUpdatedTrackables(AugmentedImage.class)) {
-                    if ("cards-table-marker-v1".equals(image.getName())) {
-                        status.setText(surfaceTitle + "\n\nShared marker ready. This phone is anchored locally to the same physical 160 mm marker as the other players.\n\nUse the digital Table or Combined view for the live game state.");
-                        break;
-                    }
-                }
-            } catch (Exception ignored) {
-                // ARCore can briefly reject a frame while the camera is resuming.
-            }
-            markerHandler.postDelayed(this, 250);
-        }
-    };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         surfaceTitle = getIntent().getStringExtra(EXTRA_SURFACE_TITLE);
         if (surfaceTitle == null || surfaceTitle.trim().isEmpty()) surfaceTitle = "Shared table";
+        buildContent();
+    }
+
+    private void buildContent() {
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.rgb(8, 10, 16));
+        surface = new GLSurfaceView(this);
+        surface.setEGLContextClientVersion(2);
+        renderer = new ArTableRenderer(this, this::setStatus);
+        surface.setRenderer(renderer);
+        surface.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        surface.setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) renderer.requestPlacement(event.getX(), event.getY());
+            return true;
+        });
+        root.addView(surface, new FrameLayout.LayoutParams(-1, -1));
+
         status = new TextView(this);
         status.setGravity(Gravity.CENTER);
-        status.setPadding(48, 48, 48, 48);
-        status.setTextSize(20);
+        status.setPadding(dp(16), dp(12), dp(16), dp(12));
+        status.setTextSize(14);
         status.setTextColor(Color.WHITE);
-        status.setBackgroundColor(Color.rgb(8, 10, 16));
-        status.setText("Checking ARCore capability…");
-        setContentView(status);
+        status.setBackgroundColor(0xC010131D);
+        FrameLayout.LayoutParams statusParams = new FrameLayout.LayoutParams(-1, -2, Gravity.TOP);
+        statusParams.setMargins(dp(12), dp(18), dp(12), 0);
+        root.addView(status, statusParams);
+
+        Button placeAhead = new Button(this);
+        placeAhead.setText("Place table ahead");
+        placeAhead.setAllCaps(false);
+        placeAhead.setOnClickListener(view -> renderer.requestPlacementAhead());
+        FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
+        buttonParams.setMargins(dp(24), 0, dp(24), dp(28));
+        root.addView(placeAhead, buttonParams);
+        setContentView(root);
+        setStatus("Checking ARCore…");
     }
 
     @Override protected void onResume() {
@@ -66,7 +81,7 @@ public final class ArTableActivity extends Activity {
             ArCoreApk.InstallStatus install = ArCoreApk.getInstance().requestInstall(this, !installRequested);
             if (install == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
                 installRequested = true;
-                status.setText("Install Google Play Services for AR, then return to Cards.");
+                setStatus("Install Google Play Services for AR, then return to Cards.");
                 return;
             }
             if (session == null) {
@@ -74,26 +89,31 @@ public final class ArTableActivity extends Activity {
                 AugmentedImageDatabase markers = new AugmentedImageDatabase(session);
                 markers.addImage("cards-table-marker-v1", BitmapFactory.decodeResource(getResources(), R.drawable.cards_table_marker_v1), 0.16f);
                 Config configuration = new Config(session);
+                configuration.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
                 configuration.setAugmentedImageDatabase(markers);
                 session.configure(configuration);
             }
+            renderer.setSession(session);
             session.resume();
-            status.setText(surfaceTitle + " AR mode is ready.\n\nFind the printed 160 mm Cards table marker to align this shared surface. The digital Table, Your deck, and Combined views remain available.");
-            markerHandler.post(markerCheck);
+            surface.onResume();
+            setStatus(surfaceTitle + ": tap a scanned horizontal surface, or use Place table ahead. The printed marker is optional shared alignment.");
         } catch (Exception error) {
-            status.setText("AR is unavailable on this device.\n\n" + error.getMessage());
+            setStatus("AR is unavailable on this device. Use the normal Table, Your deck, or Combined screen instead.\n\n" + error.getMessage());
         }
     }
 
     @Override protected void onPause() {
-        markerHandler.removeCallbacks(markerCheck);
+        if (surface != null) surface.onPause();
         if (session != null) session.pause();
         super.onPause();
     }
 
     @Override protected void onDestroy() {
-        markerHandler.removeCallbacks(markerCheck);
+        if (renderer != null) renderer.clearSession();
         if (session != null) session.close();
         super.onDestroy();
     }
+
+    private void setStatus(String value) { runOnUiThread(() -> status.setText(value)); }
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 }
