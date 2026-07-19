@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.jakkuazzo.cards.core.GameState;
 import com.jakkuazzo.cards.core.MultiplayerEngine;
 import com.jakkuazzo.cards.nearby.GameSnapshotCodec;
+import com.jakkuazzo.cards.nearby.BLEEnvelopeCipher;
 import com.jakkuazzo.cards.nearby.BluetoothGattTransport;
 import com.jakkuazzo.cards.nearby.NearbyConnectionsTransport;
 import com.jakkuazzo.cards.nearby.NearbyEnvelope;
@@ -38,6 +39,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     private LinearLayout sessionControls;
     private LinearLayout actions;
     private EditText joinCode;
+    private EditText bluetoothSecret;
     private NearbyConnectionsTransport nearby;
     private BluetoothGattTransport bluetooth;
     private boolean bluetoothMode;
@@ -47,6 +49,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     private int guestNumber = 1;
     private int nearbyPeerCount;
     private String connectionMessage = "Choose a nearby table or start a one-device preview.";
+    private String bluetoothPairingSecret = "";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,6 +175,11 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
             bluetoothJoin.setOnClickListener(view -> startBluetoothJoining(joinCode.getText().toString()));
             sessionControls.addView(bluetoothJoin);
 
+            bluetoothSecret = new EditText(this);
+            bluetoothSecret.setHint("Bluetooth pairing secret from host");
+            bluetoothSecret.setSingleLine(true);
+            sessionControls.addView(bluetoothSecret);
+
             Button local = button("One-device preview");
             local.setOnClickListener(view -> startLocalPreview());
             sessionControls.addView(local);
@@ -222,9 +230,10 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         sessionCode = "CARDS-" + String.format(Locale.US, "%04d", (int) (Math.random() * 10000));
         try {
             engine.join(localPlayerId, "Host");
-            bluetooth = new BluetoothGattTransport(this, this);
+            bluetoothPairingSecret = BLEEnvelopeCipher.makePairingSecret();
+            bluetooth = new BluetoothGattTransport(this, this, sessionCode, bluetoothPairingSecret);
             bluetooth.host();
-            connectionMessage = "Bluetooth host ready. Share " + sessionCode + " and compare the table code before joining.";
+            connectionMessage = "Bluetooth host ready. Share code " + sessionCode + " and pairing secret " + bluetoothPairingSecret + ".";
         } catch (Exception error) {
             connectionMessage = "Could not host with Bluetooth: " + error.getMessage();
         }
@@ -238,11 +247,17 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
             render();
             return;
         }
+        String secret = bluetoothSecret == null ? "" : bluetoothSecret.getText().toString().trim();
+        if (secret.isEmpty()) {
+            connectionMessage = "Enter the host’s Bluetooth pairing secret.";
+            render();
+            return;
+        }
         leaveTable();
         sessionCode = code;
         bluetoothMode = true;
         hosting = false;
-        bluetooth = new BluetoothGattTransport(this, this);
+        bluetooth = new BluetoothGattTransport(this, this, sessionCode, secret);
         bluetooth.join();
         connectionMessage = "Scanning nearby Bluetooth tables for " + sessionCode + "…";
         render();
@@ -266,6 +281,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         nearby = null;
         bluetooth = null;
         bluetoothMode = false;
+        bluetoothPairingSecret = "";
         nearbyPeerCount = 0;
         engine.reset();
         hosting = false;

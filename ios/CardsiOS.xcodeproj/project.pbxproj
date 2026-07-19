@@ -31,6 +31,7 @@
 		B83F3A1CDDB99C6EC2D8C878 /* PackStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A4388CE59393D107D0B6E3 /* PackStore.swift */; };
 		C1BD8C2A0C5F868FEBB1EC55 /* ARTableModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */; };
 		C1F17FDDCBE19EEC56774A3E /* GameRoomWire.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD739F0B2F502A663642667 /* GameRoomWire.swift */; };
+		C7B4AE6CD14F47538A6E5730 /* BLEEnvelopeCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39622CCDA5A8EDC84557B6F1 /* BLEEnvelopeCipher.swift */; };
 		D53774F2EF9EB323EE25C37F /* GameRoomWireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501D9298FC09A1AA6C619FF4 /* GameRoomWireTests.swift */; };
 		D941CD26AF3267C6EA3DB2A0 /* GameRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1806E50BA009E43DCC60A310 /* GameRuntimeTests.swift */; };
 		E25D8079A93985E599A77F9B /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791C10C195794C2CCD0BF939 /* LibraryView.swift */; };
@@ -63,6 +64,7 @@
 		1F4A75C2A75CB77C16FE570C /* CardsiOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CardsiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		2E6B9C7DB0515F5B24ACE4A3 /* GameRuntimes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimes.swift; sourceTree = "<group>"; };
+		39622CCDA5A8EDC84557B6F1 /* BLEEnvelopeCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEEnvelopeCipher.swift; sourceTree = "<group>"; };
 		41CCFC33291F18D4B160A914 /* GameSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSessionView.swift; sourceTree = "<group>"; };
 		454369D312DC6D3A154BE456 /* LiveTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTableView.swift; sourceTree = "<group>"; };
 		49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreterTests.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */,
 				2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */,
 				FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */,
+				39622CCDA5A8EDC84557B6F1 /* BLEEnvelopeCipher.swift */,
 				655DD94AEA72D445252D88E5 /* BluetoothLETransport.swift */,
 				FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */,
 				D14A95AEE25B417D778A1A2B /* CreatorView.swift */,
@@ -232,6 +235,7 @@
 				C1BD8C2A0C5F868FEBB1EC55 /* ARTableModeView.swift in Sources */,
 				24EABC1AE5E081219A17EB82 /* AppTheme.swift in Sources */,
 				121B3A0A818BE0B2DADD296E /* AppleNearbyTransport.swift in Sources */,
+				C7B4AE6CD14F47538A6E5730 /* BLEEnvelopeCipher.swift in Sources */,
 				6466BE3F0CF65F26C825DEE2 /* BluetoothLETransport.swift in Sources */,
 				3E4C12E62409AECB6EB7EC00 /* CardsiOSApp.swift in Sources */,
 				A8F412381E419AF4C520082F /* CreatorView.swift in Sources */,

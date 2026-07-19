@@ -2,9 +2,9 @@ name: Verify Cards
 
 on:
   push:
-    branches: [xcode]
+    branches: [main]
   pull_request:
-    branches: [xcode]
+    branches: [main]
 
 permissions:
   contents: read

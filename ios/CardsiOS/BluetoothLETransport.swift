@@ -18,9 +18,11 @@ final class BluetoothLETransport: NSObject, NearbyTransport {
     private var targetSessionID: String?
     private var receiver = BLEPacketFramer()
     private var peerIDs = Set<String>()
+    private let cipher: BLEEnvelopeCipher
 
-    init(localPeerID: String, displayName: String) {
+    init(localPeerID: String, displayName: String, sessionID: String, pairingSecret: String) {
         self.localPeerID = localPeerID
+        self.cipher = BLEEnvelopeCipher(pairingSecret: pairingSecret, sessionID: sessionID)
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: .main, options: [CBCentralManagerOptionShowPowerAlertKey: true])
         peripheralManager = CBPeripheralManager(delegate: self, queue: .main, options: [CBPeripheralManagerOptionShowPowerAlertKey: true])
@@ -41,8 +43,8 @@ final class BluetoothLETransport: NSObject, NearbyTransport {
     }
 
     func send(_ envelope: NearbyEnvelope) {
-        guard let data = try? JSONEncoder().encode(envelope) else { return }
-        let packets = BLEPacketFramer.packets(for: data)
+        guard let data = try? JSONEncoder().encode(envelope), let encrypted = try? cipher.seal(data) else { return }
+        let packets = BLEPacketFramer.packets(for: encrypted)
         if isHost, let streamCharacteristic {
             for packet in packets { _ = peripheralManager.updateValue(packet, for: streamCharacteristic, onSubscribedCentrals: nil) }
         } else if let peripheral = connectedPeripheral, let remoteStreamCharacteristic {
@@ -83,7 +85,7 @@ final class BluetoothLETransport: NSObject, NearbyTransport {
 
     private func receive(_ packet: Data) {
         for data in receiver.append(packet: packet) {
-            guard let envelope = try? JSONDecoder().decode(NearbyEnvelope.self, from: data) else { continue }
+            guard let plaintext = try? cipher.open(data), let envelope = try? JSONDecoder().decode(NearbyEnvelope.self, from: plaintext) else { continue }
             onEnvelope?(envelope)
         }
     }

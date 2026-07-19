@@ -20,6 +20,7 @@ final class NearbyTableSession: ObservableObject {
     @Published private(set) var state = MultiplayerGameState()
     @Published private(set) var role: Role = .localPreview
     @Published private(set) var sessionCode = ""
+    @Published private(set) var pairingSecret = ""
     @Published private(set) var connectedPeers: [String] = []
     @Published private(set) var statusMessage = "Use local preview or start a nearby table."
 
@@ -48,7 +49,16 @@ final class NearbyTableSession: ObservableObject {
     }
 
     func hostBluetooth() throws {
-        try host(using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName))
+        disconnect()
+        role = .host
+        sessionCode = Self.makeSessionCode()
+        pairingSecret = BLEEnvelopeCipher.makePairingSecret()
+        try ensureLocalPlayer()
+        let transport = BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName, sessionID: sessionCode, pairingSecret: pairingSecret)
+        configure(transport)
+        self.transport = transport
+        transport.host(sessionID: sessionCode)
+        statusMessage = "Bluetooth table ready · share code and pairing secret"
     }
 
     private func host(using transport: any NearbyTransport) throws {
@@ -66,8 +76,13 @@ final class NearbyTableSession: ObservableObject {
         join(code: code, using: makeAppleTransport())
     }
 
-    func joinBluetooth(code: String) {
-        join(code: code, using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName))
+    func joinBluetooth(code: String, pairingSecret: String) {
+        let normalized = Self.normalizedCode(code)
+        guard !normalized.isEmpty, !pairingSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            statusMessage = "Enter the host’s table code and pairing secret."
+            return
+        }
+        join(code: normalized, using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName, sessionID: normalized, pairingSecret: pairingSecret))
     }
 
     private func join(code: String, using transport: any NearbyTransport) {
@@ -94,6 +109,7 @@ final class NearbyTableSession: ObservableObject {
         }
         role = .localPreview
         sessionCode = ""
+        pairingSecret = ""
         engine.reset()
         state = engine.state
     }

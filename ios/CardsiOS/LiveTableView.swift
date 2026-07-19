@@ -6,6 +6,7 @@ struct LiveTableView: View {
     @State private var errorMessage: String?
     @State private var showingAR = false
     @State private var joinCode = ""
+    @State private var bluetoothSecret = ""
 
     init(manifest: GameManifest = .tableTalk) {
         _session = StateObject(wrappedValue: NearbyTableSession(manifest: manifest))
@@ -99,7 +100,11 @@ struct LiveTableView: View {
                     Button("Join") { session.join(code: joinCode) }
                         .buttonStyle(TableSecondaryButtonStyle())
                 }
-                Button("Join with Bluetooth") { session.joinBluetooth(code: joinCode) }
+                SecureField("Bluetooth pairing secret", text: $bluetoothSecret)
+                    .textFieldStyle(.roundedBorder)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button("Join with Bluetooth") { session.joinBluetooth(code: joinCode, pairingSecret: bluetoothSecret) }
                     .frame(maxWidth: .infinity)
                     .buttonStyle(TableSecondaryButtonStyle())
             } else {
@@ -114,6 +119,18 @@ struct LiveTableView: View {
                         .foregroundStyle(AppTheme.textSecondary)
                     Button("Leave") { session.disconnect() }
                         .buttonStyle(TableSecondaryButtonStyle())
+                }
+                if !session.pairingSecret.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Bluetooth pairing secret")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                        Text(session.pairingSecret)
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(AppTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
         }

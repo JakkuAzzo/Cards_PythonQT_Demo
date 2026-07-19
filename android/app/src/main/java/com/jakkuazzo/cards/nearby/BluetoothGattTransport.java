@@ -52,6 +52,7 @@ public final class BluetoothGattTransport {
     private final Context context;
     private final Listener listener;
     private final BluetoothAdapter adapter;
+    private final BLEEnvelopeCipher cipher;
     private final Map<String, BlePacketFramer> framers = new HashMap<>();
     private final Set<BluetoothDevice> subscribers = new HashSet<>();
     private BluetoothLeAdvertiser advertiser;
@@ -61,9 +62,10 @@ public final class BluetoothGattTransport {
     private BluetoothGattCharacteristic stream;
     private boolean hosting;
 
-    public BluetoothGattTransport(Context context, Listener listener) {
+    public BluetoothGattTransport(Context context, Listener listener, String sessionId, String pairingSecret) {
         this.context = context.getApplicationContext();
         this.listener = listener;
+        this.cipher = new BLEEnvelopeCipher(pairingSecret, sessionId);
         BluetoothManager manager = context.getSystemService(BluetoothManager.class);
         this.adapter = manager == null ? null : manager.getAdapter();
     }
@@ -101,7 +103,10 @@ public final class BluetoothGattTransport {
     }
 
     public void send(byte[] envelope) {
-        for (byte[] packet : BlePacketFramer.packets(envelope)) {
+        final byte[] encrypted;
+        try { encrypted = cipher.seal(envelope); }
+        catch (Exception error) { listener.onError("Could not encrypt Bluetooth message: " + error.getMessage()); return; }
+        for (byte[] packet : BlePacketFramer.packets(encrypted)) {
             if (hosting && server != null && stream != null) {
                 for (BluetoothDevice device : subscribers) server.notifyCharacteristicChanged(device, stream, false, packet);
             } else if (guestGatt != null && stream != null) {
@@ -125,7 +130,10 @@ public final class BluetoothGattTransport {
     private void receive(String peerId, byte[] packet) {
         BlePacketFramer framer = framers.get(peerId);
         if (framer == null) { framer = new BlePacketFramer(); framers.put(peerId, framer); }
-        for (byte[] envelope : framer.append(packet)) listener.onBytesReceived(peerId, envelope);
+        for (byte[] encrypted : framer.append(packet)) {
+            try { listener.onBytesReceived(peerId, cipher.open(encrypted)); }
+            catch (Exception error) { listener.onError("Ignored Bluetooth message with invalid authentication."); }
+        }
     }
 
     private void publishPeers() {
