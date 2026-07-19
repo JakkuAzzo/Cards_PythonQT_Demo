@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		096F59FD101A26AEF5B4131E /* GameRuntimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E6B9C7DB0515F5B24ACE4A3 /* GameRuntimes.swift */; };
 		0A8D9611DF311DF4E859755C /* NearbyTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */; };
+		0E85491DE2E191833B63E6AD /* GameRoomNetworkSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858F76A66AFDA4C55EBA78D5 /* GameRoomNetworkSessionTests.swift */; };
 		121B3A0A818BE0B2DADD296E /* AppleNearbyTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */; };
 		19830E438962EAA3B891192E /* PackDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78FEA2F7E1D9719502D8AF1 /* PackDetailView.swift */; };
 		24EABC1AE5E081219A17EB82 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */; };
@@ -21,6 +22,7 @@
 		5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A5D6BDF63E934918504B23 /* GameSessionTests.swift */; };
 		6466BE3F0CF65F26C825DEE2 /* BluetoothLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655DD94AEA72D445252D88E5 /* BluetoothLETransport.swift */; };
 		6A5217969DCB705413A0F53C /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134053370B6367E2F434AB49 /* Models.swift */; };
+		80496C88B81D5D3FDD4B23BF /* GameRoomNetworkSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7994D230042AA47BF8B1F372 /* GameRoomNetworkSession.swift */; };
 		878B2035A033911D1E938A47 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B962AC39D27E6786A9191286 /* HomeView.swift */; };
 		994D019777A790DFC8313ADD /* MultiplayerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */; };
 		A8F412381E419AF4C520082F /* CreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14A95AEE25B417D778A1A2B /* CreatorView.swift */; };
@@ -69,8 +71,10 @@
 		6A48665E88B6AA1724ECC941 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransportTests.swift; sourceTree = "<group>"; };
 		791C10C195794C2CCD0BF939 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		7994D230042AA47BF8B1F372 /* GameRoomNetworkSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomNetworkSession.swift; sourceTree = "<group>"; };
 		79EE95A532797CC934CFBCAD /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		82A4388CE59393D107D0B6E3 /* PackStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackStore.swift; sourceTree = "<group>"; };
+		858F76A66AFDA4C55EBA78D5 /* GameRoomNetworkSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomNetworkSessionTests.swift; sourceTree = "<group>"; };
 		8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreter.swift; sourceTree = "<group>"; };
 		A9FA368EFC4AAAD601CF4BC3 /* MultiplayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerModels.swift; sourceTree = "<group>"; };
 		ABED054878F396E69A2E8A77 /* MultiplayerEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerEngineTests.swift; sourceTree = "<group>"; };
@@ -90,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */,
+				858F76A66AFDA4C55EBA78D5 /* GameRoomNetworkSessionTests.swift */,
 				501D9298FC09A1AA6C619FF4 /* GameRoomWireTests.swift */,
 				1806E50BA009E43DCC60A310 /* GameRuntimeTests.swift */,
 				09A5D6BDF63E934918504B23 /* GameSessionTests.swift */,
@@ -128,6 +133,7 @@
 				D14A95AEE25B417D778A1A2B /* CreatorView.swift */,
 				AED68690C47A03BD383DDE17 /* CustomGameRuntimeView.swift */,
 				8B5766858D5BFE672457971C /* GameDraftInterpreter.swift */,
+				7994D230042AA47BF8B1F372 /* GameRoomNetworkSession.swift */,
 				DBD739F0B2F502A663642667 /* GameRoomWire.swift */,
 				2E6B9C7DB0515F5B24ACE4A3 /* GameRuntimes.swift */,
 				1235CCFA06BF1FE587FC4D77 /* GameSession.swift */,
@@ -231,6 +237,7 @@
 				A8F412381E419AF4C520082F /* CreatorView.swift in Sources */,
 				48B3EDD91E1FBE6BEE9A4A83 /* CustomGameRuntimeView.swift in Sources */,
 				E726D82B23589B0468274570 /* GameDraftInterpreter.swift in Sources */,
+				80496C88B81D5D3FDD4B23BF /* GameRoomNetworkSession.swift in Sources */,
 				C1F17FDDCBE19EEC56774A3E /* GameRoomWire.swift in Sources */,
 				096F59FD101A26AEF5B4131E /* GameRuntimes.swift in Sources */,
 				47AFD3ACB253295097F86C2B /* GameSession.swift in Sources */,
@@ -255,6 +262,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5D3842241F2B945E1536F2D /* GameDraftInterpreterTests.swift in Sources */,
+				0E85491DE2E191833B63E6AD /* GameRoomNetworkSessionTests.swift in Sources */,
 				D53774F2EF9EB323EE25C37F /* GameRoomWireTests.swift in Sources */,
 				D941CD26AF3267C6EA3DB2A0 /* GameRuntimeTests.swift in Sources */,
 				5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */,
