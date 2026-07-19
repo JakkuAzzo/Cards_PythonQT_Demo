@@ -19,6 +19,7 @@
 		48B3EDD91E1FBE6BEE9A4A83 /* CustomGameRuntimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AED68690C47A03BD383DDE17 /* CustomGameRuntimeView.swift */; };
 		560710217367EE752A21C8F8 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79EE95A532797CC934CFBCAD /* ShopView.swift */; };
 		5CAF6395DA6D1F197F5C2D48 /* GameSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A5D6BDF63E934918504B23 /* GameSessionTests.swift */; };
+		6466BE3F0CF65F26C825DEE2 /* BluetoothLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655DD94AEA72D445252D88E5 /* BluetoothLETransport.swift */; };
 		6A5217969DCB705413A0F53C /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134053370B6367E2F434AB49 /* Models.swift */; };
 		878B2035A033911D1E938A47 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B962AC39D27E6786A9191286 /* HomeView.swift */; };
 		994D019777A790DFC8313ADD /* MultiplayerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04228096151C2A56D0C31A93 /* MultiplayerEngine.swift */; };
@@ -64,6 +65,7 @@
 		454369D312DC6D3A154BE456 /* LiveTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTableView.swift; sourceTree = "<group>"; };
 		49BBBA34E6A739314FC6B1BE /* GameDraftInterpreterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDraftInterpreterTests.swift; sourceTree = "<group>"; };
 		501D9298FC09A1AA6C619FF4 /* GameRoomWireTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomWireTests.swift; sourceTree = "<group>"; };
+		655DD94AEA72D445252D88E5 /* BluetoothLETransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothLETransport.swift; sourceTree = "<group>"; };
 		6A48665E88B6AA1724ECC941 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		77BC19BD6FE1EA1EF67299B8 /* NearbyTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransportTests.swift; sourceTree = "<group>"; };
 		791C10C195794C2CCD0BF939 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				1C8705C69212E037201F8587 /* AppleNearbyTransport.swift */,
 				2C0B3AEFD691126BEB5E2136 /* AppTheme.swift */,
 				FCCF243DC9A605B7704EF676 /* ARTableModeView.swift */,
+				655DD94AEA72D445252D88E5 /* BluetoothLETransport.swift */,
 				FBE536BA2E6620555B95D974 /* CardsiOSApp.swift */,
 				D14A95AEE25B417D778A1A2B /* CreatorView.swift */,
 				AED68690C47A03BD383DDE17 /* CustomGameRuntimeView.swift */,
@@ -223,6 +226,7 @@
 				C1BD8C2A0C5F868FEBB1EC55 /* ARTableModeView.swift in Sources */,
 				24EABC1AE5E081219A17EB82 /* AppTheme.swift in Sources */,
 				121B3A0A818BE0B2DADD296E /* AppleNearbyTransport.swift in Sources */,
+				6466BE3F0CF65F26C825DEE2 /* BluetoothLETransport.swift in Sources */,
 				3E4C12E62409AECB6EB7EC00 /* CardsiOSApp.swift in Sources */,
 				A8F412381E419AF4C520082F /* CreatorView.swift in Sources */,
 				48B3EDD91E1FBE6BEE9A4A83 /* CustomGameRuntimeView.swift in Sources */,

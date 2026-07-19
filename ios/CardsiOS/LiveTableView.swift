@@ -83,6 +83,14 @@ struct LiveTableView: View {
                 }
                 .buttonStyle(TablePrimaryButtonStyle())
 
+                Button {
+                    perform { try session.hostBluetooth() }
+                } label: {
+                    Label("Host with Bluetooth", systemImage: "bonjour")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(TableSecondaryButtonStyle())
+
                 HStack(spacing: 10) {
                     TextField("Table code", text: $joinCode)
                         .textInputAutocapitalization(.characters)
@@ -91,6 +99,9 @@ struct LiveTableView: View {
                     Button("Join") { session.join(code: joinCode) }
                         .buttonStyle(TableSecondaryButtonStyle())
                 }
+                Button("Join with Bluetooth") { session.joinBluetooth(code: joinCode) }
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(TableSecondaryButtonStyle())
             } else {
                 HStack {
                     if session.role == .host {

@@ -27,7 +27,7 @@ final class NearbyTableSession: ObservableObject {
     let localPlayerID: String
     let localPlayerName: String
     private let engine: MultiplayerEngine
-    private var transport: AppleNearbyTransport?
+    private var transport: (any NearbyTransport)?
 
     init(manifest: GameManifest = .tableTalk, playerName: String = "You") {
         self.manifest = manifest
@@ -44,17 +44,33 @@ final class NearbyTableSession: ObservableObject {
     }
 
     func host() throws {
+        try host(using: makeAppleTransport())
+    }
+
+    func hostBluetooth() throws {
+        try host(using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName))
+    }
+
+    private func host(using transport: any NearbyTransport) throws {
         disconnect()
         role = .host
         sessionCode = Self.makeSessionCode()
         try ensureLocalPlayer()
-        let transport = makeTransport()
+        configure(transport)
         self.transport = transport
         transport.host(sessionID: sessionCode)
         statusMessage = "Sharing table \(sessionCode) · waiting for nearby players"
     }
 
     func join(code: String) {
+        join(code: code, using: makeAppleTransport())
+    }
+
+    func joinBluetooth(code: String) {
+        join(code: code, using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName))
+    }
+
+    private func join(code: String, using transport: any NearbyTransport) {
         disconnect()
         role = .guest
         sessionCode = Self.normalizedCode(code)
@@ -63,7 +79,7 @@ final class NearbyTableSession: ObservableObject {
             role = .localPreview
             return
         }
-        let transport = makeTransport()
+        configure(transport)
         self.transport = transport
         transport.join(sessionID: sessionCode)
         statusMessage = "Looking for table \(sessionCode)…"
@@ -114,8 +130,11 @@ final class NearbyTableSession: ObservableObject {
         }
     }
 
-    private func makeTransport() -> AppleNearbyTransport {
-        let transport = AppleNearbyTransport(localPeerID: localPlayerID, displayName: localPlayerName)
+    private func makeAppleTransport() -> AppleNearbyTransport {
+        AppleNearbyTransport(localPeerID: localPlayerID, displayName: localPlayerName)
+    }
+
+    private func configure(_ transport: any NearbyTransport) {
         transport.onPeersChanged = { [weak self] peers in
             guard let self else { return }
             self.connectedPeers = peers
@@ -128,7 +147,6 @@ final class NearbyTableSession: ObservableObject {
             }
         }
         transport.onEnvelope = { [weak self] envelope in self?.receive(envelope) }
-        return transport
     }
 
     private func ensureLocalPlayer() throws {
