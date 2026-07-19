@@ -90,8 +90,8 @@ The canonical machine-readable format is JSON; this small YAML-style syntax is o
 | Template | Configuration | Runtime |
 | --- | --- | --- |
 | Prompt draw | Complete | Playable in the local multiplayer and AR previews |
-| Poker | Complete defaults, Classic Pack resources, and digital room | Playable local dealing, community-card, bet/fold, and hand-ranking runtime; live cross-device commands are the next step |
-| Guess Who | Complete defaults, character resources, and digital room | Playable private target, shared board, elimination, and score-tracker runtime; live cross-device commands are the next step |
+| Poker | Complete defaults, Classic Pack resources, and digital room | iOS room binds host-authoritative public snapshots and recipient-only hands to Apple-nearby/BLE controls; Android room binding and real-device cross-platform proof remain. |
+| Guess Who | Complete defaults, character resources, and digital room | iOS room binds shared-board snapshots and recipient-only targets to Apple-nearby/BLE controls; Android room binding and real-device cross-platform proof remain. |
 
 The creator does not label an unimplemented runtime as playable.
 
