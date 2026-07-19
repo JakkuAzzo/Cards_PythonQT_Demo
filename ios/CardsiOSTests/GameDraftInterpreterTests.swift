@@ -30,7 +30,8 @@ final class GameDraftInterpreterTests: XCTestCase {
         XCTAssertEqual(draft.archetype, .poker)
         XCTAssertEqual(draft.players, .init(minimum: 2, maximum: 4))
         XCTAssertEqual(draft.resources.tableDesign, "poker-2")
-        XCTAssertEqual(draft.resources.cardSet, "standard-52")
+        XCTAssertEqual(draft.resources.cardSet, "classic-pack-52")
+        XCTAssertEqual(draft.resources.cardBack, "classic-pack-red")
         XCTAssertEqual(draft.rules.initialHandSize, 2)
         XCTAssertFalse(draft.capabilities.ar)
     }

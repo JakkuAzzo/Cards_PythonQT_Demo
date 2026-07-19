@@ -255,7 +255,7 @@ struct LiveTableView: View {
     }
 }
 
-private struct TablePrimaryButtonStyle: ButtonStyle {
+struct TablePrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
@@ -269,7 +269,7 @@ private struct TablePrimaryButtonStyle: ButtonStyle {
     }
 }
 
-private struct TableSecondaryButtonStyle: ButtonStyle {
+struct TableSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {

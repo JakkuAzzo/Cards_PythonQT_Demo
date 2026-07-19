@@ -1,15 +1,15 @@
 [
   {
-    "id": "classic-52",
-    "name": "Classic 52",
-    "summary": "A complete, shuffled deck for any game you already know.",
+    "id": "classic-pack-52",
+    "name": "Classic Pack 52",
+    "summary": "The original designed Cards deck: a complete 52-card pack with bundled SVG faces and back.",
     "status": "Included",
     "badge": "Classic",
     "accentStartHex": "0F766E",
     "accentEndHex": "14B8A6",
     "featured": true,
     "playMode": "classic",
-    "config": { "cards": "52", "jokers": "0", "play": "offline" }
+    "config": { "cards": "52", "jokers": "0", "card_set": "classic-pack-52", "card_back": "classic-pack-red", "default_table": "green-classic", "play": "offline" }
   },
   {
     "id": "table-talk",

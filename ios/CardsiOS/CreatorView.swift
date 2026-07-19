@@ -40,7 +40,7 @@ struct CreatorView: View {
         .sheet(isPresented: $showingPreview) {
             if let draft {
                 NavigationStack {
-                    LiveTableView(manifest: draft)
+                    CustomGameRuntimeView(manifest: draft)
                 }
             }
         }
@@ -93,19 +93,13 @@ struct CreatorView: View {
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
 
-            if manifest.archetype == .promptDraw {
-                Button {
-                    showingPreview = true
-                } label: {
-                    Label("Play local preview", systemImage: "play.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(CreatorSecondaryButtonStyle())
-            } else {
-                Label("Template configured; dedicated \(manifest.archetype.rawValue) runtime required", systemImage: "hammer.fill")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
+            Button {
+                showingPreview = true
+            } label: {
+                Label("Play local preview", systemImage: "play.fill")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(CreatorSecondaryButtonStyle())
         }
         .surfaceCard()
     }

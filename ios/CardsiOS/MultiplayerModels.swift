@@ -100,7 +100,7 @@ struct GameManifest: Codable, Equatable, Identifiable {
         summary: "Take turns drawing questions that skip the small talk.",
         players: PlayerLimits(minimum: 2, maximum: 8),
         capabilities: Capabilities(multiplayer: true, nearby: true, ar: true),
-        resources: Resources(tableDesign: "poker-2", cardBack: "classic-red", cardSet: "prompt-basic"),
+        resources: Resources(tableDesign: "green-classic", cardBack: "classic-pack-red", cardSet: "prompt-basic"),
         deck: Deck(kind: .prompts, cards: [
             .init(id: "tt-01", text: "What tiny decision changed your life more than you expected?"),
             .init(id: "tt-02", text: "Which place have you visited that still feels vivid?"),
@@ -117,9 +117,9 @@ struct GameManifest: Codable, Equatable, Identifiable {
 }
 
 enum ResourceCatalog {
-    static let tableDesignIDs: Set<String> = ["green-classic", "poker-2", "midnight"]
-    static let cardBackIDs: Set<String> = ["classic-red", "minimal-dark"]
-    static let cardSetIDs: Set<String> = ["standard-52", "prompt-basic", "classic-characters"]
+    static let tableDesignIDs: Set<String> = ["green-classic", "poker-2", "midnight", "guess-grid", "sunset-lounge", "paper-play"]
+    static let cardBackIDs: Set<String> = ["classic-pack-red", "classic-red", "minimal-dark"]
+    static let cardSetIDs: Set<String> = ["classic-pack-52", "standard-52", "prompt-basic", "classic-characters"]
 }
 
 struct MultiplayerPlayer: Codable, Equatable, Identifiable {

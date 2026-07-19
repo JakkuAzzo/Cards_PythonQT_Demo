@@ -6,7 +6,7 @@ This is the Android client in the canonical Cards repository. It is no longer th
 
 - The same SplitMix64/Fisher-Yates shuffle contract as iOS.
 - A host-authoritative Table Talk engine with turn and revision validation.
-- A conventional live-table activity that can be used without a camera.
+- A conventional live-table activity plus playable Classic Pack Poker and Guess Who rooms. Each can show the shared Table, the private Your deck page, or both together, and can open an optional AR surface.
 - A Google Nearby Connections `P2P_STAR` transport adapter with verification callbacks, byte payloads, peer lifecycle handling, and a host/join screen.
 - ARCore configured as optional so unsupported devices keep the conventional table.
 - A dependency-free JVM conformance test for the core engine.
@@ -29,4 +29,4 @@ java -cp "$BUILD_DIR" EngineSelfTest
 
 ## Important
 
-The host shares a `CARDS-####` code. Guests enter it, compare Nearby authentication digits, then exchange versioned host-authoritative envelopes. A wrong code is rejected before a player is added to the table. `ArTableActivity` currently performs the optional ARCore installation and session lifecycle; shared marker alignment and card rendering are the next AR milestone.
+The host shares a `CARDS-####` code. Guests enter it, compare Nearby authentication digits, then exchange versioned host-authoritative envelopes. A wrong code is rejected before a player is added to the table. The Poker and Guess Who rooms are local playable templates today; connecting their table commands to Nearby snapshots is the next multiplayer task. `ArTableActivity` performs optional ARCore installation and session lifecycle; shared marker alignment and card rendering are the next AR milestone.

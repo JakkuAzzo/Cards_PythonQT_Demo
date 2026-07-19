@@ -151,6 +151,14 @@
       font-weight: 600;
     }
     .table-layout { display: grid; grid-template-columns: 1.6fr 0.8fr; gap: 18px; }
+    .room-switch { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 2px; }
+    .room-switch button { border: 1px solid var(--line); background: #fffdf8; color: var(--ink); border-radius: 999px; padding: 9px 14px; font: 700 0.9rem/1 var(--body); cursor: pointer; }
+    .room-switch button.active { background: var(--brand-deep); color: #fffaf3; border-color: var(--brand-deep); }
+    .private-deck { display: grid; gap: 12px; }
+    .private-card-back { min-height: 118px; border-radius: 18px; background: #852a34 url("assets/classic-pack-back.svg") center / cover no-repeat; border: 3px solid #fffaf0; box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); }
+    .table-layout.mode-deck .table-view, .table-layout.mode-deck #sharedActions, .table-layout.mode-deck #activityCard { display: none; }
+    .table-layout.mode-deck { grid-template-columns: 1fr; }
+    .table-layout.mode-table #privateDeck { display: none; }
     .table-view {
       min-height: 520px;
       padding: 22px;
@@ -300,7 +308,7 @@
       </div>
       <div class="status-row">
         <div class="status-pill"><span class="dot"></span>Nearby play ready</div>
-        <div class="status-pill">Decks <strong>3</strong></div>
+        <div class="status-pill">Decks <strong>4</strong></div>
         <div class="status-pill">Mode <strong id="modeLabel">Prompt table</strong></div>
       </div>
     </header>
@@ -338,8 +346,13 @@
         <p class="side-note">Defaults stay lightweight: the deck decides the table layout, turn pattern, and prompt style.</p>
       </div>
       <div class="deck-grid" id="deckGrid"></div>
-      <div class="table-layout">
-        <section class="table-view">
+      <div class="room-switch" aria-label="Digital game room view">
+        <button class="active" data-room-mode="combined">Combined</button>
+        <button data-room-mode="table">Table</button>
+        <button data-room-mode="deck">Your deck</button>
+      </div>
+      <div class="table-layout" id="tableLayout">
+        <section class="table-view" id="sharedTable">
           <div class="table-toolbar">
             <div class="status-pill"><span class="dot"></span><span id="tableStatus">Avery is opening the round</span></div>
             <div class="status-pill"><span id="tableDeck">Table Talk</span></div>
@@ -361,7 +374,7 @@
           </div>
         </section>
         <aside class="table-side">
-          <div class="side-card">
+          <div class="side-card" id="sharedActions">
             <h3>Table actions</h3>
             <p class="side-note">Run a round, rotate turns, or add one more player without opening a setup screen.</p>
             <div class="table-actions">
@@ -370,9 +383,16 @@
               <button class="btn btn-secondary" id="guestBtn">Add guest</button>
             </div>
           </div>
-          <div class="side-card">
+          <div class="side-card" id="activityCard">
             <h3>Round activity</h3>
             <ul class="activity" id="activityList"></ul>
+          </div>
+          <div class="side-card private-deck" id="privateDeck">
+            <h3>Your deck</h3>
+            <div class="private-card-back" aria-hidden="true"></div>
+            <strong id="handTitle">Classic Pack 52 is ready</strong>
+            <p class="side-note" id="handNote">Private cards stay here; the shared table only shows public state.</p>
+            <button class="btn btn-secondary" id="arModeBtn">Open AR table preview</button>
           </div>
         </aside>
       </div>
@@ -418,6 +438,7 @@ notes: classic betting order, simple host-led flow</textarea>
   </main>
   <script>
     const decks = [
+      { id: "classic-pack-52", badge: "Original deck", name: "Classic Pack 52", cards: 52, mode: "Digital card room", blurb: "The original designed 52-card pack, ready for poker, tricks, and custom tables.", title: "A♠", body: "Classic Pack faces and back are the default resource for standard card games. Keep private cards on Your deck and public cards on the shared table.", tag: "Classic Pack card", kind: "classic" },
       { id: "table-talk", badge: "Prompt deck", name: "Table Talk", cards: 36, mode: "Prompt table", blurb: "Light prompts for quick local sessions, social icebreakers, and rotating turns.", title: "Tell the table about a tiny moment you still remember.", body: "Use this as the opener while everyone syncs in. The first player answers, then passes left. The creator mode can lock this into two teams, private hands, or no-camera play.", tag: "Warm-up prompt" },
       { id: "road-trip", badge: "Travel pack", name: "Road Trip", cards: 24, mode: "Shared screen", blurb: "Short prompts and mini-games for one phone in the middle of a group.", title: "Name a place everyone here would actually visit again.", body: "Everyone points at the same time, then explains their pick. Good for one-screen play where the host device drives the next card.", tag: "Group vote" },
       { id: "quick-draw", badge: "Guess game", name: "Quick Draw", cards: 18, mode: "Team challenge", blurb: "Fast team prompts with clue giving, time pressure, and clear turn changes.", title: "Give one-word clues until your team guesses the hidden card.", body: "This setup assumes teams, visible timers, and a discard pile that tracks which prompts are already spent.", tag: "Timed round" }
@@ -428,7 +449,8 @@ notes: classic betting order, simple host-led flow</textarea>
       { id: "seatRight", name: "Riley" },
       { id: "seatBottom", name: "Casey" }
     ];
-    const state = { activeDeck: decks[0], pile: decks[0].cards, turn: 0, guestAdded: false };
+    const classicFaces = ["A♠", "K♠", "Q♠", "J♠", "10♠", "9♠", "8♠", "7♠", "6♠", "5♠", "4♠", "3♠", "2♠", "A♥", "K♥", "Q♥", "J♥", "10♥", "9♥", "8♥", "7♥", "6♥", "5♥", "4♥", "3♥", "2♥", "A♦", "K♦", "Q♦", "J♦", "10♦", "9♦", "8♦", "7♦", "6♦", "5♦", "4♦", "3♦", "2♦", "A♣", "K♣", "Q♣", "J♣", "10♣", "9♣", "8♣", "7♣", "6♣", "5♣", "4♣", "3♣", "2♣"];
+    const state = { activeDeck: decks[0], pile: decks[0].cards, turn: 0, guestAdded: false, drawn: 0, roomMode: "combined" };
     const activityList = document.getElementById("activityList");
     const inferenceList = document.getElementById("inferenceList");
     const deckGrid = document.getElementById("deckGrid");
@@ -453,17 +475,23 @@ notes: classic betting order, simple host-led flow</textarea>
     };
     const renderTable = () => {
       const deck = state.activeDeck;
+      const classicCard = classicFaces[state.drawn % classicFaces.length];
+      const title = deck.kind === "classic" ? classicCard : deck.title;
+      const body = deck.kind === "classic" ? "This is a private Classic Pack card. Switch to Table for shared community cards, score, and turn state." : deck.body;
+      const tag = deck.kind === "classic" ? "Classic Pack private card" : deck.tag;
       document.getElementById("modeLabel").textContent = deck.mode;
       document.getElementById("cardCount").textContent = deck.cards;
       document.getElementById("tableDeck").textContent = deck.name;
-      document.getElementById("promptTag").textContent = deck.tag;
-      document.getElementById("promptTitle").textContent = deck.title;
-      document.getElementById("promptBody").textContent = deck.body;
+      document.getElementById("promptTag").textContent = tag;
+      document.getElementById("promptTitle").textContent = title;
+      document.getElementById("promptBody").textContent = body;
       document.getElementById("drawStack").textContent = `${state.pile} left`;
       document.getElementById("turnCount").textContent = String(state.turn + 1);
       document.getElementById("playerCount").textContent = state.guestAdded ? "5" : "4";
       document.getElementById("tableStatus").textContent = `${seats[state.turn].name} is opening the round`;
       seats.forEach((seat, index) => document.getElementById(seat.id).classList.toggle("active", index === state.turn));
+      document.getElementById("handTitle").textContent = deck.kind === "classic" ? `Your card: ${classicCard}` : `${deck.name} hand`;
+      document.getElementById("handNote").textContent = deck.kind === "classic" ? "Classic Pack 52 is the default deck. The card face stays private until you choose to play it." : "Use this private deck page for hidden prompts, targets, or hands.";
     };
     const selectDeck = (id) => {
       const deck = decks.find((entry) => entry.id === id);
@@ -471,6 +499,7 @@ notes: classic betting order, simple host-led flow</textarea>
       state.activeDeck = deck;
       state.pile = deck.cards;
       state.turn = 0;
+      state.drawn = 0;
       renderDecks();
       renderTable();
       addActivity(`${deck.name} loaded with ${deck.cards} cards and ${deck.mode.toLowerCase()} defaults.`);
@@ -562,7 +591,7 @@ notes: classic betting order, simple host-led flow</textarea>
     document.querySelectorAll("[data-tab-target]").forEach((button) => button.addEventListener("click", () => openTab(button.dataset.tabTarget)));
     tabs.forEach((tab) => tab.addEventListener("click", () => openTab(tab.dataset.tab)));
     document.getElementById("drawBtn").addEventListener("click", () => {
-      if (state.pile > 0) state.pile -= 1;
+      if (state.pile > 0) { state.pile -= 1; state.drawn += 1; }
       renderTable();
       addActivity(`${seats[state.turn].name} drew the next card. ${state.pile} remain in the stack.`);
     });
@@ -592,6 +621,13 @@ nearby_sync: bluetooth
 notes: shared clue board, elimination markers, no hidden hands`;
       renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));
     });
+    document.querySelectorAll("[data-room-mode]").forEach((button) => button.addEventListener("click", () => {
+      state.roomMode = button.dataset.roomMode;
+      document.getElementById("tableLayout").className = `table-layout mode-${state.roomMode}`;
+      document.querySelectorAll("[data-room-mode]").forEach((item) => item.classList.toggle("active", item === button));
+      addActivity(state.roomMode === "deck" ? "Private deck view opened." : state.roomMode === "table" ? "Shared table view opened." : "Combined table and deck view opened.");
+    }));
+    document.getElementById("arModeBtn").addEventListener("click", () => addActivity("AR is a native mobile mode. This web preview keeps the same shared table state on screen."));
     renderDecks();
     renderTable();
     renderDraft(resolveDraft(parseConfig(document.getElementById("configInput").value)));

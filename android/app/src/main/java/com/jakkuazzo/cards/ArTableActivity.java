@@ -12,12 +12,16 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Session;
 
 public final class ArTableActivity extends Activity {
+    public static final String EXTRA_SURFACE_TITLE = "surface_title";
     private Session session;
     private boolean installRequested;
     private TextView status;
+    private String surfaceTitle = "Shared table";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        surfaceTitle = getIntent().getStringExtra(EXTRA_SURFACE_TITLE);
+        if (surfaceTitle == null || surfaceTitle.trim().isEmpty()) surfaceTitle = "Shared table";
         status = new TextView(this);
         status.setGravity(Gravity.CENTER);
         status.setPadding(48, 48, 48, 48);
@@ -43,7 +47,7 @@ public final class ArTableActivity extends Activity {
             }
             if (session == null) session = new Session(this);
             session.resume();
-            status.setText("ARCore session ready.\n\nThe conventional table remains playable while shared-marker surface rendering is completed.");
+            status.setText(surfaceTitle + " AR mode is ready.\n\nThe digital Table, Your deck, and Combined views remain available while shared-marker surface rendering is completed.");
         } catch (Exception error) {
             status.setText("AR is unavailable on this device.\n\n" + error.getMessage());
         }
@@ -59,4 +63,3 @@ public final class ArTableActivity extends Activity {
         super.onDestroy();
     }
 }
-

@@ -14,7 +14,11 @@ There is deliberately no large store and no general code-generating AI. The crea
 | --- | --- |
 | ![Cards browser preview on desktop](docs/screenshots/web-home.png) | ![Cards browser preview on mobile](docs/screenshots/web-mobile.png) |
 
-Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It demonstrates the prompt deck, a local table flow, and constrained game-template selection; nearby transport and AR remain native-app capabilities.
+| Browser game room — Table + Your deck |
+| --- |
+| ![Cards browser game room showing a shared table and private deck](docs/screenshots/web-game-room.png) |
+
+Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It ships with the original Classic Pack as its default deck and lets a player switch between the shared Table, private Your deck, and Combined room views. Nearby transport and camera AR remain native-app capabilities.
 
 ## Preview downloads
 
@@ -26,23 +30,25 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 
 - Closed JSON schemas for game manifests and network envelopes.
 - An allowlisted resource catalogue for tables, card backs, and card sets.
-- Poker, Guess Who, and prompt-draw template classification.
+- Poker, Guess Who, and prompt-draw templates, including a game-room mode declaration (`combined`, `table`, and `deck`).
+- The original designed Classic Pack 52 as the default resource, plus allowlisted table, card-back, and template choices for custom games.
 - A SplitMix64/Fisher-Yates shuffle fixture shared by Swift and Java.
 - Host-authoritative revisions, ordered turns, snapshots/private-message protocol definitions, and validation tests.
 
 ### iPhone
 
-- Existing offline classic and prompt decks.
+- Offline Classic Pack and prompt decks, with Classic Pack selected by default.
 - A working two-dimensional multiplayer Table Talk preview.
 - Host/join controls for encrypted Apple-to-Apple nearby tables, with a shareable table code, host-authoritative commands, and revisioned snapshots.
 - A tested loopback transport retained for deterministic automated tests.
 - An ARKit/RealityKit table that finds a horizontal surface and renders the digital table/card state.
-- A minimal creator that accepts an idea or YAML-style settings and previews validated prompt games.
+- A minimal creator that accepts an idea or YAML-style settings and opens playable Poker, Guess Who, or prompt-game previews.
+- Every supported game has a digital room with separate Table and Your deck pages or a Combined view; AR opens the same shared state on a detected surface when available.
 
 ### Android
 
 - The same deterministic multiplayer engine and seed-42 conformance result as iOS.
-- A conventional live-table activity.
+- A conventional live-table activity plus Poker and Guess Who game rooms with Table, Your deck, Combined, and optional AR entry points.
 - A Google Nearby Connections `P2P_STAR` host/join flow with visible authentication digits, table-code validation, host-authoritative commands, and public snapshots.
 - Optional ARCore installation and session lifecycle with a non-AR fallback.
 
@@ -58,7 +64,7 @@ ar: n
 tabledesign: poker_2.png
 ```
 
-This selects the poker archetype, standard 52-card resource, two-card starting hands, nearby multiplayer, and the bundled `poker-2` table. Explicit settings override template defaults.
+This selects the poker archetype, Classic Pack 52 resource, two-card starting hands, nearby multiplayer, and the bundled `poker-2` table. Explicit settings override template defaults.
 
 Guess Who selects a two-player character-grid configuration and bundled character set:
 
@@ -84,8 +90,8 @@ The canonical machine-readable format is JSON; this small YAML-style syntax is o
 | Template | Configuration | Runtime |
 | --- | --- | --- |
 | Prompt draw | Complete | Playable in the local multiplayer and AR previews |
-| Poker | Complete defaults and resources | Dedicated dealing, community-card, betting, and hand-ranking runtime still required |
-| Guess Who | Complete defaults and character resources | Dedicated private-target and character-grid runtime still required |
+| Poker | Complete defaults, Classic Pack resources, and digital room | Playable local dealing, community-card, bet/fold, and hand-ranking runtime; live cross-device commands are the next step |
+| Guess Who | Complete defaults, character resources, and digital room | Playable private target, shared board, elimination, and score-tracker runtime; live cross-device commands are the next step |
 
 The creator does not label an unimplemented runtime as playable.
 
@@ -123,4 +129,4 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Run Android host/join on real hardware, then add a dedicated cross-platform BLE transport for iPhone/Android play without Wi-Fi infrastructure. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.
+Run the new Poker and Guess Who rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. Next, add a dedicated cross-platform BLE transport for iPhone/Android play without Wi-Fi infrastructure and offline visual-marker alignment so both AR platforms share the same table origin.

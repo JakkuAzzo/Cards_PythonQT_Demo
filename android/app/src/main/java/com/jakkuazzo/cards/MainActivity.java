@@ -65,6 +65,16 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         subtitle.setPadding(0, dp(6), 0, dp(14));
         content.addView(subtitle);
 
+        LinearLayout templates = new LinearLayout(this);
+        templates.setOrientation(LinearLayout.HORIZONTAL);
+        Button poker = button("Classic Pack poker");
+        poker.setOnClickListener(view -> openGameRoom("poker"));
+        templates.addView(poker, new LinearLayout.LayoutParams(0, -2, 1));
+        Button guess = button("Guess Who board");
+        guess.setOnClickListener(view -> openGameRoom("guess-who"));
+        templates.addView(guess, new LinearLayout.LayoutParams(0, -2, 1));
+        content.addView(templates);
+
         status = text("", 14, Color.LTGRAY);
         status.setPadding(0, 0, 0, dp(12));
         content.addView(status);
@@ -370,6 +380,12 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     }
 
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+
+    private void openGameRoom(String template) {
+        Intent intent = new Intent(this, GameRoomActivity.class);
+        intent.putExtra(GameRoomActivity.EXTRA_TEMPLATE, template);
+        startActivity(intent);
+    }
 
     private interface Action { void run() throws Exception; }
     private void runAction(Action action) {

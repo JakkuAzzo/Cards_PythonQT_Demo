@@ -39,7 +39,7 @@ struct GameDraftInterpreter {
             directive(["tabledesign", "table_design", "shared_card_table_theme"], in: lines)
                 ?? defaultTable(for: archetype)
         )
-        let cardBack = normalizeResource(directive(["cardback", "card_back"], in: lines) ?? "classic-red")
+        let cardBack = normalizeResource(directive(["cardback", "card_back"], in: lines) ?? "classic-pack-red")
         guard ResourceCatalog.tableDesignIDs.contains(tableDesign) else { throw DraftError.unknownResource(tableDesign) }
         guard ResourceCatalog.cardBackIDs.contains(cardBack) else { throw DraftError.unknownResource(cardBack) }
 
@@ -85,7 +85,7 @@ struct GameDraftInterpreter {
                 summary: "A nearby poker table using the bundled standard deck.",
                 deckKind: .classic,
                 cards: [],
-                cardSet: "standard-52",
+                cardSet: "classic-pack-52",
                 rules: .init(initialHandSize: 2, drawPerTurn: 0, playPerTurn: 0, turnOrder: .clockwise, winCondition: .manual),
                 accentStart: "14532D",
                 accentEnd: "166534"
@@ -163,7 +163,7 @@ struct GameDraftInterpreter {
     private func defaultTable(for archetype: GameManifest.Archetype) -> String {
         switch archetype {
         case .poker: return "poker-2"
-        case .guessWho: return "midnight"
+        case .guessWho: return "guess-grid"
         case .promptDraw: return "green-classic"
         }
     }
