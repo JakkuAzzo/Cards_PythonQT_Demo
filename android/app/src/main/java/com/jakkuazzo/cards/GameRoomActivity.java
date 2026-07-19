@@ -41,7 +41,8 @@ public final class GameRoomActivity extends Activity implements BluetoothGattTra
     private final Set<String> eliminated = new HashSet<>();
     private boolean poker, hosting, targetVisible, guestFolded;
     private RoomMode roomMode = RoomMode.COMBINED;
-    private String target, guestTarget, winner = "", status = "Play locally, or host/join one encrypted Bluetooth room.";
+    private String target, guestTarget, selectedCharacter, winner = "", status = "Play locally, or host/join one encrypted Bluetooth room.";
+    private int pot;
     private String sessionCode = "", pairingSecret = "", guestPlayerId = "";
     private BluetoothGattTransport bluetooth;
     private GameRoomNetworkSession network;
@@ -55,7 +56,7 @@ public final class GameRoomActivity extends Activity implements BluetoothGattTra
     }
 
     private void resetGame() {
-        community.clear(); hand.clear(); guestHand.clear(); eliminated.clear(); targetVisible = false; guestFolded = false; winner = "";
+        community.clear(); hand.clear(); guestHand.clear(); eliminated.clear(); targetVisible = false; guestFolded = false; winner = ""; selectedCharacter = null; pot = 0;
         if (poker) { List<String> deck = pokerDeck(); Collections.shuffle(deck); hand.add(deck.remove(0)); hand.add(deck.remove(0)); guestHand.add(deck.remove(0)); guestHand.add(deck.remove(0)); }
         else { List<String> targets = new ArrayList<>(characters); Collections.shuffle(targets); target = targets.get(0); guestTarget = targets.get(1); }
         status = poker ? "Classic Pack dealt. Each phone keeps its own hand private." : "Private targets assigned. The shared board is public.";
@@ -88,8 +89,8 @@ public final class GameRoomActivity extends Activity implements BluetoothGattTra
     private void roomSelector() { LinearLayout row = new LinearLayout(this); for (RoomMode mode : RoomMode.values()) { Button b = button(mode == RoomMode.COMBINED ? "Combined" : mode == RoomMode.TABLE ? "Table" : "Your deck"); b.setEnabled(roomMode != mode); b.setOnClickListener(v -> { roomMode = mode; render(); }); row.addView(b, new LinearLayout.LayoutParams(0, -2, 1)); } content.addView(row); }
     private void tablePage() {
         section(poker ? "Shared table" : "Shared board / score tracker");
-        if (poker) { body("Pot: " + pot() + " chips · Community cards: " + (community.isEmpty() ? "hidden" : join(community)) + (guestFolded ? " · Guest folded" : "")); Button next = button(community.size() < 3 ? "Reveal flop" : community.size() < 4 ? "Reveal turn" : community.size() < 5 ? "Reveal river" : "Showdown ready"); next.setEnabled(community.size() < 5); next.setOnClickListener(v -> action("advance-street", null, null)); content.addView(next); Button fold = button("Fold"); fold.setOnClickListener(v -> action("fold", null, null)); content.addView(fold); }
-        else { body((characters.size() - eliminated.size()) + " possibilities remain." + (winner.isEmpty() ? "" : " Winner: " + winner)); for (String character : characters) { Button tile = button((eliminated.contains(character) ? "✓ " : "") + character); tile.setOnClickListener(v -> action("toggle-elimination", character, null)); content.addView(tile); } }
+        if (poker) { body("Pot: " + pot + " chips · Community cards: " + (community.isEmpty() ? "hidden" : join(community)) + (guestFolded ? " · Guest folded" : "")); Button next = button(community.size() < 3 ? "Reveal flop" : community.size() < 4 ? "Reveal turn" : community.size() < 5 ? "Reveal river" : "Showdown ready"); next.setEnabled(community.size() < 5); next.setOnClickListener(v -> action("advance-street", null, null)); content.addView(next); Button fold = button("Fold"); fold.setOnClickListener(v -> action("fold", null, null)); content.addView(fold); }
+        else { body((characters.size() - eliminated.size()) + " possibilities remain." + (selectedCharacter == null ? " Select a character." : " Selected: " + selectedCharacter) + (winner.isEmpty() ? "" : " Winner: " + winner)); for (String character : characters) { Button tile = button((eliminated.contains(character) ? "✓ " : "") + character); tile.setOnClickListener(v -> { selectedCharacter = character; render(); }); content.addView(tile); } Button eliminate = button("Toggle selected character"); eliminate.setEnabled(selectedCharacter != null); eliminate.setOnClickListener(v -> action("toggle-elimination", selectedCharacter, null)); content.addView(eliminate); Button guess = button("Guess selected character"); guess.setEnabled(selectedCharacter != null); guess.setOnClickListener(v -> action("guess", selectedCharacter, null)); content.addView(guess); }
     }
     private void deckPage() {
         section("Your deck");
@@ -99,12 +100,11 @@ public final class GameRoomActivity extends Activity implements BluetoothGattTra
 
     private void action(String name, String character, Integer amount) { if (network != null && !hosting) network.submit(new GameRoomNetworkSession.Command(name, localPlayerId, character, amount)); else { applyHostCommand(new GameRoomNetworkSession.Command(name, localPlayerId, character, amount)); publish(); render(); } }
     private boolean applyHostCommand(GameRoomNetworkSession.Command command) {
-        if (poker) { if ("advance-street".equals(command.action)) revealStreet(); else if ("bet".equals(command.action)) status = "A player added " + (command.amount == null ? 20 : command.amount) + " chips to the pot."; else if ("fold".equals(command.action)) { guestFolded = !localPlayerId.equals(command.playerId); status = "A player folded."; } else if ("restart".equals(command.action)) resetGame(); else return false; }
+        if (poker) { if ("advance-street".equals(command.action)) revealStreet(); else if ("bet".equals(command.action)) { int amount = command.amount == null ? 20 : command.amount; pot += amount; status = "A player added " + amount + " chips to the pot."; } else if ("fold".equals(command.action)) { guestFolded = !localPlayerId.equals(command.playerId); status = "A player folded."; } else if ("restart".equals(command.action)) resetGame(); else return false; }
         else { if ("toggle-elimination".equals(command.action)) { if (command.characterId == null) return false; if (eliminated.contains(command.characterId)) eliminated.remove(command.characterId); else eliminated.add(command.characterId); } else if ("ask-question".equals(command.action)) status = "Question asked. Check your private target before answering."; else if ("guess".equals(command.action)) { if (command.characterId == null) return false; String wanted = localPlayerId.equals(command.playerId) ? guestTarget : target; winner = wanted.equals(command.characterId) ? "Correct guess" : "Incorrect guess"; } else if ("restart".equals(command.action)) resetGame(); else return false; }
         return true;
     }
     private void revealStreet() { String[] cards = {"A♥", "10♣", "7♦", "4♠", "K♥"}; int amount = community.isEmpty() ? 3 : 1; for (int i = 0; i < amount && community.size() < cards.length; i++) community.add(cards[community.size()]); status = "Shared table updated. Private cards remain private."; }
-    private int pot() { return community.size() * 20; }
 
     private void hostRoom() { leaveRoom(); hosting = true; sessionCode = String.format("CARDS-%04d", (int) (Math.random() * 10000)); pairingSecret = BLEEnvelopeCipher.makePairingSecret(); bluetooth = new BluetoothGattTransport(this, this, sessionCode, pairingSecret); configureNetwork(GameRoomNetworkSession.Role.HOST); bluetooth.host(); status = "Bluetooth host ready. Share code and secret with one guest."; render(); }
     private void joinRoom(String code, String secret) { String normalized = code.toUpperCase().trim(); if (!normalized.matches("CARDS-[0-9]{4}") || secret.trim().isEmpty()) { status = "Enter the host's CARDS-1234 code and pairing secret."; render(); return; } leaveRoom(); hosting = false; sessionCode = normalized; pairingSecret = secret.trim(); bluetooth = new BluetoothGattTransport(this, this, sessionCode, pairingSecret); configureNetwork(GameRoomNetworkSession.Role.GUEST); bluetooth.join(); status = "Scanning for " + sessionCode + "…"; render(); }
@@ -119,9 +119,9 @@ public final class GameRoomActivity extends Activity implements BluetoothGattTra
         network.connected();
     }
     private void publish() { if (network == null || !hosting) return; HashMap<String, JSONObject> privateStates = new HashMap<>(); if (!guestPlayerId.isEmpty()) privateStates.put(guestPlayerId, privateState()); network.publish(publicState(), privateStates); }
-    private JSONObject publicState() { try { JSONObject state = new JSONObject(); state.put("community", new JSONArray(community)); state.put("pot", pot()); state.put("guestFolded", guestFolded); state.put("eliminated", new JSONArray(eliminated)); state.put("winner", winner); return state; } catch (Exception error) { return new JSONObject(); } }
+    private JSONObject publicState() { try { JSONObject state = new JSONObject(); state.put("community", new JSONArray(community)); state.put("pot", pot); state.put("guestFolded", guestFolded); state.put("eliminated", new JSONArray(eliminated)); state.put("winner", winner); return state; } catch (Exception error) { return new JSONObject(); } }
     private JSONObject privateState() { try { JSONObject state = new JSONObject(); state.put("hand", new JSONArray(guestHand)); state.put("target", guestTarget); return state; } catch (Exception error) { return new JSONObject(); } }
-    private void applyPublic(JSONObject state) { community.clear(); JSONArray cards = state.optJSONArray("community"); if (cards != null) for (int i = 0; i < cards.length(); i++) community.add(cards.optString(i)); eliminated.clear(); JSONArray removed = state.optJSONArray("eliminated"); if (removed != null) for (int i = 0; i < removed.length(); i++) eliminated.add(removed.optString(i)); guestFolded = state.optBoolean("guestFolded"); winner = state.optString("winner"); }
+    private void applyPublic(JSONObject state) { community.clear(); JSONArray cards = state.optJSONArray("community"); if (cards != null) for (int i = 0; i < cards.length(); i++) community.add(cards.optString(i)); eliminated.clear(); JSONArray removed = state.optJSONArray("eliminated"); if (removed != null) for (int i = 0; i < removed.length(); i++) eliminated.add(removed.optString(i)); pot = state.optInt("pot"); guestFolded = state.optBoolean("guestFolded"); winner = state.optString("winner"); }
     private void applyPrivate(JSONObject state) { JSONArray cards = state.optJSONArray("hand"); if (cards != null) { hand.clear(); for (int i = 0; i < cards.length(); i++) hand.add(cards.optString(i)); } if (state.has("target")) target = state.optString("target"); }
     private void leaveRoom() { if (bluetooth != null) bluetooth.stop(); bluetooth = null; network = null; hosting = false; sessionCode = pairingSecret = guestPlayerId = ""; }
     @Override public void onPeersChanged(Set<String> peers) { runOnUiThread(() -> { if (network != null && !hosting && !peers.isEmpty()) network.connected(); }); }
