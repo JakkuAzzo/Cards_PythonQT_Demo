@@ -4,6 +4,10 @@ Cards is a local-first platform for creating and playing card games on iPhone an
 
 There is deliberately no large store and no general code-generating AI. The creator is a lightweight classifier and configuration interpreter: it recognises a game family, chooses tested defaults, applies explicit overrides, and rejects unknown resources.
 
+For module ownership, entry points, state flow, and safe extension points, read
+[the architecture guide](docs/ARCHITECTURE.md). Coding agents should begin with
+[AGENTS.md](AGENTS.md) and then the relevant platform guide.
+
 ## App preview
 
 | iPhone home | iPhone live table |
@@ -19,6 +23,8 @@ There is deliberately no large store and no general code-generating AI. The crea
 | ![Cards browser game room showing a shared table and private deck](docs/screenshots/web-game-room.png) |
 
 Visit [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/) for a lightweight product home with download and project-update links. Cards gameplay, nearby transport, and camera AR remain native-app capabilities rather than a reduced browser imitation.
+
+Cards v1 is intentionally local-first: it has no account, cloud game service, browser game client, or background job system. See the [privacy page](web/privacy.html) and [production release gates](docs/PRODUCTION_RELEASE.md) for the required release evidence.
 
 ## Preview downloads
 
@@ -90,8 +96,9 @@ The canonical machine-readable format is JSON; this small YAML-style syntax is o
 | Template | Configuration | Runtime |
 | --- | --- | --- |
 | Prompt draw | Complete | Playable in the local multiplayer and AR previews |
-| Poker | Complete defaults, Classic Pack resources, and digital room | iOS room binds host-authoritative public snapshots and recipient-only hands to Apple-nearby/BLE controls; Android room binding and real-device cross-platform proof remain. |
-| Guess Who | Complete defaults, character resources, and digital room | iOS room binds shared-board snapshots and recipient-only targets to Apple-nearby/BLE controls; Android room binding and real-device cross-platform proof remain. |
+| Poker | Complete defaults, Classic Pack resources, and digital room | Local solo play can enable the deterministic Cards AI; iOS room binds host-authoritative public snapshots and recipient-only hands to Apple-nearby/BLE controls. Android room binding and real-device cross-platform proof remain. |
+| Guess Who | Complete defaults, character resources, and digital room | Local solo play can enable the deterministic Cards AI; iOS room binds shared-board snapshots and recipient-only targets to Apple-nearby/BLE controls. Android room binding and real-device cross-platform proof remain. |
+| Double-Six Dominoes | Complete 2–4 player draw-dominoes template, shared train, private hands, and Domino Yard table | Playable locally on iOS and Android in Combined, Table, and Hand modes, including an optional deterministic Cards AI opponent for solo play. Real-device room synchronization remains a validation milestone. |
 
 The creator does not label an unimplemented runtime as playable.
 
@@ -129,7 +136,7 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Run the new Poker and Guess Who rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. The cross-platform BLE framing/encryption layer and printed-marker contract are present; the remaining release blocker is a real-device validation pass for encrypted BLE, marker recognition, and host-authoritative Poker/Guess Who state binding.
+Run the Poker, Guess Who, and Double-Six Dominoes rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. The cross-platform BLE framing/encryption layer and printed-marker contract are present; the remaining release blocker is a real-device validation pass for encrypted BLE, marker recognition, and host-authoritative game-state binding. Simulator testing verifies UI, rules, and graceful AR fallback but cannot certify Bluetooth discovery or shared surface alignment.
 
 ## Shared AR marker
 
