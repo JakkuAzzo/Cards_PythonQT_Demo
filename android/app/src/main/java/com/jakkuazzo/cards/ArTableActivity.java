@@ -19,7 +19,7 @@ import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.Config;
 import com.google.ar.core.Session;
 
-/** Camera-backed AR table: place a digital table ahead or on any scanned surface. */
+/** Camera-backed AR table: preview a detected horizontal surface, then place a digital table. */
 public final class ArTableActivity extends Activity {
     public static final String EXTRA_SURFACE_TITLE = "surface_title";
     private Session session;
@@ -60,13 +60,13 @@ public final class ArTableActivity extends Activity {
         statusParams.setMargins(dp(12), dp(18), dp(12), 0);
         root.addView(status, statusParams);
 
-        Button placeAhead = new Button(this);
-        placeAhead.setText("Place table ahead");
-        placeAhead.setAllCaps(false);
-        placeAhead.setOnClickListener(view -> renderer.requestPlacementAhead());
+        Button findSurface = new Button(this);
+        findSurface.setText("Find a table surface");
+        findSurface.setAllCaps(false);
+        findSurface.setOnClickListener(view -> renderer.requestSurfacePreview());
         FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
         buttonParams.setMargins(dp(24), 0, dp(24), dp(28));
-        root.addView(placeAhead, buttonParams);
+        root.addView(findSurface, buttonParams);
         setContentView(root);
         setStatus("Checking ARCore…");
     }
@@ -96,7 +96,8 @@ public final class ArTableActivity extends Activity {
             renderer.setSession(session);
             session.resume();
             surface.onResume();
-            setStatus(surfaceTitle + ": tap a scanned horizontal surface, or use Place table ahead. The printed marker is optional shared alignment.");
+            setStatus(surfaceTitle + ": slowly point at a clear table or floor. A translucent green preview appears before anything is placed. Then tap the preview to lock it in place.");
+            renderer.requestSurfacePreview();
         } catch (Exception error) {
             setStatus("AR is unavailable on this device. Use the normal Table, Your deck, or Combined screen instead.\n\n" + error.getMessage());
         }

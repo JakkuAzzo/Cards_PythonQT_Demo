@@ -48,9 +48,10 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
     private int width;
     private int height;
     private Anchor tableAnchor;
+    private Anchor previewAnchor;
     private float requestedX = Float.NaN;
     private float requestedY = Float.NaN;
-    private boolean placeAhead;
+    private boolean surfacePreviewRequested;
     private boolean markerReported;
 
     ArTableRenderer(Context context, Listener listener) { this.context = context; this.listener = listener; }
@@ -58,7 +59,7 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
     void setSession(Session session) { this.session = session; }
     void clearSession() { this.session = null; }
     void requestPlacement(float x, float y) { requestedX = x; requestedY = y; }
-    void requestPlacementAhead() { placeAhead = true; }
+    void requestSurfacePreview() { surfacePreviewRequested = true; }
 
     @Override public void onSurfaceCreated(javax.microedition.khronos.opengles.GL10 ignored, javax.microedition.khronos.egl.EGLConfig config) {
         cameraProgram = program(CAMERA_VERTEX, CAMERA_FRAGMENT);
@@ -96,24 +97,29 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
     }
 
     private void processPlacement(Frame frame, Camera camera, Session active) {
+        if (surfacePreviewRequested && previewAnchor == null) {
+            List<HitResult> previewHits = frame.hitTest(width * 0.5f, height * 0.62f);
+            for (HitResult hit : previewHits) {
+                if (isHorizontalSurface(hit)) {
+                    replacePreviewAnchor(hit.createAnchor());
+                    listener.onStatus("Green preview found. Tap it to place the table.");
+                    break;
+                }
+            }
+        }
         if (!Float.isNaN(requestedX) && !Float.isNaN(requestedY)) {
             float x = requestedX, y = requestedY;
             requestedX = Float.NaN; requestedY = Float.NaN;
             List<HitResult> hits = frame.hitTest(x, y);
             for (HitResult hit : hits) {
-                if (hit.getTrackable() instanceof Plane && ((Plane) hit.getTrackable()).isPoseInPolygon(hit.getHitPose())) {
+                if (isHorizontalSurface(hit)) {
                     replaceAnchor(hit.createAnchor());
-                    listener.onStatus("Table placed on this surface. Tap another surface to move it.");
+                    clearPreviewAnchor();
+                    listener.onStatus("Table placed. It stays anchored here while you play. Tap another surface to move it.");
                     return;
                 }
             }
             listener.onStatus("No horizontal surface there yet. Move the phone slowly and try again.");
-        }
-        if (placeAhead) {
-            placeAhead = false;
-            float[] point = camera.getPose().transformPoint(new float[] {0, -0.24f, -0.72f});
-            replaceAnchor(active.createAnchor(Pose.makeTranslation(point)));
-            listener.onStatus("Table placed in front of you. Tap a real surface to lock it in place.");
         }
     }
 
@@ -147,8 +153,9 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
     }
 
     private void drawTable(Camera camera) {
-        if (tableAnchor == null || tableAnchor.getTrackingState() != TrackingState.TRACKING) return;
-        tableAnchor.getPose().toMatrix(model, 0);
+        Anchor visibleAnchor = tableAnchor != null ? tableAnchor : previewAnchor;
+        if (visibleAnchor == null || visibleAnchor.getTrackingState() != TrackingState.TRACKING) return;
+        visibleAnchor.getPose().toMatrix(model, 0);
         camera.getProjectionMatrix(projection, 0, 0.05f, 20f);
         camera.getViewMatrix(view, 0);
         Matrix.multiplyMM(projectionView, 0, projection, 0, view, 0);
@@ -161,13 +168,21 @@ final class ArTableRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnableVertexAttribArray(position);
         GLES20.glVertexAttribPointer(position, 3, GLES20.GL_FLOAT, false, 0, table);
         GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(tableProgram, "uMvp"), 1, false, mvp, 0);
-        GLES20.glUniform4f(GLES20.glGetUniformLocation(tableProgram, "uColor"), 0.06f, 0.42f, 0.25f, 0.88f);
+        boolean preview = tableAnchor == null;
+        GLES20.glUniform4f(GLES20.glGetUniformLocation(tableProgram, "uColor"), preview ? 0.22f : 0.06f, preview ? 0.85f : 0.42f, preview ? 0.47f : 0.25f, preview ? 0.52f : 0.88f);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(position);
         GLES20.glDisable(GLES20.GL_BLEND);
     }
 
+    private boolean isHorizontalSurface(HitResult hit) {
+        return hit.getTrackable() instanceof Plane
+            && ((Plane) hit.getTrackable()).getType() == Plane.Type.HORIZONTAL_UPWARD_FACING
+            && ((Plane) hit.getTrackable()).isPoseInPolygon(hit.getHitPose());
+    }
     private void replaceAnchor(Anchor anchor) { if (tableAnchor != null) tableAnchor.detach(); tableAnchor = anchor; }
+    private void replacePreviewAnchor(Anchor anchor) { if (previewAnchor != null) previewAnchor.detach(); previewAnchor = anchor; }
+    private void clearPreviewAnchor() { if (previewAnchor != null) previewAnchor.detach(); previewAnchor = null; }
     private void configureDisplayGeometry() {
         Session active = session;
         if (active == null || width == 0 || height == 0) return;
