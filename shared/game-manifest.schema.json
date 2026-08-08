@@ -9,7 +9,7 @@
     "schemaVersion": { "const": 1 },
     "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$" },
     "name": { "type": "string", "minLength": 1, "maxLength": 80 },
-    "archetype": { "enum": ["prompt-draw", "poker", "guess-who"] },
+    "archetype": { "enum": ["prompt-draw", "poker", "guess-who", "dominoes"] },
     "summary": { "type": "string", "maxLength": 280 },
     "players": {
       "type": "object",
@@ -45,7 +45,7 @@
       "additionalProperties": false,
       "required": ["kind", "cards"],
       "properties": {
-        "kind": { "enum": ["classic", "prompts", "characters"] },
+        "kind": { "enum": ["classic", "prompts", "characters", "dominoes"] },
         "cards": {
           "type": "array",
           "items": {

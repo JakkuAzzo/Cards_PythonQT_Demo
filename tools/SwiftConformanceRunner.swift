@@ -9,7 +9,10 @@ struct ConformanceRunner {
         precondition(poker.archetype == .poker)
         precondition(poker.players.maximum == 4)
         precondition(poker.resources.tableDesign == "poker-2")
-        precondition(poker.resources.cardSet == "standard-52")
+        // The creator's documented/default pack is the bundled designed
+        // Classic Pack. `standard-52` remains only as a resource alias for
+        // backwards-compatible manifests.
+        precondition(poker.resources.cardSet == "classic-pack-52")
         precondition(poker.rules.initialHandSize == 2)
         precondition(!poker.capabilities.ar)
 

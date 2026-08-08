@@ -27,7 +27,7 @@ class ContractTests(unittest.TestCase):
         self.assertIn(game["resources"]["tableDesign"], table_ids)
         self.assertIn(game["resources"]["cardBack"], card_back_ids)
         self.assertIn(game["resources"]["cardSet"], card_set_ids)
-        self.assertIn(game["deck"]["kind"], {"classic", "prompts", "characters"})
+        self.assertIn(game["deck"]["kind"], {"classic", "prompts", "characters", "dominoes"})
         self.assertEqual(len({card["id"] for card in game["deck"]["cards"]}), len(game["deck"]["cards"]))
         self.assertTrue(all(card["text"].strip() for card in game["deck"]["cards"]))
         effective_deck_count = 52 if game["deck"]["kind"] == "classic" and not game["deck"]["cards"] else len(game["deck"]["cards"])
@@ -55,7 +55,7 @@ class ContractTests(unittest.TestCase):
         self.assertTrue((repository_root / classic_set["asset"]).is_dir())
         self.assertTrue((repository_root / classic_back["asset"]).is_file())
         table_ids = {item["id"] for item in catalog["tableDesigns"]}
-        self.assertEqual({template["id"] for template in catalog["templates"]}, {"poker-holdem", "guess-who-board", "prompt-table"})
+        self.assertEqual({template["id"] for template in catalog["templates"]}, {"poker-holdem", "guess-who-board", "prompt-table", "double-six-dominoes"})
         self.assertTrue(all(template["tableDesign"] in table_ids for template in catalog["templates"]))
         self.assertTrue(all(template["digitalModes"] == ["combined", "table", "deck"] for template in catalog["templates"]))
 
