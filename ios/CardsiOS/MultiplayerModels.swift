@@ -5,6 +5,7 @@ struct GameManifest: Codable, Equatable, Identifiable {
         case promptDraw = "prompt-draw"
         case poker
         case guessWho = "guess-who"
+        case dominoes
     }
 
     struct PlayerLimits: Codable, Equatable {
@@ -13,7 +14,7 @@ struct GameManifest: Codable, Equatable, Identifiable {
     }
 
     struct Deck: Codable, Equatable {
-        enum Kind: String, Codable { case classic, prompts, characters }
+        enum Kind: String, Codable { case classic, prompts, characters, dominoes }
 
         struct Card: Codable, Equatable, Identifiable {
             let id: String
@@ -114,12 +115,34 @@ struct GameManifest: Codable, Equatable, Identifiable {
         rules: Rules(initialHandSize: 0, drawPerTurn: 1, playPerTurn: 0, turnOrder: .clockwise, winCondition: .deckEmpty),
         presentation: Presentation(accentStartHex: "7C3AED", accentEndHex: "DB2777", supportsAR: true)
     )
+
+    static let dominoes = GameManifest(
+        schemaVersion: 1,
+        id: "double-six-dominoes",
+        name: "Double-Six Dominoes",
+        archetype: .dominoes,
+        summary: "A two-to-four player domino game with a shared table and private hands.",
+        players: PlayerLimits(minimum: 2, maximum: 4),
+        capabilities: Capabilities(multiplayer: true, nearby: true, ar: true),
+        resources: Resources(tableDesign: "domino-yard", cardBack: "minimal-dark", cardSet: "double-six-dominoes"),
+        deck: Deck(kind: .dominoes, cards: dominoDeck),
+        rules: Rules(initialHandSize: 7, drawPerTurn: 1, playPerTurn: 1, turnOrder: .clockwise, winCondition: .manual),
+        presentation: Presentation(accentStartHex: "0F766E", accentEndHex: "0891B2", supportsAR: true)
+    )
+
+    static var dominoDeck: [Deck.Card] {
+        (0...6).flatMap { left in
+            (left...6).map { right in
+                .init(id: "domino-\(left)-\(right)", text: "\(left) | \(right)")
+            }
+        }
+    }
 }
 
 enum ResourceCatalog {
-    static let tableDesignIDs: Set<String> = ["green-classic", "poker-2", "midnight", "guess-grid", "sunset-lounge", "paper-play"]
+    static let tableDesignIDs: Set<String> = ["green-classic", "poker-2", "midnight", "guess-grid", "sunset-lounge", "paper-play", "domino-yard"]
     static let cardBackIDs: Set<String> = ["classic-pack-red", "classic-red", "minimal-dark"]
-    static let cardSetIDs: Set<String> = ["classic-pack-52", "standard-52", "prompt-basic", "classic-characters"]
+    static let cardSetIDs: Set<String> = ["classic-pack-52", "standard-52", "prompt-basic", "classic-characters", "double-six-dominoes"]
 }
 
 struct MultiplayerPlayer: Codable, Equatable, Identifiable {

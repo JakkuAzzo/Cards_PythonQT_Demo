@@ -52,6 +52,43 @@ struct LibraryView: View {
                     }
                 }
 
+                if !store.savedDrafts.isEmpty {
+                    Text("Your created games")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .padding(.top, 8)
+
+                    ForEach(store.savedDrafts) { draft in
+                        HStack(spacing: 10) {
+                            NavigationLink {
+                                CustomGameRuntimeView(manifest: draft)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(draft.name)
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundStyle(AppTheme.textPrimary)
+                                    Text("\(draft.archetype.rawValue) · \(draft.players.minimum)–\(draft.players.maximum) players · saved on this device")
+                                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                                        .foregroundStyle(AppTheme.textSecondary)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(16)
+                                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+
+                            Button(role: .destructive) {
+                                store.removeDraft(draft)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .frame(width: 44, height: 44)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Delete saved game \(draft.name)")
+                        }
+                    }
+                }
+
                 Button {
                     store.loadPacks()
                 } label: {

@@ -1,9 +1,19 @@
 import SwiftUI
 
+/// Purpose: SwiftUI room rendering for each built-in interactive game.
+///
+/// Responsibilities: presents public Table, private Deck, and Combined modes;
+/// routes user intent to game runtime models; and exposes the shared room-sync
+/// and optional AR entry points. The game models in `GameRuntimes.swift` own
+/// rules, and `GameRoomSyncController` owns transport/revision delivery.
+///
+/// Constraint: never add a second source of game state or reveal private room
+/// information from these views. Split game-specific views before adding a
+/// fourth runtime rather than extending this coordinator indefinitely.
 private enum DigitalRoomMode: String, CaseIterable, Identifiable {
     case combined = "Combined"
     case table = "Table"
-    case deck = "Your deck"
+    case deck = "Hands"
 
     var id: String { rawValue }
 }
@@ -17,6 +27,8 @@ struct CustomGameRuntimeView: View {
             PokerRuntimeView(manifest: manifest)
         case .guessWho:
             GuessWhoRuntimeView(manifest: manifest)
+        case .dominoes:
+            DominoesRuntimeView(manifest: manifest)
         case .promptDraw:
             LiveTableView(manifest: manifest)
         }
@@ -30,6 +42,7 @@ private struct PokerRuntimeView: View {
     @State private var showHands = false
     @State private var roomMode: DigitalRoomMode = .combined
     @State private var showingAR = false
+    @State private var cardsAI = false
     @StateObject private var sync = GameRoomSyncController()
 
     var body: some View {
@@ -43,6 +56,8 @@ private struct PokerRuntimeView: View {
                     .foregroundStyle(AppTheme.textSecondary)
 
                 DigitalRoomModePicker(selection: $roomMode)
+                Button(cardsAI ? "Cards AI opponent on" : "Play against Cards AI") { cardsAI.toggle() }
+                    .buttonStyle(TableSecondaryButtonStyle())
                 GameRoomSyncPanel(sync: sync)
                 Button {
                     showingAR = true
@@ -179,6 +194,16 @@ private struct PokerRuntimeView: View {
         default: break
         }
         sync.publish()
+        runAI()
+    }
+
+    private func runAI() {
+        guard cardsAI, !sync.isGuest, game.street != .showdown else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            if self.game.street == .preflop || self.game.street == .flop || self.game.street == .turn { self.game.advanceStreet() }
+            else { self.game.placeBet(for: self.game.players[1].id, amount: 20) }
+            self.sync.publish()
+        }
     }
 
     private func configureSync() {
@@ -209,6 +234,7 @@ private struct GuessWhoRuntimeView: View {
     @State private var roomMode: DigitalRoomMode = .combined
     @State private var showingAR = false
     @State private var revealTarget = false
+    @State private var cardsAI = false
     @StateObject private var sync = GameRoomSyncController()
     private let columns = [GridItem(.adaptive(minimum: 92), spacing: 10)]
 
@@ -223,6 +249,8 @@ private struct GuessWhoRuntimeView: View {
                     .foregroundStyle(AppTheme.textSecondary)
 
                 DigitalRoomModePicker(selection: $roomMode)
+                Button(cardsAI ? "Cards AI opponent on" : "Play against Cards AI") { cardsAI.toggle() }
+                    .buttonStyle(TableSecondaryButtonStyle())
                 GameRoomSyncPanel(sync: sync)
                 Button {
                     showingAR = true
@@ -344,6 +372,20 @@ private struct GuessWhoRuntimeView: View {
         default: break
         }
         sync.publish()
+        runAI()
+    }
+
+    private func runAI() {
+        guard cardsAI, !sync.isGuest, game.winnerName == nil, game.activePlayer != "You" else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            guard self.cardsAI,
+                  self.game.winnerName == nil,
+                  self.game.activePlayer != "You",
+                  let choice = self.game.characters.first(where: { !self.game.eliminated.contains($0.id) }) else { return }
+            self.game.toggleElimination(choice)
+            self.game.askQuestion()
+            self.sync.publish()
+        }
     }
 
     private func configureSync() {
@@ -364,6 +406,250 @@ private struct GuessWhoRuntimeView: View {
             applyPublicState: { data in if let snapshot = try? JSONDecoder().decode(GuessWhoGame.PublicSnapshot.self, from: data) { game.apply(publicSnapshot: snapshot) } },
             applyPrivateState: { data in if let id = try? JSONDecoder().decode(String.self, from: data) { game.applyPrivateTarget(id: id) } }
         )
+    }
+}
+
+private struct DominoesRuntimeView: View {
+    @Environment(\.dismiss) private var dismiss
+    let manifest: GameManifest
+    @StateObject private var game = DominoesGame(playerNames: ["You", "Avery"])
+    @State private var roomMode: DigitalRoomMode = .combined
+    @State private var selectedHand = "You"
+    @State private var selectedTile: DominoesGame.Tile?
+    @State private var cardsAI = false
+    @State private var showingAR = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Text(manifest.name)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppTheme.textPrimary)
+                Text("Two-player local table by default. Take turns placing matching dominoes, then pass the phone for the next hand.")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(AppTheme.textSecondary)
+
+                DigitalRoomModePicker(selection: $roomMode)
+
+                Button(cardsAI ? "Cards AI opponent on" : "Play against Cards AI") {
+                    cardsAI.toggle()
+                    selectedHand = game.activePlayer
+                    runAI()
+                }
+                .buttonStyle(TableSecondaryButtonStyle())
+
+                if roomMode != .deck { dominoTable }
+                if roomMode != .table { handsPage }
+            }
+            .padding(20)
+        }
+        .background(AppTheme.background.ignoresSafeArea())
+        .navigationTitle("Dominoes")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") { dismiss() }.foregroundStyle(AppTheme.accent)
+            }
+        }
+        .sheet(isPresented: $showingAR) {
+            ARTableModeView(
+                card: .init(id: "domino-table", text: "Dominoes · \(game.table.count) tiles on table"),
+                manifest: manifest
+            )
+        }
+    }
+
+    private var dominoTable: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Label(game.isFinished ? "Round complete" : "\(game.activePlayer)’s turn", systemImage: game.isFinished ? "trophy.fill" : "person.crop.circle.fill")
+                Spacer()
+                Label("\(game.boneyard.count) in boneyard", systemImage: "rectangle.stack.fill")
+            }
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .foregroundStyle(AppTheme.accent)
+
+            Text(game.message)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(AppTheme.textSecondary)
+
+            HStack(spacing: 10) {
+                endChip(label: "Left", value: game.leftEnd)
+                Spacer()
+                endChip(label: "Right", value: game.rightEnd)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if game.table.isEmpty {
+                        ContentUnavailableView("Open the table", systemImage: "square.grid.2x2", description: Text("Choose a tile from the Hands page."))
+                            .frame(width: 270, height: 105)
+                    } else {
+                        ForEach(game.table) { placed in
+                            DominoTileView(tile: placed.tile, compact: true)
+                        }
+                    }
+                }
+                .padding(4)
+            }
+            .frame(minHeight: 104)
+            .background(Color.black.opacity(0.18), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+            HStack(spacing: 12) {
+                Button {
+                    game.drawOrPass()
+                    selectedHand = game.activePlayer
+                    runAI()
+                } label: {
+                    Label(game.boneyard.isEmpty ? "Pass" : "Draw tile", systemImage: game.boneyard.isEmpty ? "arrow.right" : "plus.rectangle.on.rectangle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(TableSecondaryButtonStyle())
+                .disabled(game.isFinished)
+
+                Button { showingAR = true } label: {
+                    Label("AR table", systemImage: "arkit")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(TableSecondaryButtonStyle())
+                .disabled(!manifest.presentation.supportsAR)
+            }
+        }
+        .surfaceCard()
+    }
+
+    private var handsPage: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Private hands")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                    Text("Hand the phone to the player whose tiles you want to view.")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+                Spacer()
+                Text("2 players")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppTheme.accent)
+            }
+
+            Picker("Player hand", selection: $selectedHand) {
+                ForEach(game.players, id: \.self) { Text($0).tag($0) }
+            }
+            .pickerStyle(.segmented)
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 78), spacing: 10)], spacing: 10) {
+                ForEach(game.hand(for: selectedHand)) { tile in
+                    Button { selectedTile = tile } label: {
+                        DominoTileView(tile: tile, isSelected: selectedTile == tile)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(tile.left) and \(tile.right) domino")
+                }
+            }
+
+            if selectedHand == game.activePlayer, let selectedTile {
+                VStack(spacing: 10) {
+                    Text("Play \(selectedTile.left)|\(selectedTile.right) on the shared table")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    HStack(spacing: 12) {
+                        Button("Play left") { play(selectedTile, on: .left) }
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(TablePrimaryButtonStyle())
+                            .disabled(!canPlay(selectedTile, on: .left))
+                        Button("Play right") { play(selectedTile, on: .right) }
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(TablePrimaryButtonStyle())
+                            .disabled(!canPlay(selectedTile, on: .right))
+                    }
+                }
+                .padding(.top, 4)
+            } else if selectedHand != game.activePlayer {
+                Label("It’s \(game.activePlayer)’s turn. Pass the phone when ready.", systemImage: "hand.raised.fill")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+
+            Button { game.restart(); selectedTile = nil; selectedHand = game.activePlayer } label: {
+                Label("New round", systemImage: "shuffle")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(TableSecondaryButtonStyle())
+        }
+        .surfaceCard()
+    }
+
+    private func endChip(label: String, value: Int?) -> some View {
+        Label(value.map { "\(label) · \($0)" } ?? "\(label) · —", systemImage: "circle.grid.2x2.fill")
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .foregroundStyle(AppTheme.textPrimary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.08), in: Capsule())
+    }
+
+    private func canPlay(_ tile: DominoesGame.Tile, on end: DominoesGame.End) -> Bool {
+        guard !game.isFinished else { return false }
+        if game.table.isEmpty { return true }
+        return tile.matches(end == .left ? game.leftEnd ?? -1 : game.rightEnd ?? -1)
+    }
+
+    private func play(_ tile: DominoesGame.Tile, on end: DominoesGame.End) {
+        game.play(tile, on: end)
+        selectedTile = nil
+        selectedHand = game.activePlayer
+        runAI()
+    }
+
+    private func runAI() {
+        guard cardsAI, !game.isFinished, game.activePlayer != "You" else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            guard cardsAI, !game.isFinished, game.activePlayer != "You" else { return }
+            let player = game.activePlayer
+            if let tile = game.playableTiles(for: player).first {
+                game.play(tile, on: .right)
+            } else {
+                game.drawOrPass()
+            }
+            selectedTile = nil
+            selectedHand = game.activePlayer
+            runAI()
+        }
+    }
+}
+
+private struct DominoTileView: View {
+    let tile: DominoesGame.Tile
+    var compact = false
+    var isSelected = false
+
+    var body: some View {
+        HStack(spacing: 0) {
+            pipFace(tile.left)
+            Rectangle().fill(Color.black.opacity(0.20)).frame(width: 1)
+            pipFace(tile.right)
+        }
+        .frame(width: compact ? 76 : 92, height: compact ? 50 : 62)
+        .background(Color(red: 0.97, green: 0.95, blue: 0.88), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(isSelected ? AppTheme.accent : Color.black.opacity(0.14), lineWidth: isSelected ? 3 : 1))
+        .shadow(color: .black.opacity(0.18), radius: 5, x: 0, y: 3)
+    }
+
+    private func pipFace(_ value: Int) -> some View {
+        GeometryReader { proxy in
+            let positions: [(CGFloat, CGFloat)] = [(0.25, 0.22), (0.75, 0.22), (0.25, 0.50), (0.75, 0.50), (0.25, 0.78), (0.75, 0.78)]
+            ZStack {
+                ForEach(0..<value, id: \.self) { index in
+                    let point = positions[value == 1 ? 2 : index]
+                    Circle()
+                        .fill(AppTheme.ink)
+                        .frame(width: compact ? 7 : 8, height: compact ? 7 : 8)
+                        .position(x: proxy.size.width * point.0, y: proxy.size.height * point.1)
+                }
+            }
+        }
     }
 }
 

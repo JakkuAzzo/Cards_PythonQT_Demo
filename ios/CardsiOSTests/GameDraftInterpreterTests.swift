@@ -57,4 +57,21 @@ final class GameDraftInterpreterTests: XCTestCase {
             XCTAssertEqual(error as? GameDraftInterpreter.DraftError, .invalidPlayerRange)
         }
     }
+
+    @MainActor
+    func testPackStorePersistsAndRemovesSavedDraftsLocally() {
+        let suiteName = "CardsiOSTests.saved-drafts"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        let store = PackStore(defaults: defaults)
+
+        store.saveDraft(.dominoes)
+        XCTAssertEqual(store.savedDrafts.map(\.id), ["double-six-dominoes"])
+
+        let restored = PackStore(defaults: defaults)
+        XCTAssertEqual(restored.savedDrafts.map(\.id), ["double-six-dominoes"])
+        restored.removeDraft(.dominoes)
+        XCTAssertTrue(restored.savedDrafts.isEmpty)
+        defaults.removePersistentDomain(forName: suiteName)
+    }
 }

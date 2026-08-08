@@ -30,3 +30,7 @@ The creator produces data, not Swift code. It selects from `ResourceCatalog`, ap
 ## Production nearby work
 
 `AppleNearbyTransport` supports encrypted Apple-to-Apple sessions. Poker and Guess Who now expose host/join controls and bind their public snapshots plus recipient-only hands/targets through the shared room layer. `BluetoothLETransport` adds encrypted cross-platform BLE framing for a nearby room. The remaining work is Android room binding and real-device iPhone/Android BLE validation. Print the [`cards-table-marker-v1`](../docs/ar-marker/README.md) at 100% scale to test shared AR; every phone anchors locally to it rather than sending incompatible AR-world coordinates.
+
+Read [the iOS agent guide](AGENTS.md) before modifying a game room, transport,
+or AR surface; the repository-level data flow is in
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).

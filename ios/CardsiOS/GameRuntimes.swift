@@ -1,6 +1,15 @@
 import Foundation
 import Combine
 
+/// Purpose: local, deterministic state models for the supported game rooms.
+///
+/// Responsibilities: Poker, Guess Who, and Dominoes rules, turn progression,
+/// public snapshots, and deterministic solo-AI decisions. SwiftUI views render
+/// these models but must not duplicate their rule decisions. Network adapters
+/// serialize only their public data plus recipient-only private state.
+///
+/// Constraint: a gameplay-rule change here normally needs matching Android
+/// behaviour and conformance/regression tests; AR remains a presentation layer.
 @MainActor
 final class PokerGame: ObservableObject {
     enum Street: String, CaseIterable, Codable {
@@ -54,6 +63,7 @@ final class PokerGame: ObservableObject {
     @Published private(set) var actionMessage = "Deal a hand to begin."
 
     private var deck: [PlayingCard] = []
+    private var winnerIndexes: [Int] = []
 
     struct PublicSnapshot: Codable, Equatable {
         struct PlayerState: Codable, Equatable { let chips: Int; let folded: Bool }
@@ -62,6 +72,7 @@ final class PokerGame: ObservableObject {
         let pot: Int
         let dealerIndex: Int
         let players: [PlayerState]
+        let winnerIndexes: [Int]
         let actionMessage: String
     }
 
@@ -71,9 +82,10 @@ final class PokerGame: ObservableObject {
     }
 
     var winner: Player? {
-        guard street == .showdown else { return nil }
-        return activePlayers.max { score(for: $0) < score(for: $1) }
+        winners.first
     }
+
+    var winners: [Player] { winnerIndexes.compactMap { players.indices.contains($0) ? players[$0] : nil } }
 
     var activePlayers: [Player] { players.filter { !$0.folded } }
 
@@ -82,6 +94,7 @@ final class PokerGame: ObservableObject {
         communityCards = []
         street = .preflop
         pot = 0
+        winnerIndexes = []
         players.indices.forEach { index in
             players[index].hand = [drawCard(), drawCard()]
             players[index].folded = false
@@ -105,7 +118,7 @@ final class PokerGame: ObservableObject {
             actionMessage = "The river card is on the table."
         case .river:
             street = .showdown
-            if let winner { actionMessage = "\(winner.name) wins with \(score(for: winner).label)." }
+            settlePot(with: showdownWinnerIndexes())
         case .showdown:
             dealerIndex = (dealerIndex + 1) % max(players.count, 1)
             deal()
@@ -130,14 +143,15 @@ final class PokerGame: ObservableObject {
         players[index].folded = true
         if activePlayers.count == 1, let winner = activePlayers.first {
             street = .showdown
-            actionMessage = "\(winner.name) takes the pot after the fold."
+            guard let winnerIndex = players.firstIndex(where: { $0.id == winner.id }) else { return }
+            settlePot(with: [winnerIndex], description: "\(winner.name) takes the pot after the fold.")
         } else {
             actionMessage = "\(players[index].name) folded."
         }
     }
 
     func publicSnapshot() -> PublicSnapshot {
-        PublicSnapshot(street: street, communityCards: communityCards, pot: pot, dealerIndex: dealerIndex, players: players.map { .init(chips: $0.chips, folded: $0.folded) }, actionMessage: actionMessage)
+        PublicSnapshot(street: street, communityCards: communityCards, pot: pot, dealerIndex: dealerIndex, players: players.map { .init(chips: $0.chips, folded: $0.folded) }, winnerIndexes: winnerIndexes, actionMessage: actionMessage)
     }
 
     func apply(publicSnapshot: PublicSnapshot) {
@@ -146,6 +160,7 @@ final class PokerGame: ObservableObject {
         communityCards = publicSnapshot.communityCards
         pot = publicSnapshot.pot
         dealerIndex = min(max(publicSnapshot.dealerIndex, 0), max(players.count - 1, 0))
+        winnerIndexes = publicSnapshot.winnerIndexes.filter { players.indices.contains($0) }
         actionMessage = publicSnapshot.actionMessage
         for index in players.indices {
             players[index].chips = publicSnapshot.players[index].chips
@@ -164,6 +179,34 @@ final class PokerGame: ObservableObject {
         return Self.combinations(of: cards, choose: 5)
             .map(Self.score)
             .max() ?? HandScore(category: 0, values: [])
+    }
+
+    private func showdownWinnerIndexes() -> [Int] {
+        let eligible = players.indices.filter { !players[$0].folded }
+        guard let best = eligible.map({ score(for: players[$0]) }).max() else { return [] }
+        return eligible.filter { score(for: players[$0]) == best }
+    }
+
+    private func settlePot(with indexes: [Int], description: String? = nil) {
+        guard !indexes.isEmpty else { return }
+        winnerIndexes = indexes
+        let total = pot
+        let share = total / indexes.count
+        var remainder = total % indexes.count
+        for index in indexes {
+            players[index].chips += share + (remainder > 0 ? 1 : 0)
+            if remainder > 0 { remainder -= 1 }
+        }
+        pot = 0
+        if let description {
+            actionMessage = description
+        } else {
+            let names = indexes.map { players[$0].name }.joined(separator: ", ")
+            let hand = score(for: players[indexes[0]]).label.lowercased()
+            actionMessage = indexes.count == 1
+                ? "\(names) wins \(total) chips with \(hand)."
+                : "\(names) split \(total) chips with \(hand)."
+        }
     }
 
     static func score(_ cards: [PlayingCard]) -> HandScore {
@@ -307,4 +350,169 @@ final class GuessWhoGame: ObservableObject {
     }
 
     static let defaultNames = ["Alex", "Blair", "Casey", "Drew", "Emery", "Frankie", "Gray", "Harper", "Indigo", "Jules", "Kai", "Lane"]
+}
+
+@MainActor
+final class DominoesGame: ObservableObject {
+    struct Tile: Identifiable, Equatable {
+        let left: Int
+        let right: Int
+
+        var id: String { "domino-\(min(left, right))-\(max(left, right))" }
+        var pips: Int { left + right }
+        func matches(_ value: Int) -> Bool { left == value || right == value }
+    }
+
+    enum End: String, CaseIterable, Identifiable { case left, right; var id: String { rawValue } }
+
+    struct PlacedTile: Identifiable, Equatable {
+        let id = UUID()
+        let tile: Tile
+        let exposedLeft: Int
+        let exposedRight: Int
+    }
+
+    @Published private(set) var players: [String]
+    @Published private(set) var hands: [[Tile]]
+    @Published private(set) var boneyard: [Tile] = []
+    @Published private(set) var table: [PlacedTile] = []
+    @Published private(set) var activePlayerIndex = 0
+    @Published private(set) var winnerName: String?
+    @Published private(set) var scores: [String: Int] = [:]
+    @Published private(set) var message = "Deal the tiles, then play from either end of the table."
+    private var consecutivePasses = 0
+    private let deckOrder: [Tile]?
+
+    /// `deckOrder` provides deterministic local/test rounds. Production passes
+    /// nil and receives a freshly shuffled double-six set.
+    init(playerNames: [String], deckOrder: [Tile]? = nil) {
+        let names = Array(playerNames.prefix(4))
+        precondition(names.count >= 2, "Dominoes needs at least two players.")
+        if let deckOrder { precondition(deckOrder.count >= names.count * 7, "Dominoes deck must deal seven tiles to every player.") }
+        players = names
+        hands = Array(repeating: [], count: names.count)
+        self.deckOrder = deckOrder
+        restart()
+    }
+
+    var activePlayer: String { players[activePlayerIndex] }
+    var leftEnd: Int? { table.first?.exposedLeft }
+    var rightEnd: Int? { table.last?.exposedRight }
+    var isFinished: Bool { winnerName != nil }
+    var activeScore: Int { scores[activePlayer, default: 0] }
+
+    func hand(for player: String) -> [Tile] {
+        guard let index = players.firstIndex(of: player) else { return [] }
+        return hands[index]
+    }
+
+    func playableTiles(for player: String) -> [Tile] {
+        let hand = hand(for: player)
+        guard let leftEnd, let rightEnd else {
+            guard player == activePlayer else { return [] }
+            return hand.filter { $0.id == openingTileID }
+        }
+        return hand.filter { $0.matches(leftEnd) || $0.matches(rightEnd) }
+    }
+
+    func play(_ tile: Tile, on end: End) {
+        guard !isFinished,
+              let playerIndex = players.firstIndex(of: activePlayer),
+              hands[playerIndex].contains(tile) else { return }
+
+        if table.isEmpty, tile.id == openingTileID {
+            table = [.init(tile: tile, exposedLeft: tile.left, exposedRight: tile.right)]
+        } else if table.isEmpty {
+            message = "Open with the highest double in the active hand."
+            return
+        } else if end == .left, let target = leftEnd, tile.matches(target) {
+            let outer = tile.left == target ? tile.right : tile.left
+            table.insert(.init(tile: tile, exposedLeft: outer, exposedRight: target), at: 0)
+        } else if end == .right, let target = rightEnd, tile.matches(target) {
+            let outer = tile.left == target ? tile.right : tile.left
+            table.append(.init(tile: tile, exposedLeft: target, exposedRight: outer))
+        } else {
+            message = "That tile does not match the \(end.rawValue) end."
+            return
+        }
+
+        hands[playerIndex].removeAll { $0 == tile }
+        consecutivePasses = 0
+        if hands[playerIndex].isEmpty {
+            winnerName = activePlayer
+            let awarded = hands.enumerated().filter { $0.offset != playerIndex }.flatMap(\.element).reduce(0) { $0 + $1.pips }
+            scores[activePlayer, default: 0] += awarded
+            message = "\(activePlayer) played every tile and scores \(awarded) points."
+        } else {
+            message = "\(activePlayer) played \(tile.left)|\(tile.right)."
+            advanceTurn()
+        }
+    }
+
+    func drawOrPass() {
+        guard !isFinished else { return }
+        guard playableTiles(for: activePlayer).isEmpty else { message = "A legal tile is available; place it instead of drawing."; return }
+        while !boneyard.isEmpty, playableTiles(for: activePlayer).isEmpty { hands[activePlayerIndex].append(boneyard.removeFirst()) }
+        if playableTiles(for: activePlayer).isEmpty {
+            consecutivePasses += 1
+            if consecutivePasses >= players.count {
+                finishBlockedRound()
+            } else {
+                message = "No legal tile remains. \(activePlayer) passes."
+                advanceTurn()
+            }
+        }
+        else { message = "\(activePlayer) drew until a legal tile was available." }
+    }
+
+    func restart() {
+        var deck = deckOrder ?? Self.doubleSixSet().shuffled()
+        hands = []
+        for _ in players {
+            hands.append(Array(deck.prefix(7)))
+            deck.removeFirst(min(7, deck.count))
+        }
+        boneyard = deck
+        table = []
+        winnerName = nil
+        consecutivePasses = 0
+        scores = Dictionary(uniqueKeysWithValues: players.map { ($0, scores[$0, default: 0]) })
+        activePlayerIndex = openingPlayerIndex()
+        message = "\(activePlayer) starts with \(openingTileID.replacingOccurrences(of: "domino-", with: "").replacingOccurrences(of: "-", with: "|"))."
+    }
+
+    private func advanceTurn() {
+        activePlayerIndex = (activePlayerIndex + 1) % players.count
+        message += " \(activePlayer)’s turn."
+    }
+
+    private func finishBlockedRound() {
+        guard let winnerIndex = hands.indices.min(by: { handPips(at: $0) < handPips(at: $1) }) else { return }
+        let winner = players[winnerIndex]
+        let awarded = hands.indices.filter { $0 != winnerIndex }.reduce(0) { total, index in total + handPips(at: index) }
+        scores[winner, default: 0] += awarded
+        activePlayerIndex = winnerIndex
+        winnerName = winner
+        message = "Blocked round. \(winner) has the lowest hand and scores \(awarded) points."
+    }
+
+    private func handPips(at index: Int) -> Int { hands[index].reduce(0) { $0 + $1.pips } }
+
+    private var openingTileID: String {
+        for value in stride(from: 6, through: 0, by: -1) {
+            if let tile = hands[activePlayerIndex].first(where: { $0.left == value && $0.right == value }) { return tile.id }
+        }
+        return hands[activePlayerIndex].first?.id ?? ""
+    }
+
+    private func openingPlayerIndex() -> Int {
+        for value in stride(from: 6, through: 0, by: -1) {
+            if let index = hands.indices.first(where: { hands[$0].contains(where: { $0.left == value && $0.right == value }) }) { return index }
+        }
+        return 0
+    }
+
+    static func doubleSixSet() -> [Tile] {
+        (0...6).flatMap { left in (left...6).map { Tile(left: left, right: $0) } }
+    }
 }

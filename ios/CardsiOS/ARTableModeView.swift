@@ -41,7 +41,7 @@ struct ARTableModeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Place ahead", systemImage: "viewfinder") { placementRequest += 1 }
+                    Button("Preview ahead", systemImage: "viewfinder") { placementRequest += 1 }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
@@ -87,6 +87,7 @@ private struct ARTableContainer: UIViewRepresentable {
         let manifest: GameManifest
         var lastPlacementRequest = 0
         private var placedAnchor: AnchorEntity?
+        private var previewAnchor: AnchorEntity?
         @Binding private var markerStatus: String
 
         init(card: GameManifest.Deck.Card?, manifest: GameManifest, markerStatus: Binding<String>) {
@@ -113,18 +114,36 @@ private struct ARTableContainer: UIViewRepresentable {
             let point = camera * SIMD4<Float>(0, -0.24, -0.72, 1)
             var transform = camera
             transform.columns.3 = SIMD4<Float>(point.x, point.y, point.z, 1)
-            placeTable(at: transform, status: "Table placed in front of you. Tap a surface to lock it to a real table.")
+            placePreview(at: transform, status: "Table previewed ahead. Look it over, then tap a detected surface to lock it in place.")
         }
 
         private func placeTable(at transform: simd_float4x4, status: String) {
             guard let view else { return }
             if let placedAnchor { view.scene.removeAnchor(placedAnchor) }
+            if let previewAnchor { view.scene.removeAnchor(previewAnchor) }
+            let anchor = tableAnchor(at: transform, preview: false)
+            view.scene.addAnchor(anchor)
+            placedAnchor = anchor
+            previewAnchor = nil
+            markerStatus = status
+        }
+
+        private func placePreview(at transform: simd_float4x4, status: String) {
+            guard let view else { return }
+            if let previewAnchor { view.scene.removeAnchor(previewAnchor) }
+            let anchor = tableAnchor(at: transform, preview: true)
+            view.scene.addAnchor(anchor)
+            previewAnchor = anchor
+            markerStatus = status
+        }
+
+        private func tableAnchor(at transform: simd_float4x4, preview: Bool) -> AnchorEntity {
             let anchor = AnchorEntity(world: transform)
             let table = ModelEntity(
                 mesh: .generatePlane(width: 0.62, depth: 0.42, cornerRadius: 0.03),
-                materials: [SimpleMaterial(color: .init(red: 0.05, green: 0.25, blue: 0.16, alpha: 0.86), isMetallic: false)]
+                materials: [SimpleMaterial(color: .init(red: preview ? 0.14 : 0.05, green: preview ? 0.72 : 0.25, blue: preview ? 0.38 : 0.16, alpha: preview ? 0.48 : 0.86), isMetallic: false)]
             )
-            table.name = "digital-table"
+            table.name = preview ? "table-preview" : "digital-table"
             anchor.addChild(table)
             let cardEntity = ModelEntity(
                 mesh: .generateBox(width: 0.12, height: 0.004, depth: 0.18, cornerRadius: 0.012),
@@ -133,9 +152,7 @@ private struct ARTableContainer: UIViewRepresentable {
             cardEntity.name = "current-card"
             cardEntity.position = [0, 0.004, 0]
             anchor.addChild(cardEntity)
-            view.scene.addAnchor(anchor)
-            placedAnchor = anchor
-            markerStatus = status
+            return anchor
         }
 
         func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {

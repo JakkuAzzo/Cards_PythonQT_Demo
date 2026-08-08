@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CreatorView: View {
+    @EnvironmentObject private var store: PackStore
     @State private var description = """
     idea: four-player poker night
     multiplayer: y
@@ -100,6 +101,15 @@ struct CreatorView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(CreatorSecondaryButtonStyle())
+
+            Button {
+                store.saveDraft(manifest)
+            } label: {
+                Label("Save to your library", systemImage: "bookmark.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(CreatorSecondaryButtonStyle())
+            .accessibilityHint("Saves this validated game configuration on this device")
         }
         .surfaceCard()
     }
