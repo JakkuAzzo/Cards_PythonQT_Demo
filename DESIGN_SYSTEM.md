@@ -1,8 +1,17 @@
 # Cards mobile design specification
 
+The implementation target is [`docs/design/cards-mobile-wireframe.png`](docs/design/cards-mobile-wireframe.png), with the editable source in
+[`docs/design/cards-mobile-wireframe.svg`](docs/design/cards-mobile-wireframe.svg).
+The values below are mirrored in [`shared/design-tokens.json`](shared/design-tokens.json);
+update the token file first when a cross-platform value changes.
+
 ## Product structure
 
 The permanent navigation is Home, Library, Table, Create, and Discover. Home starts solo play; Library selects installed games and packs; Table owns nearby play; Create makes validated templates; Discover promotes included and future packs.
+
+Navigation uses one floating dock inset from the screen edges. Inactive
+destinations are icon-only; the selected destination gets a single capsule,
+accent color, and short label. Do not render five equal-width text buttons.
 
 ## Visual tokens
 
@@ -18,6 +27,11 @@ The permanent navigation is Home, Library, Table, Create, and Discover. Home sta
 | Secondary text | `#BEC6D5` | Supporting copy |
 
 Use 20–24dp continuous corners for surfaces, 16–18dp for controls, 48dp minimum touch targets, and 8dp spacing increments.
+
+These rules were checked against the iOS home/live-table captures and the web
+mobile capture in [`docs/design/README.md`](docs/design/README.md). The native
+shells may use platform-native controls, but their hierarchy, labels, spacing,
+and semantic colors must remain equivalent.
 
 ## Game surfaces
 

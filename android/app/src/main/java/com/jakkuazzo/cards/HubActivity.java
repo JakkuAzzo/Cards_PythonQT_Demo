@@ -28,6 +28,10 @@ import java.util.List;
 public final class HubActivity extends Activity {
     private static final int HOME = 0, LIBRARY = 1, TABLE = 2, CREATE = 3, DISCOVER = 4;
     private static final String DRAFTS_KEY = "saved_creator_drafts";
+    private static final int NAV_DOCK = Color.rgb(21, 26, 35);
+    private static final int NAV_ACTIVE = Color.rgb(43, 55, 69);
+    private static final int NAV_MUTED = Color.rgb(137, 147, 164);
+    private static final int GOLD = Color.rgb(245, 183, 43);
     private LinearLayout page, nav;
     private int tab = HOME;
 
@@ -38,15 +42,17 @@ public final class HubActivity extends Activity {
         ScrollView scroll = new ScrollView(this); scroll.setFillViewport(true);
         page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL); page.setPadding(dp(20), dp(20), dp(20), dp(20)); scroll.addView(page);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        nav = new LinearLayout(this); nav.setOrientation(LinearLayout.HORIZONTAL); nav.setPadding(dp(8), dp(7), dp(8), dp(12)); nav.setBackgroundColor(Color.rgb(18, 21, 30));
-        root.addView(nav, new LinearLayout.LayoutParams(-1, -2)); return root;
+        nav = new LinearLayout(this); nav.setOrientation(LinearLayout.HORIZONTAL); nav.setGravity(Gravity.CENTER_VERTICAL); nav.setPadding(dp(7), dp(6), dp(7), dp(6)); nav.setBackground(background(NAV_DOCK, 26));
+        LinearLayout.LayoutParams navParams = new LinearLayout.LayoutParams(-1, dp(68)); navParams.setMargins(dp(12), dp(8), dp(12), dp(12));
+        root.addView(nav, navParams); return root;
     }
 
     private void render() {
         page.removeAllViews(); nav.removeAllViews();
         if (tab == HOME) home(); else if (tab == LIBRARY) library(); else if (tab == TABLE) table(); else if (tab == CREATE) create(); else discover();
         String[] labels = {"Home", "Library", "Table", "Create", "Discover"};
-        for (int i = 0; i < labels.length; i++) { final int next = i; Button b = button(labels[i], i == tab, 12); b.setOnClickListener(v -> { tab = next; render(); }); nav.addView(b, new LinearLayout.LayoutParams(0, dp(48), 1)); }
+        String[] icons = {"⌂", "▣", "♟", "+", "✦"};
+        for (int i = 0; i < labels.length; i++) { final int next = i; nav.addView(navItem(labels[i], icons[i], i == tab, () -> { tab = next; render(); }), new LinearLayout.LayoutParams(0, dp(56), 1)); }
     }
 
     private void home() {
@@ -101,7 +107,8 @@ public final class HubActivity extends Activity {
     private void title(String value) { TextView v = text(value, 33, Color.WHITE); v.setTypeface(null, Typeface.BOLD); v.setPadding(0, dp(7), 0, 0); page.addView(v); }
     private void heading(String value) { TextView v = text(value, 19, Color.WHITE); v.setTypeface(null, Typeface.BOLD); page.addView(v); }
     private void body(String value) { TextView v = text(value, 15, Color.rgb(190, 198, 213)); v.setPadding(0, dp(8), 0, 0); page.addView(v); }
-    private Button button(String value, boolean primary, int size) { Button v = new Button(this); v.setText(value); v.setAllCaps(false); v.setTextSize(size); v.setTextColor(primary ? Color.rgb(8, 20, 18) : Color.WHITE); v.setGravity(Gravity.CENTER); v.setPadding(dp(8), 0, dp(8), 0); v.setBackground(background(primary ? Color.rgb(70, 220, 170) : Color.rgb(51, 67, 99), 18)); return v; }
+    private Button button(String value, boolean primary, int size) { Button v = new Button(this); v.setText(value); v.setAllCaps(false); v.setTextSize(size); v.setTypeface(Typeface.create("sans-serif", Typeface.BOLD)); v.setTextColor(primary ? Color.rgb(8, 20, 18) : Color.WHITE); v.setGravity(Gravity.CENTER); v.setPadding(dp(8), 0, dp(8), 0); v.setMinHeight(dp(48)); v.setStateListAnimator(null); v.setBackground(background(primary ? Color.rgb(70, 220, 170) : Color.rgb(51, 67, 99), 18)); return v; }
+    private LinearLayout navItem(String label, String icon, boolean active, Runnable action) { LinearLayout item = new LinearLayout(this); item.setOrientation(LinearLayout.VERTICAL); item.setGravity(Gravity.CENTER); item.setPadding(dp(2), dp(3), dp(2), dp(3)); if (active) item.setBackground(background(NAV_ACTIVE, 20)); item.setOnClickListener(v -> action.run()); TextView glyph = text(icon, 17, active ? GOLD : NAV_MUTED); glyph.setGravity(Gravity.CENTER); item.addView(glyph, new LinearLayout.LayoutParams(-1, active ? dp(25) : dp(50))); if (active) { TextView caption = text(label, 9, GOLD); caption.setTypeface(Typeface.create("sans-serif", Typeface.BOLD)); caption.setGravity(Gravity.CENTER); item.addView(caption, new LinearLayout.LayoutParams(-1, dp(17))); } return item; }
     private LinearLayout card(int color, int radius) { LinearLayout v = new LinearLayout(this); v.setOrientation(LinearLayout.VERTICAL); v.setPadding(dp(18), dp(18), dp(18), dp(18)); v.setBackground(background(color, radius)); return v; }
     private GradientDrawable background(int color, int radius) { GradientDrawable d = new GradientDrawable(); d.setColor(color); d.setCornerRadius(dp(radius)); return d; }
     private LinearLayout.LayoutParams full() { LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2); p.setMargins(0, dp(6), 0, dp(6)); return p; }

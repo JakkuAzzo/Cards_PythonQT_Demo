@@ -2,6 +2,8 @@
 
 Cards is a local-first platform for creating and playing card games on iPhone and Android. A game is a small validated manifest that selects a known gameplay template, bundled card resources, multiplayer capabilities, and a table design. The same deterministic state drives conventional screens and optional AR tables.
 
+The cross-platform mobile shell is documented in the [design board](docs/design/cards-mobile-wireframe.png), with editable SVG source, shared tokens, screenshot assessment, and production asset references in [`docs/design/README.md`](docs/design/README.md).
+
 There is deliberately no large store and no general code-generating AI. The creator is a lightweight classifier and configuration interpreter: it recognises a game family, chooses tested defaults, applies explicit overrides, and rejects unknown resources.
 
 For module ownership, entry points, state flow, and safe extension points, read

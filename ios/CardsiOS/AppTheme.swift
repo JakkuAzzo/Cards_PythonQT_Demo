@@ -13,6 +13,10 @@ enum AppTheme {
 
     static let surface = Color.white.opacity(0.08)
     static let surfaceStrong = Color.white.opacity(0.14)
+    static let navDock = Color(red: 0.082, green: 0.102, blue: 0.137)
+    static let navDockStroke = Color(red: 0.224, green: 0.271, blue: 0.333)
+    static let navActive = Color(red: 0.169, green: 0.216, blue: 0.271)
+    static let navMuted = Color(red: 0.537, green: 0.576, blue: 0.643)
     static let accent = Color(red: 0.95, green: 0.70, blue: 0.18)
     static let mint = Color(red: 0.10, green: 0.78, blue: 0.68)
     static let ink = Color(red: 0.025, green: 0.035, blue: 0.065)

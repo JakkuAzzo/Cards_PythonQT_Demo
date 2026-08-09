@@ -19,7 +19,9 @@ struct HomeView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
-            .padding(.bottom, 24)
+            // Leave room for the floating root dock so the stats card never sits
+            // underneath navigation on the initial viewport.
+            .padding(.bottom, 100)
         }
         .navigationTitle("Cards")
         .navigationBarTitleDisplayMode(.inline)
