@@ -8,6 +8,13 @@ struct ShopView: View {
             VStack(alignment: .leading, spacing: 18) {
                 header
 
+                NavigationLink {
+                    CustomGameRuntimeView(manifest: .dominoes)
+                } label: {
+                    dominoesCard
+                }
+                .buttonStyle(.plain)
+
                 ForEach(store.packs.filter(\.featured)) { pack in
                     Button {
                         store.select(pack)
@@ -40,10 +47,42 @@ struct ShopView: View {
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
 
-            Text("Included decks worth trying next.")
+            Text("Included games and decks worth trying next.")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
         }
+    }
+
+    private var dominoesCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 7) {
+                    Label("NEW BUILT-IN GAME", systemImage: "square.grid.2x2.fill")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .tracking(1)
+                        .foregroundStyle(.white.opacity(0.76))
+                    Text("Double-Six Dominoes")
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("Place matching tiles on a shared table. Each player gets a private hand view.")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.76))
+                }
+                Spacer()
+                DominoesDiscoverTile(left: 6, right: 4)
+            }
+
+            HStack {
+                Label("2–4 players", systemImage: "person.2.fill")
+                Spacer()
+                Label("Play now", systemImage: "arrow.right.circle.fill")
+            }
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.90))
+        }
+        .padding(18)
+        .background(LinearGradient(colors: [Color(hex: "0F766E"), Color(hex: "0891B2")], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1))
     }
 
     private func featuredCard(_ pack: PackRecord) -> some View {
@@ -78,5 +117,23 @@ struct ShopView: View {
             }
         }
         .surfaceCard()
+    }
+}
+
+private struct DominoesDiscoverTile: View {
+    let left: Int
+    let right: Int
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Text("\(left)")
+            Rectangle().fill(Color.black.opacity(0.18)).frame(width: 1)
+            Text("\(right)")
+        }
+        .font(.system(size: 22, weight: .bold, design: .rounded))
+        .foregroundStyle(AppTheme.ink)
+        .frame(width: 72, height: 50)
+        .background(Color(red: 0.97, green: 0.95, blue: 0.88), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .rotationEffect(.degrees(8))
     }
 }

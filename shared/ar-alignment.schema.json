@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cards.local/schemas/ar-alignment.schema.json",
+  "title": "Cards Shared AR Marker Alignment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["markerID", "markerWidthMetres", "revision", "status"],
+  "properties": {
+    "markerID": { "const": "cards-table-marker-v1" },
+    "markerWidthMetres": { "type": "number", "minimum": 0.08, "maximum": 0.5 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["ready", "lost"] }
+  }
+}

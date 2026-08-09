@@ -2,9 +2,9 @@ name: Verify Cards
 
 on:
   push:
-    branches: [xcode]
+    branches: [main]
   pull_request:
-    branches: [xcode]
+    branches: [main]
 
 permissions:
   contents: read
@@ -26,13 +26,15 @@ jobs:
       - name: Verify preview assets and response
         run: |
           test -f web/index.html
+          test -f web/privacy.html
           test -f web/assets/icon.svg
           test -f web/assets/logo-mark.svg
           python3 -m http.server 4173 --directory web >/tmp/cards-web.log 2>&1 &
           server=$!
           trap 'kill "$server"' EXIT
           for attempt in 1 2 3 4 5; do
-            if curl --fail --silent http://127.0.0.1:4173/ | grep -Fq "Cards - local table games"; then
+            if curl --fail --silent http://127.0.0.1:4173/ | grep -Fq "Cards — local multiplayer, real tables" \
+              && curl --fail --silent http://127.0.0.1:4173/privacy.html | grep -Fq "Cards v1 is local-first"; then
               exit 0
             fi
             sleep 1
@@ -62,7 +64,6 @@ jobs:
           java-version: "17"
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.1.1"
       - run: yes | sdkmanager "platforms;android-33" "build-tools;33.0.2"
-      - run: gradle -p android assembleDebug
+      - run: ./gradlew --no-daemon :app:assembleDebug
+        working-directory: android

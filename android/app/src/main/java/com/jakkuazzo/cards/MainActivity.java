@@ -3,9 +3,12 @@ package com.jakkuazzo.cards;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -19,6 +22,8 @@ import android.widget.TextView;
 import com.jakkuazzo.cards.core.GameState;
 import com.jakkuazzo.cards.core.MultiplayerEngine;
 import com.jakkuazzo.cards.nearby.GameSnapshotCodec;
+import com.jakkuazzo.cards.nearby.BLEEnvelopeCipher;
+import com.jakkuazzo.cards.nearby.BluetoothGattTransport;
 import com.jakkuazzo.cards.nearby.NearbyConnectionsTransport;
 import com.jakkuazzo.cards.nearby.NearbyEnvelope;
 
@@ -28,7 +33,18 @@ import org.json.JSONObject;
 import java.util.Locale;
 import java.util.UUID;
 
-public final class MainActivity extends Activity implements NearbyConnectionsTransport.Listener {
+/**
+ * Purpose: legacy Android entry for creating and joining a generic nearby
+ * table.
+ *
+ * Relationships: {@link HubActivity} is the launcher and opens this activity
+ * from its Table destination. The transport adapters own discovery and bytes;
+ * this activity only drives the generic table UI and engine.
+ *
+ * Constraint: retain its public/private snapshot and connection-state checks
+ * while the controls are migrated into the persistent Hub table experience.
+ */
+public final class MainActivity extends Activity implements NearbyConnectionsTransport.Listener, BluetoothGattTransport.Listener {
     private final MultiplayerEngine engine = new MultiplayerEngine();
     private final String localPlayerId = UUID.randomUUID().toString();
     private final String localName = "Android player";
@@ -37,12 +53,17 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     private LinearLayout sessionControls;
     private LinearLayout actions;
     private EditText joinCode;
+    private EditText bluetoothSecret;
     private NearbyConnectionsTransport nearby;
+    private BluetoothGattTransport bluetooth;
+    private boolean bluetoothMode;
     private boolean hosting;
     private boolean localPreview;
     private String sessionCode = "";
     private int guestNumber = 1;
+    private int nearbyPeerCount;
     private String connectionMessage = "Choose a nearby table or start a one-device preview.";
+    private String bluetoothPairingSecret = "";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,31 +74,52 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
 
     private View buildContent() {
         ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Color.rgb(8, 10, 16));
+        scroll.setFillViewport(true);
+        scroll.setBackgroundColor(Color.rgb(10, 14, 24));
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(20), dp(32), dp(20), dp(32));
+        content.setPadding(dp(20), dp(28), dp(20), dp(28));
 
-        TextView title = text("Live Table", 30, Color.WHITE);
+        TextView eyebrow = text("CARDS · NEARBY PLAY", 12, Color.rgb(108, 221, 183));
+        eyebrow.setLetterSpacing(0.12f);
+        content.addView(eyebrow);
+        TextView title = text("Choose a table.\nBring friends.", 32, Color.WHITE);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setPadding(0, dp(7), 0, 0);
         content.addView(title);
-        TextView subtitle = text("Host a nearby Table Talk game, or keep play on one device.", 15, Color.LTGRAY);
-        subtitle.setPadding(0, dp(6), 0, dp(14));
+        TextView subtitle = text("Start with a familiar game, play together on one phone, or create a verified nearby table.", 16, Color.rgb(190, 198, 213));
+        subtitle.setPadding(0, dp(10), 0, dp(22));
         content.addView(subtitle);
 
+        content.addView(sectionTitle("PLAY A GAME"));
+        LinearLayout templates = new LinearLayout(this);
+        templates.setOrientation(LinearLayout.HORIZONTAL);
+        Button poker = button("♠  Poker", true);
+        poker.setOnClickListener(view -> openGameRoom("poker"));
+        templates.addView(poker, new LinearLayout.LayoutParams(0, -2, 1));
+        Button guess = button("?  Guess Who", false);
+        guess.setOnClickListener(view -> openGameRoom("guess-who"));
+        LinearLayout.LayoutParams guessParams = new LinearLayout.LayoutParams(0, -2, 1);
+        guessParams.setMargins(dp(10), 0, 0, 0);
+        templates.addView(guess, guessParams);
+        content.addView(templates);
+
         status = text("", 14, Color.LTGRAY);
-        status.setPadding(0, 0, 0, dp(12));
-        content.addView(status);
+        status.setPadding(dp(16), dp(14), dp(16), dp(14));
+        status.setBackground(panelBackground(Color.rgb(20, 27, 43), 16));
+        LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
+        statusParams.setMargins(0, dp(20), 0, dp(12));
+        content.addView(status, statusParams);
 
         sessionControls = new LinearLayout(this);
         sessionControls.setOrientation(LinearLayout.VERTICAL);
         content.addView(sessionControls, new LinearLayout.LayoutParams(-1, -2));
 
         card = text("", 24, Color.WHITE);
-        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setGravity(Gravity.CENTER);
         card.setPadding(dp(22), dp(22), dp(22), dp(22));
-        card.setBackgroundColor(Color.rgb(93, 45, 145));
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(-1, dp(300));
+        card.setBackground(panelBackground(Color.rgb(49, 34, 100), 22));
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(-1, dp(184));
         cardParams.setMargins(0, dp(18), 0, dp(18));
         content.addView(card, cardParams);
 
@@ -85,7 +127,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         actions.setOrientation(LinearLayout.VERTICAL);
         content.addView(actions, new LinearLayout.LayoutParams(-1, -2));
 
-        Button ar = button("Open experimental AR table");
+        Button ar = button("Open camera table placement", false);
         ar.setOnClickListener(view -> startActivity(new Intent(this, ArTableActivity.class)));
         content.addView(ar);
         scroll.addView(content);
@@ -135,9 +177,15 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     private void renderSessionControls() {
         sessionControls.removeAllViews();
         if (sessionCode.isEmpty() && !localPreview) {
-            Button host = button("Host nearby table");
+            contentSpacer(sessionControls, 8);
+            sessionControls.addView(sectionTitle("PLAY TOGETHER"));
+            Button host = button("Create nearby table", true);
             host.setOnClickListener(view -> startHosting());
             sessionControls.addView(host);
+
+            Button bluetoothHost = button("Create Bluetooth table", false);
+            bluetoothHost.setOnClickListener(view -> startBluetoothHosting());
+            sessionControls.addView(bluetoothHost);
 
             LinearLayout joinRow = new LinearLayout(this);
             joinRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -145,24 +193,34 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
             joinCode.setHint("Table code, e.g. CARDS-1234");
             joinCode.setSingleLine(true);
             joinRow.addView(joinCode, new LinearLayout.LayoutParams(0, -2, 1));
-            Button join = button("Join");
+            Button join = button("Join", true);
             join.setOnClickListener(view -> startJoining(joinCode.getText().toString()));
             joinRow.addView(join, new LinearLayout.LayoutParams(-2, -2));
             sessionControls.addView(joinRow);
 
-            Button local = button("One-device preview");
+            Button bluetoothJoin = button("Join Bluetooth table", false);
+            bluetoothJoin.setOnClickListener(view -> startBluetoothJoining(joinCode.getText().toString()));
+            sessionControls.addView(bluetoothJoin);
+
+            bluetoothSecret = new EditText(this);
+            bluetoothSecret.setHint("Bluetooth pairing secret from host");
+            bluetoothSecret.setSingleLine(true);
+            sessionControls.addView(bluetoothSecret);
+
+            Button local = button("Play on this phone", false);
             local.setOnClickListener(view -> startLocalPreview());
             sessionControls.addView(local);
         } else {
-            TextView players = text("Players: " + engine.state().players.size() + " · Nearby peers: " + (nearby == null ? 0 : nearby.connectedPeerCount()), 14, Color.LTGRAY);
+            TextView players = text("Players: " + engine.state().players.size() + " · Nearby peers: " + nearbyPeerCount, 14, Color.LTGRAY);
             sessionControls.addView(players);
-            Button leave = button("Leave table");
-            leave.setOnClickListener(view -> leaveTable());
+            Button leave = button("Leave table", false);
+            leave.setOnClickListener(view -> { leaveTable(); render(); });
             sessionControls.addView(leave);
         }
     }
 
     private void startHosting() {
+        if (!ensureNearbyReady("create a nearby table")) return;
         leaveTable();
         hosting = true;
         sessionCode = "CARDS-" + String.format(Locale.US, "%04d", (int) (Math.random() * 10000));
@@ -178,6 +236,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     }
 
     private void startJoining(String enteredCode) {
+        if (!ensureNearbyReady("join a nearby table")) return;
         String code = enteredCode.toUpperCase(Locale.US).replaceAll("[^A-Z0-9-]", "");
         if (!code.startsWith("CARDS-") || code.length() != 10) {
             connectionMessage = "Enter the host’s table code, for example CARDS-1234.";
@@ -190,6 +249,48 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         nearby = new NearbyConnectionsTransport(this, localName, this);
         nearby.startJoining();
         connectionMessage = "Looking for " + sessionCode + ". Compare the authentication digits before accepting.";
+        render();
+    }
+
+    private void startBluetoothHosting() {
+        if (!ensureBluetoothReady("create a Bluetooth table")) return;
+        leaveTable();
+        hosting = true;
+        bluetoothMode = true;
+        sessionCode = "CARDS-" + String.format(Locale.US, "%04d", (int) (Math.random() * 10000));
+        try {
+            engine.join(localPlayerId, "Host");
+            bluetoothPairingSecret = BLEEnvelopeCipher.makePairingSecret();
+            bluetooth = new BluetoothGattTransport(this, this, sessionCode, bluetoothPairingSecret);
+            bluetooth.host();
+            connectionMessage = "Bluetooth host ready. Share code " + sessionCode + " and pairing secret " + bluetoothPairingSecret + ".";
+        } catch (Exception error) {
+            connectionMessage = "Could not host with Bluetooth: " + error.getMessage();
+        }
+        render();
+    }
+
+    private void startBluetoothJoining(String enteredCode) {
+        if (!ensureBluetoothReady("join a Bluetooth table")) return;
+        String code = enteredCode.toUpperCase(Locale.US).replaceAll("[^A-Z0-9-]", "");
+        if (!code.startsWith("CARDS-") || code.length() != 10) {
+            connectionMessage = "Enter the Bluetooth host’s CARDS-1234 table code.";
+            render();
+            return;
+        }
+        String secret = bluetoothSecret == null ? "" : bluetoothSecret.getText().toString().trim();
+        if (secret.isEmpty()) {
+            connectionMessage = "Enter the host’s Bluetooth pairing secret.";
+            render();
+            return;
+        }
+        leaveTable();
+        sessionCode = code;
+        bluetoothMode = true;
+        hosting = false;
+        bluetooth = new BluetoothGattTransport(this, this, sessionCode, secret);
+        bluetooth.join();
+        connectionMessage = "Scanning nearby Bluetooth tables for " + sessionCode + "…";
         render();
     }
 
@@ -207,7 +308,12 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
 
     private void leaveTable() {
         if (nearby != null) nearby.stop();
+        if (bluetooth != null) bluetooth.stop();
         nearby = null;
+        bluetooth = null;
+        bluetoothMode = false;
+        bluetoothPairingSecret = "";
+        nearbyPeerCount = 0;
         engine.reset();
         hosting = false;
         localPreview = false;
@@ -264,7 +370,8 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     }
 
     private void send(NearbyEnvelope envelope) throws JSONException {
-        if (nearby != null) nearby.send(envelope.encode());
+        if (bluetoothMode && bluetooth != null) bluetooth.send(envelope.encode());
+        else if (nearby != null) nearby.send(envelope.encode());
     }
 
     @Override public void onVerificationRequired(String endpointId, String endpointName, String digits) {
@@ -279,6 +386,7 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
 
     @Override public void onPeersChanged(java.util.Set<String> endpointIds) {
         runOnUiThread(() -> {
+            nearbyPeerCount = endpointIds.size();
             if (!hosting && !sessionCode.isEmpty() && !endpointIds.isEmpty()) sendHello();
             if (hosting) connectionMessage = endpointIds.isEmpty() ? "Waiting for nearby players." : endpointIds.size() + " nearby peer(s) connected. Waiting for valid table code.";
             render();
@@ -354,11 +462,66 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
         }
     }
 
-    private Button button(String label) {
+    private boolean ensureBluetoothReady(String action) {
+        BluetoothManager manager = getSystemService(BluetoothManager.class);
+        BluetoothAdapter adapter = manager == null ? null : manager.getAdapter();
+        if (adapter != null && adapter.isEnabled()) return true;
+        connectionMessage = "Bluetooth is switched off. Turn it on, then try again to " + action + ".";
+        render();
+        return false;
+    }
+
+    private boolean ensureNearbyReady(String action) {
+        BluetoothManager manager = getSystemService(BluetoothManager.class);
+        BluetoothAdapter adapter = manager == null ? null : manager.getAdapter();
+        if (adapter == null || !adapter.isEnabled()) {
+            connectionMessage = "Nearby play needs Bluetooth switched on to discover the other phone. Turn it on, then try again to " + action + ".";
+            render();
+            return false;
+        }
+        if (Build.VERSION.SDK_INT >= 31 && (checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)) {
+            requestNearbyPermissions();
+            connectionMessage = "Allow Nearby devices, then tap again to " + action + ".";
+            render();
+            return false;
+        }
+        return true;
+    }
+
+    private Button button(String label) { return button(label, false); }
+
+    private Button button(String label, boolean primary) {
         Button button = new Button(this);
         button.setText(label);
         button.setAllCaps(false);
+        button.setTextColor(Color.WHITE);
+        button.setTextSize(16);
+        button.setGravity(Gravity.CENTER);
+        button.setPadding(dp(14), dp(10), dp(14), dp(10));
+        button.setBackground(panelBackground(primary ? Color.rgb(70, 172, 130) : Color.rgb(35, 44, 64), 14));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp(52));
+        params.setMargins(0, dp(5), 0, dp(5));
+        button.setLayoutParams(params);
         return button;
+    }
+
+    private TextView sectionTitle(String label) {
+        TextView view = text(label, 12, Color.rgb(137, 151, 177));
+        view.setLetterSpacing(0.1f);
+        view.setPadding(0, 0, 0, dp(9));
+        return view;
+    }
+
+    private GradientDrawable panelBackground(int colour, int radius) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(colour);
+        drawable.setCornerRadius(dp(radius));
+        return drawable;
+    }
+
+    private void contentSpacer(LinearLayout target, int height) {
+        View spacer = new View(this);
+        target.addView(spacer, new LinearLayout.LayoutParams(1, dp(height)));
     }
 
     private TextView text(String value, int size, int colour) {
@@ -370,6 +533,12 @@ public final class MainActivity extends Activity implements NearbyConnectionsTra
     }
 
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+
+    private void openGameRoom(String template) {
+        Intent intent = new Intent(this, GameRoomActivity.class);
+        intent.putExtra(GameRoomActivity.EXTRA_TEMPLATE, template);
+        startActivity(intent);
+    }
 
     private interface Action { void run() throws Exception; }
     private void runAction(Action action) {

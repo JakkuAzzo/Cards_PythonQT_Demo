@@ -1,0 +1,17 @@
+{
+  "protocolVersion": 1,
+  "bleServiceUUID": "B9BB2D71-0B11-4E39-A5DF-0F17C4E81001",
+  "bleStreamUUID": "B9BB2D71-0B11-4E39-A5DF-0F17C4E81002",
+  "maximumFramePayloadBytes": 160,
+  "poker": {
+    "publicSnapshot": { "game": "poker", "kind": "snapshot", "revision": 4, "publicState": { "street": "flop", "pot": 40, "communityCards": ["A♠", "10♣", "7♦"], "players": [{ "id": "host", "chips": 980, "folded": false }, { "id": "guest", "chips": 980, "folded": false }] } },
+    "privateState": { "game": "poker", "kind": "private-state", "revision": 4, "publicState": {}, "privateState": { "hand": ["K♥", "K♣"] } },
+    "command": { "game": "poker", "kind": "command", "revision": 4, "publicState": {}, "command": { "action": "bet", "playerID": "guest", "amount": 20 } }
+  },
+  "guessWho": {
+    "publicSnapshot": { "game": "guess-who", "kind": "snapshot", "revision": 7, "publicState": { "activePlayerID": "guest", "eliminated": ["character-2", "character-8"], "winnerID": null } },
+    "privateState": { "game": "guess-who", "kind": "private-state", "revision": 7, "publicState": {}, "privateState": { "targetID": "character-4" } },
+    "command": { "game": "guess-who", "kind": "command", "revision": 7, "publicState": {}, "command": { "action": "toggle-elimination", "playerID": "guest", "characterID": "character-3" } }
+  },
+  "alignment": { "markerID": "cards-table-marker-v1", "markerWidthMetres": 0.16, "revision": 7, "status": "ready" }
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "colors": {
+    "canvas": "#080A10",
+    "surface": "#1F242D",
+    "surfaceElevated": "#272D38",
+    "navDock": "#151A23",
+    "navDockStroke": "#394555",
+    "navActive": "#2B3745",
+    "control": "#334363",
+    "teal": "#1A9686",
+    "mint": "#46DCAA",
+    "gold": "#F5B72B",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#BEC6D5",
+    "ivory": "#F8F4E6",
+    "ink": "#121921"
+  },
+  "metrics": {
+    "screenWidth": 402,
+    "screenHeight": 874,
+    "screenPadding": 20,
+    "surfaceRadius": 24,
+    "controlRadius": 18,
+    "touchTarget": 48,
+    "grid": 8,
+    "navDockHeight": 62,
+    "navDockInset": 12,
+    "navActiveWidth": 62
+  },
+  "navigation": ["Home", "Library", "Table", "Create", "Discover"],
+  "rules": {
+    "soloIsPrimary": true,
+    "nearbyIsSecondary": true,
+    "arExplainsPlacementBeforeCameraLock": true,
+    "privateHandsNeverEnterPublicState": true
+  }
+}

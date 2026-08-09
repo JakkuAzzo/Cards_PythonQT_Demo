@@ -2,7 +2,13 @@
 
 Cards is a local-first platform for creating and playing card games on iPhone and Android. A game is a small validated manifest that selects a known gameplay template, bundled card resources, multiplayer capabilities, and a table design. The same deterministic state drives conventional screens and optional AR tables.
 
+The cross-platform mobile shell is documented in the [design board](docs/design/cards-mobile-wireframe.png), with editable SVG source, shared tokens, screenshot assessment, and production asset references in [`docs/design/README.md`](docs/design/README.md).
+
 There is deliberately no large store and no general code-generating AI. The creator is a lightweight classifier and configuration interpreter: it recognises a game family, chooses tested defaults, applies explicit overrides, and rejects unknown resources.
+
+For module ownership, entry points, state flow, and safe extension points, read
+[the architecture guide](docs/ARCHITECTURE.md). Coding agents should begin with
+[AGENTS.md](AGENTS.md) and then the relevant platform guide.
 
 ## App preview
 
@@ -14,7 +20,13 @@ There is deliberately no large store and no general code-generating AI. The crea
 | --- | --- |
 | ![Cards browser preview on desktop](docs/screenshots/web-home.png) | ![Cards browser preview on mobile](docs/screenshots/web-mobile.png) |
 
-Try the lightweight browser preview at [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/). It demonstrates the prompt deck, a local table flow, and constrained game-template selection; nearby transport and AR remain native-app capabilities.
+| Browser game room — Table + Your deck |
+| --- |
+| ![Cards browser game room showing a shared table and private deck](docs/screenshots/web-game-room.png) |
+
+Visit [jakkuazzo.github.io/Cards_PythonQT_Demo](https://jakkuazzo.github.io/Cards_PythonQT_Demo/) for a lightweight product home with download and project-update links. Cards gameplay, nearby transport, and camera AR remain native-app capabilities rather than a reduced browser imitation.
+
+Cards v1 is intentionally local-first: it has no account, cloud game service, browser game client, or background job system. See the [privacy page](web/privacy.html) and [production release gates](docs/PRODUCTION_RELEASE.md) for the required release evidence.
 
 ## Preview downloads
 
@@ -26,25 +38,27 @@ Each version tag creates a GitHub prerelease with an Android debug APK, a macOS 
 
 - Closed JSON schemas for game manifests and network envelopes.
 - An allowlisted resource catalogue for tables, card backs, and card sets.
-- Poker, Guess Who, and prompt-draw template classification.
+- Poker, Guess Who, and prompt-draw templates, including a game-room mode declaration (`combined`, `table`, and `deck`).
+- The original designed Classic Pack 52 as the default resource, plus allowlisted table, card-back, and template choices for custom games.
 - A SplitMix64/Fisher-Yates shuffle fixture shared by Swift and Java.
 - Host-authoritative revisions, ordered turns, snapshots/private-message protocol definitions, and validation tests.
 
 ### iPhone
 
-- Existing offline classic and prompt decks.
+- Offline Classic Pack and prompt decks, with Classic Pack selected by default.
 - A working two-dimensional multiplayer Table Talk preview.
 - Host/join controls for encrypted Apple-to-Apple nearby tables, with a shareable table code, host-authoritative commands, and revisioned snapshots.
 - A tested loopback transport retained for deterministic automated tests.
-- An ARKit/RealityKit table that finds a horizontal surface and renders the digital table/card state.
-- A minimal creator that accepts an idea or YAML-style settings and previews validated prompt games.
+- An ARKit/RealityKit table that can be placed ahead of the player or locked to any tapped horizontal surface; the bundled 160 mm printed marker is optional precision alignment for a shared physical table.
+- A minimal creator that accepts an idea or YAML-style settings and opens playable Poker, Guess Who, or prompt-game previews.
+- Every supported game has a digital room with separate Table and Your deck pages or a Combined view; AR opens the same shared state on a detected surface when available.
 
 ### Android
 
 - The same deterministic multiplayer engine and seed-42 conformance result as iOS.
-- A conventional live-table activity.
+- A conventional live-table activity plus Poker and Guess Who game rooms with Table, Your deck, Combined, and optional AR entry points.
 - A Google Nearby Connections `P2P_STAR` host/join flow with visible authentication digits, table-code validation, host-authoritative commands, and public snapshots.
-- Optional ARCore installation and session lifecycle with a non-AR fallback.
+- Optional ARCore installation, the same 160 mm marker database, and a non-AR fallback.
 
 ## Lightweight creator format
 
@@ -58,7 +72,7 @@ ar: n
 tabledesign: poker_2.png
 ```
 
-This selects the poker archetype, standard 52-card resource, two-card starting hands, nearby multiplayer, and the bundled `poker-2` table. Explicit settings override template defaults.
+This selects the poker archetype, Classic Pack 52 resource, two-card starting hands, nearby multiplayer, and the bundled `poker-2` table. Explicit settings override template defaults.
 
 Guess Who selects a two-player character-grid configuration and bundled character set:
 
@@ -84,8 +98,9 @@ The canonical machine-readable format is JSON; this small YAML-style syntax is o
 | Template | Configuration | Runtime |
 | --- | --- | --- |
 | Prompt draw | Complete | Playable in the local multiplayer and AR previews |
-| Poker | Complete defaults and resources | Dedicated dealing, community-card, betting, and hand-ranking runtime still required |
-| Guess Who | Complete defaults and character resources | Dedicated private-target and character-grid runtime still required |
+| Poker | Complete defaults, Classic Pack resources, and digital room | Local solo play can enable the deterministic Cards AI; iOS room binds host-authoritative public snapshots and recipient-only hands to Apple-nearby/BLE controls. Android room binding and real-device cross-platform proof remain. |
+| Guess Who | Complete defaults, character resources, and digital room | Local solo play can enable the deterministic Cards AI; iOS room binds shared-board snapshots and recipient-only targets to Apple-nearby/BLE controls. Android room binding and real-device cross-platform proof remain. |
+| Double-Six Dominoes | Complete 2–4 player draw-dominoes template, shared train, private hands, and Domino Yard table | Playable locally on iOS and Android in Combined, Table, and Hand modes, including an optional deterministic Cards AI opponent for solo play. Real-device room synchronization remains a validation milestone. |
 
 The creator does not label an unimplemented runtime as playable.
 
@@ -123,4 +138,8 @@ This repository is the canonical monorepo and now contains `ios/`, `android/`, a
 
 ## Next engineering milestone
 
-Run Android host/join on real hardware, then add a dedicated cross-platform BLE transport for iPhone/Android play without Wi-Fi infrastructure. After that, implement offline visual-marker alignment so both AR platforms share the same table origin without cloud access.
+Run the Poker, Guess Who, and Double-Six Dominoes rooms on real Android and iPhone hardware, then connect their shared table state to the existing nearby transports. The cross-platform BLE framing/encryption layer and printed-marker contract are present; the remaining release blocker is a real-device validation pass for encrypted BLE, marker recognition, and host-authoritative game-state binding. Simulator testing verifies UI, rules, and graceful AR fallback but cannot certify Bluetooth discovery or shared surface alignment.
+
+## Shared AR marker
+
+Print [Cards table marker v1](docs/ar-marker/cards-table-marker-v1.svg) at 100% scale (160 mm square) before using shared AR. Each phone creates its own local AR anchor from that physical marker; raw AR-world positions are never sent between devices. See [marker instructions](docs/ar-marker/README.md).

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cards.local/schemas/game-room-wire.schema.json",
+  "title": "Cards Game Room Wire Payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["game", "kind", "revision", "publicState"],
+  "properties": {
+    "game": { "enum": ["poker", "guess-who"] },
+    "kind": { "enum": ["snapshot", "command", "private-state"] },
+    "revision": { "type": "integer", "minimum": 0 },
+    "publicState": { "type": "object" },
+    "privateState": { "type": "object" },
+    "command": {
+      "type": "object",
+      "properties": {
+        "action": { "enum": ["start", "advance-street", "bet", "fold", "toggle-elimination", "ask-question", "guess", "restart"] },
+        "playerID": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "characterID": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "amount": { "type": "integer", "minimum": 1, "maximum": 100000 }
+      },
+      "required": ["action"],
+      "additionalProperties": false
+    }
+  }
+}

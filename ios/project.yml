@@ -11,8 +11,11 @@ targets:
     platform: iOS
     sources:
       - path: CardsiOS
-    resources:
-      - path: Resources
+      - path: Resources/packs.json
+        buildPhase: resources
+      - path: "Resources/AR Resources.arresourcegroup"
+        type: folder
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jakkuazzo.cardsios

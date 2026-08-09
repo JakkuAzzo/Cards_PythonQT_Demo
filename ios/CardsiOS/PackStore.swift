@@ -7,11 +7,13 @@ final class PackStore: ObservableObject {
     @Published var activeSessionPack: PackRecord?
     @Published private(set) var favoritePackIDs: Set<String> = []
     @Published private(set) var statsByPackID: [String: PackStats] = [:]
+    @Published private(set) var savedDrafts: [GameManifest] = []
 
     private let defaults: UserDefaults
     private static let selectedPackKey = "selectedPackID"
     private static let favoritesKey = "favoritePackIDs"
     private static let statsKey = "packStats"
+    private static let savedDraftsKey = "savedGameDrafts"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -19,6 +21,10 @@ final class PackStore: ObservableObject {
         if let data = defaults.data(forKey: Self.statsKey),
            let decoded = try? JSONDecoder().decode([String: PackStats].self, from: data) {
             statsByPackID = decoded
+        }
+        if let data = defaults.data(forKey: Self.savedDraftsKey),
+           let decoded = try? JSONDecoder().decode([GameManifest].self, from: data) {
+            savedDrafts = decoded
         }
         loadPacks()
     }
@@ -86,6 +92,18 @@ final class PackStore: ObservableObject {
         persistStats()
     }
 
+    func saveDraft(_ manifest: GameManifest) {
+        savedDrafts.removeAll { $0.id == manifest.id }
+        savedDrafts.append(manifest)
+        savedDrafts.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        persistDrafts()
+    }
+
+    func removeDraft(_ manifest: GameManifest) {
+        savedDrafts.removeAll { $0.id == manifest.id }
+        persistDrafts()
+    }
+
     private func recordSessionStarted(for pack: PackRecord) {
         var stats = stats(for: pack)
         stats.sessionsStarted += 1
@@ -98,6 +116,12 @@ final class PackStore: ObservableObject {
     private func persistStats() {
         if let data = try? JSONEncoder().encode(statsByPackID) {
             defaults.set(data, forKey: Self.statsKey)
+        }
+    }
+
+    private func persistDrafts() {
+        if let data = try? JSONEncoder().encode(savedDrafts) {
+            defaults.set(data, forKey: Self.savedDraftsKey)
         }
     }
 

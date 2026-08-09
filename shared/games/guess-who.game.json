@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "guess-who-board",
+  "name": "Guess Who Board",
+  "archetype": "guess-who",
+  "summary": "A two-player private-target game with a shared character board and score tracking table.",
+  "players": { "minimum": 2, "maximum": 2 },
+  "capabilities": { "multiplayer": true, "nearby": true, "ar": true },
+  "resources": { "tableDesign": "guess-grid", "cardBack": "minimal-dark", "cardSet": "classic-characters" },
+  "deck": {
+    "kind": "characters",
+    "cards": [
+      { "id": "character-1", "text": "Alex" },
+      { "id": "character-2", "text": "Blair" },
+      { "id": "character-3", "text": "Casey" },
+      { "id": "character-4", "text": "Drew" },
+      { "id": "character-5", "text": "Emery" },
+      { "id": "character-6", "text": "Frankie" },
+      { "id": "character-7", "text": "Gray" },
+      { "id": "character-8", "text": "Harper" },
+      { "id": "character-9", "text": "Indigo" },
+      { "id": "character-10", "text": "Jules" },
+      { "id": "character-11", "text": "Kai" },
+      { "id": "character-12", "text": "Lane" }
+    ]
+  },
+  "rules": { "initialHandSize": 1, "drawPerTurn": 0, "playPerTurn": 0, "turnOrder": "clockwise", "winCondition": "manual" },
+  "presentation": { "accentStartHex": "0369A1", "accentEndHex": "7C3AED", "supportsAR": true }
+}

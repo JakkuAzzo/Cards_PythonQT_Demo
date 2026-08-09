@@ -20,6 +20,7 @@ final class NearbyTableSession: ObservableObject {
     @Published private(set) var state = MultiplayerGameState()
     @Published private(set) var role: Role = .localPreview
     @Published private(set) var sessionCode = ""
+    @Published private(set) var pairingSecret = ""
     @Published private(set) var connectedPeers: [String] = []
     @Published private(set) var statusMessage = "Use local preview or start a nearby table."
 
@@ -27,7 +28,7 @@ final class NearbyTableSession: ObservableObject {
     let localPlayerID: String
     let localPlayerName: String
     private let engine: MultiplayerEngine
-    private var transport: AppleNearbyTransport?
+    private var transport: (any NearbyTransport)?
 
     init(manifest: GameManifest = .tableTalk, playerName: String = "You") {
         self.manifest = manifest
@@ -44,17 +45,47 @@ final class NearbyTableSession: ObservableObject {
     }
 
     func host() throws {
+        try host(using: makeAppleTransport())
+    }
+
+    func hostBluetooth() throws {
+        disconnect()
+        role = .host
+        sessionCode = Self.makeSessionCode()
+        pairingSecret = BLEEnvelopeCipher.makePairingSecret()
+        try ensureLocalPlayer()
+        let transport = BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName, sessionID: sessionCode, pairingSecret: pairingSecret)
+        configure(transport)
+        self.transport = transport
+        transport.host(sessionID: sessionCode)
+        statusMessage = "Bluetooth table ready · share code and pairing secret"
+    }
+
+    private func host(using transport: any NearbyTransport) throws {
         disconnect()
         role = .host
         sessionCode = Self.makeSessionCode()
         try ensureLocalPlayer()
-        let transport = makeTransport()
+        configure(transport)
         self.transport = transport
         transport.host(sessionID: sessionCode)
         statusMessage = "Sharing table \(sessionCode) · waiting for nearby players"
     }
 
     func join(code: String) {
+        join(code: code, using: makeAppleTransport())
+    }
+
+    func joinBluetooth(code: String, pairingSecret: String) {
+        let normalized = Self.normalizedCode(code)
+        guard !normalized.isEmpty, !pairingSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            statusMessage = "Enter the host’s table code and pairing secret."
+            return
+        }
+        join(code: normalized, using: BluetoothLETransport(localPeerID: localPlayerID, displayName: localPlayerName, sessionID: normalized, pairingSecret: pairingSecret))
+    }
+
+    private func join(code: String, using transport: any NearbyTransport) {
         disconnect()
         role = .guest
         sessionCode = Self.normalizedCode(code)
@@ -63,7 +94,7 @@ final class NearbyTableSession: ObservableObject {
             role = .localPreview
             return
         }
-        let transport = makeTransport()
+        configure(transport)
         self.transport = transport
         transport.join(sessionID: sessionCode)
         statusMessage = "Looking for table \(sessionCode)…"
@@ -78,6 +109,7 @@ final class NearbyTableSession: ObservableObject {
         }
         role = .localPreview
         sessionCode = ""
+        pairingSecret = ""
         engine.reset()
         state = engine.state
     }
@@ -114,8 +146,11 @@ final class NearbyTableSession: ObservableObject {
         }
     }
 
-    private func makeTransport() -> AppleNearbyTransport {
-        let transport = AppleNearbyTransport(localPeerID: localPlayerID, displayName: localPlayerName)
+    private func makeAppleTransport() -> AppleNearbyTransport {
+        AppleNearbyTransport(localPeerID: localPlayerID, displayName: localPlayerName)
+    }
+
+    private func configure(_ transport: any NearbyTransport) {
         transport.onPeersChanged = { [weak self] peers in
             guard let self else { return }
             self.connectedPeers = peers
@@ -128,7 +163,6 @@ final class NearbyTableSession: ObservableObject {
             }
         }
         transport.onEnvelope = { [weak self] envelope in self?.receive(envelope) }
-        return transport
     }
 
     private func ensureLocalPlayer() throws {

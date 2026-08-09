@@ -30,7 +30,8 @@ final class GameDraftInterpreterTests: XCTestCase {
         XCTAssertEqual(draft.archetype, .poker)
         XCTAssertEqual(draft.players, .init(minimum: 2, maximum: 4))
         XCTAssertEqual(draft.resources.tableDesign, "poker-2")
-        XCTAssertEqual(draft.resources.cardSet, "standard-52")
+        XCTAssertEqual(draft.resources.cardSet, "classic-pack-52")
+        XCTAssertEqual(draft.resources.cardBack, "classic-pack-red")
         XCTAssertEqual(draft.rules.initialHandSize, 2)
         XCTAssertFalse(draft.capabilities.ar)
     }
@@ -55,5 +56,22 @@ final class GameDraftInterpreterTests: XCTestCase {
         XCTAssertThrowsError(try GameDraftInterpreter().interpret("Name: Huge\nPlayers: 2-99\n- One\n- Two")) { error in
             XCTAssertEqual(error as? GameDraftInterpreter.DraftError, .invalidPlayerRange)
         }
+    }
+
+    @MainActor
+    func testPackStorePersistsAndRemovesSavedDraftsLocally() {
+        let suiteName = "CardsiOSTests.saved-drafts"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+        let store = PackStore(defaults: defaults)
+
+        store.saveDraft(.dominoes)
+        XCTAssertEqual(store.savedDrafts.map(\.id), ["double-six-dominoes"])
+
+        let restored = PackStore(defaults: defaults)
+        XCTAssertEqual(restored.savedDrafts.map(\.id), ["double-six-dominoes"])
+        restored.removeDraft(.dominoes)
+        XCTAssertTrue(restored.savedDrafts.isEmpty)
+        defaults.removePersistentDomain(forName: suiteName)
     }
 }

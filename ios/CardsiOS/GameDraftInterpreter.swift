@@ -13,7 +13,7 @@ struct GameDraftInterpreter {
             case .emptyDescription: return "Describe the game before creating a draft."
             case .notEnoughCards: return "Custom prompt games need at least two card lines beginning with a dash."
             case .invalidPlayerRange: return "The player range must be between 1 and 16."
-            case .unknownGameType: return "Use poker, guess-who, or prompt-draw as the game type."
+            case .unknownGameType: return "Use poker, guess-who, dominoes, or prompt-draw as the game type."
             case .unknownResource(let resource): return "\(resource) is not in the bundled resource catalogue."
             }
         }
@@ -29,7 +29,7 @@ struct GameDraftInterpreter {
         let archetype = try classify(lines: lines, fullDescription: description)
         let multiplayerDefault = true
         let multiplayer = booleanDirective(["multiplayer"], in: lines) ?? multiplayerDefault
-        let defaultMaximum = archetype == .guessWho ? 2 : (archetype == .poker ? 4 : 8)
+        let defaultMaximum = archetype == .guessWho ? 2 : (archetype == .poker || archetype == .dominoes ? 4 : 8)
         var playerRange = try configuredPlayerRange(in: lines) ?? (multiplayer ? 2...defaultMaximum : 1...1)
         if !multiplayer { playerRange = 1...1 }
 
@@ -39,7 +39,7 @@ struct GameDraftInterpreter {
             directive(["tabledesign", "table_design", "shared_card_table_theme"], in: lines)
                 ?? defaultTable(for: archetype)
         )
-        let cardBack = normalizeResource(directive(["cardback", "card_back"], in: lines) ?? "classic-red")
+        let cardBack = normalizeResource(directive(["cardback", "card_back"], in: lines) ?? "classic-pack-red")
         guard ResourceCatalog.tableDesignIDs.contains(tableDesign) else { throw DraftError.unknownResource(tableDesign) }
         guard ResourceCatalog.cardBackIDs.contains(cardBack) else { throw DraftError.unknownResource(cardBack) }
 
@@ -70,6 +70,7 @@ struct GameDraftInterpreter {
         let explicit = directive(["type", "game", "archetype"], in: lines)?.lowercased()
         let value = explicit ?? fullDescription.lowercased()
         if value.contains("guess who") || value.contains("guess-who") || value.contains("guess_who") { return .guessWho }
+        if value.contains("domino") { return .dominoes }
         if value.contains("poker") { return .poker }
         if explicit == "prompt" || explicit == "prompts" || explicit == "prompt-draw" { return .promptDraw }
         if lines.contains(where: { $0.hasPrefix("-") }) { return .promptDraw }
@@ -85,7 +86,7 @@ struct GameDraftInterpreter {
                 summary: "A nearby poker table using the bundled standard deck.",
                 deckKind: .classic,
                 cards: [],
-                cardSet: "standard-52",
+                cardSet: "classic-pack-52",
                 rules: .init(initialHandSize: 2, drawPerTurn: 0, playPerTurn: 0, turnOrder: .clockwise, winCondition: .manual),
                 accentStart: "14532D",
                 accentEnd: "166534"
@@ -101,6 +102,17 @@ struct GameDraftInterpreter {
                 rules: .init(initialHandSize: 1, drawPerTurn: 0, playPerTurn: 0, turnOrder: .clockwise, winCondition: .manual),
                 accentStart: "0369A1",
                 accentEnd: "7C3AED"
+            )
+        case .dominoes:
+            return Template(
+                name: "Double-Six Dominoes",
+                summary: "A nearby domino table with a shared train and private hands.",
+                deckKind: .dominoes,
+                cards: GameManifest.dominoDeck,
+                cardSet: "double-six-dominoes",
+                rules: .init(initialHandSize: 7, drawPerTurn: 1, playPerTurn: 1, turnOrder: .clockwise, winCondition: .manual),
+                accentStart: "0F766E",
+                accentEnd: "0891B2"
             )
         case .promptDraw:
             let cards = lines.enumerated().compactMap { index, line -> GameManifest.Deck.Card? in
@@ -163,7 +175,8 @@ struct GameDraftInterpreter {
     private func defaultTable(for archetype: GameManifest.Archetype) -> String {
         switch archetype {
         case .poker: return "poker-2"
-        case .guessWho: return "midnight"
+        case .guessWho: return "guess-grid"
+        case .dominoes: return "domino-yard"
         case .promptDraw: return "green-classic"
         }
     }

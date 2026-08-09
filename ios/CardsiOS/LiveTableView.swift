@@ -6,6 +6,7 @@ struct LiveTableView: View {
     @State private var errorMessage: String?
     @State private var showingAR = false
     @State private var joinCode = ""
+    @State private var bluetoothSecret = ""
 
     init(manifest: GameManifest = .tableTalk) {
         _session = StateObject(wrappedValue: NearbyTableSession(manifest: manifest))
@@ -83,6 +84,14 @@ struct LiveTableView: View {
                 }
                 .buttonStyle(TablePrimaryButtonStyle())
 
+                Button {
+                    perform { try session.hostBluetooth() }
+                } label: {
+                    Label("Host with Bluetooth", systemImage: "bonjour")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(TableSecondaryButtonStyle())
+
                 HStack(spacing: 10) {
                     TextField("Table code", text: $joinCode)
                         .textInputAutocapitalization(.characters)
@@ -91,6 +100,13 @@ struct LiveTableView: View {
                     Button("Join") { session.join(code: joinCode) }
                         .buttonStyle(TableSecondaryButtonStyle())
                 }
+                SecureField("Bluetooth pairing secret", text: $bluetoothSecret)
+                    .textFieldStyle(.roundedBorder)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button("Join with Bluetooth") { session.joinBluetooth(code: joinCode, pairingSecret: bluetoothSecret) }
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(TableSecondaryButtonStyle())
             } else {
                 HStack {
                     if session.role == .host {
@@ -103,6 +119,18 @@ struct LiveTableView: View {
                         .foregroundStyle(AppTheme.textSecondary)
                     Button("Leave") { session.disconnect() }
                         .buttonStyle(TableSecondaryButtonStyle())
+                }
+                if !session.pairingSecret.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Bluetooth pairing secret")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                        Text(session.pairingSecret)
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(AppTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
         }
@@ -255,7 +283,7 @@ struct LiveTableView: View {
     }
 }
 
-private struct TablePrimaryButtonStyle: ButtonStyle {
+struct TablePrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
@@ -269,7 +297,7 @@ private struct TablePrimaryButtonStyle: ButtonStyle {
     }
 }
 
-private struct TableSecondaryButtonStyle: ButtonStyle {
+struct TableSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {

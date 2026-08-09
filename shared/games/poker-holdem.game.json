@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "poker-holdem",
+  "name": "Poker Hold'em",
+  "archetype": "poker",
+  "summary": "A four-seat Texas Hold'em template using the original Classic Pack artwork.",
+  "players": { "minimum": 2, "maximum": 4 },
+  "capabilities": { "multiplayer": true, "nearby": true, "ar": true },
+  "resources": { "tableDesign": "poker-2", "cardBack": "classic-pack-red", "cardSet": "classic-pack-52" },
+  "deck": { "kind": "classic", "cards": [] },
+  "rules": { "initialHandSize": 2, "drawPerTurn": 0, "playPerTurn": 0, "turnOrder": "clockwise", "winCondition": "manual" },
+  "presentation": { "accentStartHex": "14532D", "accentEndHex": "166534", "supportsAR": true }
+}

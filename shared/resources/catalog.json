@@ -3,15 +3,28 @@
   "tableDesigns": [
     { "id": "green-classic", "asset": "built-in://green-classic", "label": "Green Classic" },
     { "id": "poker-2", "asset": "built-in://poker-2", "label": "Poker Night" },
-    { "id": "midnight", "asset": "built-in://midnight", "label": "Midnight" }
+    { "id": "midnight", "asset": "built-in://midnight", "label": "Midnight" },
+    { "id": "guess-grid", "asset": "built-in://guess-grid", "label": "Guess Grid" },
+    { "id": "sunset-lounge", "asset": "built-in://sunset-lounge", "label": "Sunset Lounge" },
+    { "id": "paper-play", "asset": "built-in://paper-play", "label": "Paper Play" }
+    ,{ "id": "domino-yard", "asset": "built-in://domino-yard", "label": "Domino Yard" }
   ],
   "cardBacks": [
-    { "id": "classic-red", "asset": "Packs/Demo/ClassicPack/BACK OF CARD.svg", "label": "Classic Red" },
+    { "id": "classic-pack-red", "asset": "Packs/Demo/ClassicPack/BACK OF CARD.svg", "label": "Classic Pack Red" },
+    { "id": "classic-red", "asset": "Packs/Demo/ClassicPack/BACK OF CARD.svg", "label": "Classic Red (legacy)" },
     { "id": "minimal-dark", "asset": "built-in://minimal-dark", "label": "Minimal Dark" }
   ],
   "cardSets": [
-    { "id": "standard-52", "asset": "Packs/Demo/ClassicPack", "label": "Standard 52" },
+    { "id": "classic-pack-52", "asset": "Packs/Demo/ClassicPack", "label": "Classic Pack 52" },
+    { "id": "standard-52", "asset": "Packs/Demo/ClassicPack", "label": "Standard 52 (legacy)" },
     { "id": "prompt-basic", "asset": "built-in://prompt-basic", "label": "Prompt Cards" },
-    { "id": "classic-characters", "asset": "built-in://classic-characters", "label": "Classic Characters" }
+    { "id": "classic-characters", "asset": "built-in://classic-characters", "label": "Classic Characters" },
+    { "id": "double-six-dominoes", "asset": "built-in://double-six-dominoes", "label": "Double-Six Dominoes" }
+  ],
+  "templates": [
+    { "id": "poker-holdem", "archetype": "poker", "tableDesign": "poker-2", "cardSet": "classic-pack-52", "cardBack": "classic-pack-red", "digitalModes": ["combined", "table", "deck"] },
+    { "id": "guess-who-board", "archetype": "guess-who", "tableDesign": "guess-grid", "cardSet": "classic-characters", "cardBack": "minimal-dark", "digitalModes": ["combined", "table", "deck"] },
+    { "id": "prompt-table", "archetype": "prompt-draw", "tableDesign": "green-classic", "cardSet": "prompt-basic", "cardBack": "classic-pack-red", "digitalModes": ["combined", "table", "deck"] }
+    ,{ "id": "double-six-dominoes", "archetype": "dominoes", "tableDesign": "domino-yard", "cardSet": "double-six-dominoes", "cardBack": "minimal-dark", "digitalModes": ["combined", "table", "deck"] }
   ]
 }
